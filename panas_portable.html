@@ -1,0 +1,408 @@
+<!doctype html>
+<!--
+PANAS-GEN Windrose + History App
+--------------------------------
+Interactive PANAS tracker with windrose + history.
+
+New:
+- Import box (drag/drop or click) to load a .sqlite database and replace local storage, then refresh UI from latest entry.
+
+Other features:
+- Petals default to most recent saved entry (or 3 if none).
+- After saving, petals reset to the just-saved state.
+- Free-text daily log.
+- Positive/Negative scores stored per entry.
+- DB stored in browser (sql.js) and persisted in localStorage.
+- Save button downloads both DB (panas.sqlite) and the page (panas.html).
+- Clear wipes DB and resets to neutral.
+- Windrose overlays most recent saved entry.
+- Time-series shows Pos/Neg over time with tooltips (shows logs).
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>PANAS-GEN Windrose + History</title>
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<style>
+  :root{--pad:18px}
+  body{font-family:system-ui,Arial,sans-serif;margin:0;padding:var(--pad);display:grid;grid-template-columns:1fr 1fr;gap:var(--pad);}
+  h2{margin:.2rem 0 .6rem}
+  #left,#right{min-width:320px}
+  svg{width:100%;height:620px}
+  .grid circle{fill:none;stroke:#eee}
+  .axis line{stroke:#ccc}
+  .label{font-size:11px;text-anchor:middle}
+  .handle{fill:#1f77b4;cursor:pointer}
+  .current{fill:rgba(31,119,180,.25);stroke:#1f77b4;stroke-width:2}
+  .reference{fill:none;stroke:#888;stroke-width:2;stroke-dasharray:6,6}
+  .controls{display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.5rem}
+  button{padding:.5rem .8rem;border:1px solid #ddd;border-radius:8px;background:#fff;cursor:pointer}
+  button:hover{background:#f5f5f5}
+  #status{font-size:.9rem;color:#666;margin-top:.4rem}
+  .legend{display:flex;gap:12px;align-items:center;margin:.3rem 0 .8rem}
+  .sw{display:inline-block;width:16px;height:10px;border-radius:2px}
+  .sw.pos{background:#1f77b4}
+  .sw.neg{background:#d62728}
+  textarea{width:100%;height:80px;margin-top:.6rem;padding:.4rem;font-family:inherit;font-size:14px}
+  .tooltip{
+    position:absolute;pointer-events:none;background:rgba(0,0,0,0.75);color:#fff;
+    font-size:12px;padding:4px 8px;border-radius:4px;white-space:pre-wrap;max-width:220px;line-height:1.3
+  }
+  /* Import box */
+  .import-box{
+    margin:.6rem 0;padding:14px;border:2px dashed #bbb;border-radius:10px;
+    text-align:center;font-size:.95rem;color:#555;user-select:none;cursor:pointer
+  }
+  .import-box strong{display:block;margin-bottom:.25rem}
+  .import-box.hover{background:#fafafa;border-color:#888}
+  .import-help{font-size:.85rem;color:#777;margin-top:.25rem}
+  .row{display:grid;grid-template-columns:1fr;gap:.6rem}
+</style>
+</head>
+<body>
+  <div id="left">
+    <h2>PANAS-GEN Windrose (drag petals)</h2>
+
+    <div class="row">
+      <div id="importBox" class="import-box" tabindex="0">
+        <strong>Import database (.sqlite)</strong>
+        Drop file here or click to choose
+        <div class="import-help">Replaces the in-browser database; UI refreshes from the newest entry.</div>
+        <input id="fileInput" type="file" accept=".sqlite,application/x-sqlite3,application/octet-stream" style="display:none" />
+      </div>
+    </div>
+
+    <svg id="radar"></svg>
+    <label for="log">Daily Log:</label>
+    <textarea id="log" placeholder="Write your notes here..."></textarea>
+    <div class="controls">
+      <button id="randomize">Randomize petals</button>
+      <button id="save">Save + Download DB + Page</button>
+      <button id="clear">Clear DB</button>
+    </div>
+    <div id="status"></div>
+  </div>
+
+  <div id="right">
+    <h2>Scores Over Time</h2>
+    <div class="legend">
+      <span class="sw pos"></span> Positive affect &nbsp;&nbsp;
+      <span class="sw neg" style="background:#d62728"></span> Negative affect
+    </div>
+    <svg id="timeseries"></svg>
+  </div>
+
+<script src="https://d3js.org/d3.v7.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.10.2/sql-wasm.js"></script>
+<script>
+(async function(){
+  // --- PANAS items
+  const ITEMS=[
+    "Interested","Distressed","Excited","Upset","Strong","Guilty","Scared","Hostile",
+    "Enthusiastic","Proud","Irritable","Alert","Ashamed","Inspired","Nervous",
+    "Determined","Attentive","Jittery","Active","Afraid"
+  ];
+  const POS_IDX=[1,3,5,9,10,12,14,16,17,19];
+  const NEG_IDX=[2,4,6,7,8,11,13,15,18,20];
+
+  // --- SQLite init
+  const SQL=await initSqlJs({locateFile:f=>`https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.10.2/${f}`});
+  const LSKEY="panas_db";
+  function base64ToU8(b64){if(!b64)return new Uint8Array();const s=atob(b64);const u=new Uint8Array(s.length);for(let i=0;i<s.length;i++)u[i]=s.charCodeAt(i);return u;}
+  function u8ToBase64(u8){let s="";u8.forEach(b=>s+=String.fromCharCode(b));return btoa(s);}
+  function persist(){localStorage.setItem(LSKEY,u8ToBase64(db.export()));}
+
+  let dbBytes=base64ToU8(localStorage.getItem(LSKEY)||"");
+  let db=dbBytes.length?new SQL.Database(dbBytes):new SQL.Database();
+
+  // base schema
+  db.exec(`CREATE TABLE IF NOT EXISTS entries (id INTEGER PRIMARY KEY AUTOINCREMENT, ts TEXT)`);
+  // ensure required columns
+  const ensureCol=(name,type)=>{
+    const info=db.exec(`PRAGMA table_info(entries)`)[0]?.values||[];
+    const names=info.map(r=>r[1]);
+    if(!names.includes(name)){db.exec(`ALTER TABLE entries ADD COLUMN "${name}" ${type}`);}
+  };
+  ensureCol("log","TEXT");
+  ITEMS.forEach(it=>ensureCol(it,"INTEGER NOT NULL DEFAULT 3"));
+  ensureCol("positive_score","INTEGER");
+  ensureCol("negative_score","INTEGER");
+  // normalize null logs
+  db.exec(`UPDATE entries SET log='' WHERE log IS NULL`);
+  persist();
+
+  // --- Import (.sqlite) → replace localStorage + live DB, then refresh UI
+  const importBox=document.getElementById("importBox");
+  const fileInput=document.getElementById("fileInput");
+  const status=t=>document.getElementById("status").textContent=t;
+
+  function setHover(on){importBox.classList.toggle("hover",!!on);}
+
+  ["dragenter","dragover"].forEach(evName=>{
+    importBox.addEventListener(evName,(e)=>{e.preventDefault();e.stopPropagation();setHover(true);});
+  });
+  ["dragleave","dragend","drop"].forEach(evName=>{
+    importBox.addEventListener(evName,(e)=>{e.preventDefault();e.stopPropagation();if(evName!=="drop")setHover(false);});
+  });
+  importBox.addEventListener("click",()=>fileInput.click());
+  importBox.addEventListener("keydown",(e)=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();fileInput.click();}});
+
+  importBox.addEventListener("drop",(e)=>{
+    setHover(false);
+    const f=e.dataTransfer.files?.[0];
+    if(f)importDbFromFile(f);
+  });
+  fileInput.addEventListener("change",()=>{
+    const f=fileInput.files?.[0];
+    if(f)importDbFromFile(f);
+    fileInput.value="";
+  });
+
+  async function importDbFromFile(file){
+    try{
+      status(`Importing "${file.name}"...`);
+      const buf=await file.arrayBuffer();
+      const u8=new Uint8Array(buf);
+      // Validate by attempting to open
+      const tmp=new SQL.Database(u8);
+      // Optional: ensure columns (safe if already there)
+      const needCols=()=>{
+        const info=tmp.exec(`PRAGMA table_info(entries)`)[0]?.values||[];
+        const names=new Set(info.map(r=>r[1]));
+        if(!names.has("log"))tmp.exec(`ALTER TABLE entries ADD COLUMN "log" TEXT`);
+        ITEMS.forEach(it=>{if(!names.has(it))tmp.exec(`ALTER TABLE entries ADD COLUMN "\${it}" INTEGER NOT NULL DEFAULT 3`);});
+        if(!names.has("positive_score"))tmp.exec(`ALTER TABLE entries ADD COLUMN "positive_score" INTEGER`);
+        if(!names.has("negative_score"))tmp.exec(`ALTER TABLE entries ADD COLUMN "negative_score" INTEGER`);
+      };
+      needCols();
+      // Replace live db + persist to localStorage
+      db=tmp;
+      persist();
+      // Refresh UI
+      refreshFromDb();
+      status(`Imported ${file.name} and refreshed from latest entry.`);
+    }catch(err){
+      console.error(err);
+      status("Import failed: not a valid PANAS SQLite file?");
+      alert("Import failed. Ensure you're selecting the exported panas.sqlite file.");
+    }
+  }
+
+  // Helpers to read latest entry and refresh UI
+  function getMostRecentEntry(){
+    const res=db.exec(`SELECT ${ITEMS.map(n=>`"${n}"`).join(",")} FROM entries ORDER BY id DESC LIMIT 1`);
+    if(!res.length)return null;
+    const row=res[0].values[0];
+    const o={};ITEMS.forEach((n,i)=>o[n]=row[i]);
+    return o;
+  }
+
+  // --- Windrose setup
+  const size=620, radius=size/2-70, levels=5;
+  const svg=d3.select("#radar").attr("viewBox",[0,0,size,size]).append("g").attr("transform",`translate(${size/2},${size/2})`);
+  let labels=d3.shuffle(ITEMS.slice());
+  let values={};
+
+  const last=getMostRecentEntry();
+  ITEMS.forEach(l=>values[l]=last?(last[l]??3):3);
+
+  const step=radius/levels;
+  const angleForIndex=i=>(i/labels.length)*2*Math.PI;
+  const posOnSpoke=(angle,v)=>[Math.cos(angle)*(v*step),Math.sin(angle)*(v*step)];
+
+  for(let l=1;l<=levels;l++){svg.append("circle").attr("r",l*step).attr("class","grid");}
+
+  function drawAxes(){
+    svg.selectAll(".axis").remove();
+    svg.selectAll(".label").remove();
+    labels.forEach((label,i)=>{
+      const a=angleForIndex(i);
+      svg.append("line").attr("class","axis").attr("x1",0).attr("y1",0)
+        .attr("x2",Math.cos(a)*radius).attr("y2",Math.sin(a)*radius);
+      svg.append("text").attr("class","label")
+        .attr("x",Math.cos(a)*(radius+20))
+        .attr("y",Math.sin(a)*(radius+20))
+        .text(label);
+    });
+  }
+  drawAxes();
+
+  const refPoly=svg.append("path").attr("class","reference");
+  const curPoly=svg.append("path").attr("class","current");
+  const handleGroup=svg.append("g");
+
+  function updateHandlePositions(){
+    handleGroup.selectAll("circle")
+      .attr("cx",d=>posOnSpoke(d.angle,values[d.label])[0])
+      .attr("cy",d=>posOnSpoke(d.angle,values[d.label])[1]);
+  }
+
+  let handles=handleGroup.selectAll("circle")
+    .data(labels.map((label,i)=>({label,angle:angleForIndex(i)})))
+    .join("circle")
+    .attr("class","handle")
+    .attr("r",6)
+    .attr("cx",d=>posOnSpoke(d.angle,values[d.label])[0])
+    .attr("cy",d=>posOnSpoke(d.angle,values[d.label])[1])
+    .call(d3.drag().on("drag",function(ev,d){
+      const r=Math.min(radius,Math.hypot(ev.x,ev.y));
+      let val=Math.round(r/step);
+      val=Math.max(1,Math.min(5,val));
+      values[d.label]=val;
+      d3.select(this).attr("cx",posOnSpoke(d.angle,val)[0]).attr("cy",posOnSpoke(d.angle,val)[1]);
+      drawPolygons();
+    }));
+
+  function drawPolygons(){
+    const ptsCur=labels.map((lbl,i)=>posOnSpoke(angleForIndex(i),values[lbl]));
+    curPoly.attr("d",d3.line().curve(d3.curveLinearClosed)(ptsCur));
+    const ref=getMostRecentEntry();
+    if(ref){
+      const ptsRef=labels.map((lbl,i)=>posOnSpoke(angleForIndex(i),ref[lbl]??3));
+      refPoly.attr("d",d3.line().curve(d3.curveLinearClosed)(ptsRef));
+    }else{refPoly.attr("d",null);}
+  }
+  drawPolygons();
+
+  // Randomize layout (keep values)
+  document.getElementById("randomize").onclick=()=>{
+    labels=d3.shuffle(labels.slice());
+    handles=handleGroup.selectAll("circle")
+      .data(labels.map((label,i)=>({label,angle:angleForIndex(i)})))
+      .join("circle")
+      .attr("class","handle")
+      .attr("r",6)
+      .attr("cx",d=>posOnSpoke(d.angle,values[d.label])[0])
+      .attr("cy",d=>posOnSpoke(d.angle,values[d.label])[1])
+      .call(d3.drag().on("drag",function(ev,d){
+        const r=Math.min(radius,Math.hypot(ev.x,ev.y));
+        let val=Math.round(r/step);
+        val=Math.max(1,Math.min(5,val));
+        values[d.label]=val;
+        d3.select(this).attr("cx",posOnSpoke(d.angle,val)[0]).attr("cy",posOnSpoke(d.angle,val)[1]);
+        drawPolygons();
+      }));
+    drawAxes();
+    drawPolygons();
+    status("Petals randomized (values preserved).");
+  };
+
+  // Save
+  document.getElementById("save").onclick=()=>{
+    const missing=ITEMS.filter(k=>!(values[k]>=1&&values[k]<=5));
+    if(missing.length){status("Please rate all 20 items (1–5).");return;}
+
+    const ts=new Date().toISOString();
+    const log=document.getElementById("log").value.trim();
+    const getByIndex=i1=>values[ITEMS[i1-1]];
+    const posScore=POS_IDX.reduce((s,i)=>s+getByIndex(i),0);
+    const negScore=NEG_IDX.reduce((s,i)=>s+getByIndex(i),0);
+
+    const cols=["ts","log",...ITEMS,"positive_score","negative_score"];
+    const q=`INSERT INTO entries (${cols.map(c=>'"'+c+'"').join(",")}) VALUES (${cols.map(()=>"?").join(",")})`;
+    const vals=[ts,log,...ITEMS.map(k=>values[k]),posScore,negScore];
+    const stmt=db.prepare(q);stmt.run(vals);stmt.free();persist();
+
+    // Reset UI to saved values
+    const latest=getMostRecentEntry();
+    ITEMS.forEach(k=>values[k]=(latest&&latest[k]!=null)?latest[k]:3);
+    updateHandlePositions();
+    drawPolygons();
+    drawTimeSeries();
+
+    downloadDBAndPage();
+    status("Saved & downloaded database + page.");
+    document.getElementById("log").value="";
+  };
+
+  // Clear
+  document.getElementById("clear").onclick=()=>{
+    if(!confirm("Delete all saved entries?"))return;
+    db.exec("DELETE FROM entries");persist();
+    ITEMS.forEach(k=>values[k]=3);
+    updateHandlePositions();
+    drawPolygons();drawTimeSeries();
+    status("Database cleared.");
+  };
+
+  // Timeseries
+  const tsvg=d3.select("#timeseries").attr("viewBox",[0,0,760,620]);
+  const tooltip=d3.select("body").append("div").attr("class","tooltip").style("opacity",0);
+
+  function drawTimeSeries(){
+    tsvg.selectAll("*").remove();
+    const res=db.exec(`SELECT ts, positive_score, negative_score, log, ${ITEMS.map(n=>`"${n}"`).join(",")} FROM entries ORDER BY ts ASC`);
+    if(!res.length)return;
+    const rows=res[0].values.map(r=>({ts:new Date(r[0]),pos:r[1],neg:r[2],log:r[3]||""}));
+
+    const margin={l:70,r:20,t:10,b:60};
+    const W=760,H=620,iw=W-margin.l-margin.r,ih=H-margin.t-margin.b;
+    const g=tsvg.append("g").attr("transform",`translate(${margin.l},${margin.t})`);
+    const x=d3.scaleTime().domain(d3.extent(rows,d=>d.ts)).range([0,iw]);
+    const y=d3.scaleLinear().domain([10,50]).range([ih,0]);
+
+    g.append("g").attr("transform",`translate(0,${ih})`).call(d3.axisBottom(x));
+    g.append("g").call(d3.axisLeft(y));
+
+    g.append("path").datum(rows).attr("fill","none").attr("stroke","#1f77b4").attr("stroke-width",2)
+      .attr("d",d3.line().x(d=>x(d.ts)).y(d=>y(d.pos)));
+    g.append("path").datum(rows).attr("fill","none").attr("stroke","#d62728").attr("stroke-width",2)
+      .attr("d",d3.line().x(d=>x(d.ts)).y(d=>y(d.neg)));
+
+    const showTip=(ev,d)=>{
+      tooltip.style("opacity",1).html(`<b>${d.ts.toLocaleString()}</b><br>Pos: ${d.pos}, Neg: ${d.neg}<br>${d.log}`)
+        .style("left",(ev.pageX+10)+"px").style("top",(ev.pageY-28)+"px");
+    };
+    const hideTip=()=>tooltip.style("opacity",0);
+
+    g.selectAll(".ptP").data(rows).enter().append("circle").attr("class","ptP")
+      .attr("cx",d=>x(d.ts)).attr("cy",d=>y(d.pos)).attr("r",4).attr("fill","#1f77b4")
+      .on("mouseover",showTip).on("mouseout",hideTip);
+
+    g.selectAll(".ptN").data(rows).enter().append("circle").attr("class","ptN")
+      .attr("cx",d=>x(d.ts)).attr("cy",d=>y(d.neg)).attr("r",4).attr("fill","#d62728")
+      .on("mouseover",showTip).on("mouseout",hideTip);
+
+    g.append("text").attr("x",iw/2).attr("y",ih+40).attr("text-anchor","middle").text("Date");
+    g.append("text").attr("x",-ih/2).attr("y",-48).attr("text-anchor","middle").attr("transform","rotate(-90)").text("Score (10–50)");
+  }
+  drawTimeSeries();
+
+  function refreshFromDb(){
+    // Re-sync values from most recent entry, update plots, timeseries
+    const latest=getMostRecentEntry();
+    ITEMS.forEach(k=>values[k]=(latest&&latest[k]!=null)?latest[k]:3);
+    // Reposition handles (data-binding already exists)
+    updateHandlePositions();
+    drawPolygons();
+    drawTimeSeries();
+  }
+
+function downloadDBAndPage(){
+  // DB
+  const dbBlob = new Blob([db.export()], {type:"application/x-sqlite3"});
+  const dbUrl = URL.createObjectURL(dbBlob);
+  const adb = document.createElement("a");
+  adb.href=dbUrl;
+  adb.download="panas.sqlite";
+  adb.click();
+  URL.revokeObjectURL(dbUrl);
+  // Page
+  const html = document.documentElement.outerHTML;
+  const pageBlob = new Blob([html], {type:"text/html"});
+  const pageUrl = URL.createObjectURL(pageBlob);
+  const ap = document.createElement("a");
+  ap.href=pageUrl;
+  ap.download="panas.html";
+  ap.click();
+  URL.revokeObjectURL(pageUrl);
+}
+
+
+  // Initial alignment
+  updateHandlePositions();
+  drawPolygons();
+})();
+</script>
+</body>
+</html>
