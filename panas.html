@@ -204,12 +204,26 @@
             gap: .6rem
         }
 
+        .settings-toggle {
+            margin-bottom: .5rem;
+        }
+
+        .settings-toggle button {
+            font-size: 12px;
+            padding: .4rem .6rem;
+        }
+
         .settings-box {
             border: 2px solid #ddd;
             border-radius: 8px;
             padding: 1rem;
             background: #f9f9f9;
             margin-bottom: 1rem;
+            display: none;
+        }
+
+        .settings-box.expanded {
+            display: block;
         }
 
         .settings-box input {
@@ -246,7 +260,10 @@
         <h2>PANAS-GEN Windrose (drag petals)</h2>
 
         <div class="row">
-            <div class="settings-box">
+            <div class="settings-toggle">
+                <button id="toggleSettings">⚙️ GitHub Sync Settings</button>
+            </div>
+            <div class="settings-box" id="settingsBox">
                 <strong>GitHub Sync Settings</strong>
                 <label>GitHub Token (with repo permissions):</label>
                 <input id="ghToken" type="password" placeholder="ghp_...">
@@ -443,11 +460,14 @@
                 }
 
                 try {
+                    // First, pull any remote changes to avoid conflicts
+                    await syncFromGitHub();
+
                     const entries = getAllEntries();
                     const content = JSON.stringify(entries, null, 2);
                     const encodedContent = btoa(unescape(encodeURIComponent(content)));
 
-                    // Get current file SHA if it exists
+                    // Get current file SHA (fresh after pull)
                     const url = `https://api.github.com/repos/${settings.owner}/${settings.repo}/contents/${settings.path}?ref=${settings.branch}`;
                     let sha = null;
                     
@@ -515,6 +535,12 @@
             document.getElementById("ghRepo").value = ghSettings.repo || "minimal_mood_dashboard";
             document.getElementById("ghBranch").value = ghSettings.branch || "main";
             document.getElementById("ghPath").value = ghSettings.path || "data/entries.json";
+
+            // Toggle settings visibility
+            document.getElementById("toggleSettings").onclick = () => {
+                const box = document.getElementById("settingsBox");
+                box.classList.toggle("expanded");
+            };
 
             // Auto-sync from GitHub on page load
             (async () => {
