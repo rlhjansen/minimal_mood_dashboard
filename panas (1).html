@@ -1,0 +1,772 @@
+<html lang="en"><head>
+    <meta charset="utf-8">
+    <title>PANAS-GEN Windrose + History</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <style>
+        :root {
+            --pad: 18px
+        }
+
+        body {
+            font-family: system-ui, Arial, sans-serif;
+            margin: 0;
+            padding: var(--pad);
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: var(--pad)
+        }
+
+        h2 {
+            margin: .2rem 0 .6rem
+        }
+
+        #left,
+        #right {
+            min-width: 320px
+        }
+
+        svg {
+            width: 100%;
+            height: 620px
+        }
+
+        svg#timeseries,
+        svg#bigfive {
+            height: 310px
+        }
+
+        .grid circle {
+            fill: none;
+            stroke: #eee
+        }
+
+        .axis line {
+            stroke: #ccc
+        }
+
+        .label {
+            font-size: 11px;
+            text-anchor: middle
+        }
+
+        .handle {
+            fill: #1f77b4;
+            cursor: pointer
+        }
+
+        .current {
+            fill: rgba(31, 119, 180, .25);
+            stroke: #1f77b4;
+            stroke-width: 2
+        }
+
+        .reference {
+            fill: none;
+            stroke: #888;
+            stroke-width: 2;
+            stroke-dasharray: 6, 6
+        }
+
+        .preview {
+            fill: rgba(128, 0, 128, .12);
+            stroke: purple;
+            stroke-width: 2;
+            stroke-dasharray: 4, 6
+        }
+
+        .monthly {
+            fill: rgba(0, 128, 0, .10);
+            stroke: green;
+            stroke-width: 2;
+            stroke-dasharray: 6, 4
+        }
+
+        .controls {
+            display: flex;
+            gap: .5rem;
+            flex-wrap: wrap;
+            margin-top: .5rem
+        }
+
+        button {
+            padding: .5rem .8rem;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background: #fff;
+            cursor: pointer
+        }
+
+        button:hover {
+            background: #f5f5f5
+        }
+
+        #status {
+            font-size: .9rem;
+            color: #666;
+            margin-top: .4rem
+        }
+
+        .legend {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            margin: .3rem 0 .8rem
+        }
+
+        .sw {
+            display: inline-block;
+            width: 16px;
+            height: 10px;
+            border-radius: 2px
+        }
+
+        .sw.pos {
+            background: #1f77b4
+        }
+
+        .sw.neg {
+            background: #d62728
+        }
+
+        .sw.extraversion {
+            background: #ff7f0e
+        }
+
+        .sw.agreeableness {
+            background: #2ca02c
+        }
+
+        .sw.conscientiousness {
+            background: #9467bd
+        }
+
+        .sw.neuroticism {
+            background: #8c564b
+        }
+
+        .sw.openness {
+            background: #e377c2
+        }
+
+        textarea {
+            width: 100%;
+            height: 80px;
+            margin-top: .6rem;
+            padding: .4rem;
+            font-family: inherit;
+            font-size: 14px
+        }
+
+        .tooltip {
+            position: absolute;
+            pointer-events: none;
+            background: rgba(0, 0, 0, .75);
+            color: #fff;
+            font-size: 12px;
+            padding: 6px 10px;
+            border-radius: 4px;
+            white-space: pre-wrap;
+            max-width: 360px;
+            line-height: 1.35
+        }
+
+        .import-box {
+            margin: .6rem 0;
+            padding: 14px;
+            border: 2px dashed #bbb;
+            border-radius: 10px;
+            text-align: center;
+            font-size: .95rem;
+            color: #555;
+            user-select: none;
+            cursor: pointer
+        }
+
+        .import-box strong {
+            display: block;
+            margin-bottom: .25rem
+        }
+
+        .import-box.hover {
+            background: #fafafa;
+            border-color: #888
+        }
+
+        .import-help {
+            font-size: .85rem;
+            color: #777;
+            margin-top: .25rem
+        }
+
+        .row {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: .6rem
+        }
+    </style>
+</head>
+
+<body>
+    <div id="left">
+        <h2>PANAS-GEN Windrose (drag petals)</h2>
+
+        <div class="row">
+            <div id="importBox" class="import-box" tabindex="0">
+                <strong>Import database (.sqlite)</strong>
+                Drop file here or click to choose
+                <div class="import-help">Replaces the in-browser database; UI refreshes from the newest entry.</div>
+                <input id="fileInput" type="file" accept=".sqlite,application/x-sqlite3,application/octet-stream" style="display:none">
+            </div>
+        </div>
+
+        <svg id="radar" viewBox="0,0,620,620"><g transform="translate(310,310)"><circle r="48" class="grid"></circle><circle r="96" class="grid"></circle><circle r="144" class="grid"></circle><circle r="192" class="grid"></circle><circle r="240" class="grid"></circle><line class="axis" x1="0" y1="0" x2="240" y2="0"></line><text class="label" x="260" y="0">Nervous</text><line class="axis" x1="0" y1="0" x2="228.25356391083685" y2="74.16407864998737"></line><text class="label" x="247.27469423673992" y="80.34441853748632">Irritable</text><line class="axis" x1="0" y1="0" x2="194.1640786499874" y2="141.06846055019355"></line><text class="label" x="210.34441853748635" y="152.824165596043">Interested</text><line class="axis" x1="0" y1="0" x2="141.06846055019355" y2="194.1640786499874"></line><text class="label" x="152.824165596043" y="210.34441853748635">Strong</text><line class="axis" x1="0" y1="0" x2="74.16407864998739" y2="228.25356391083685"></line><text class="label" x="80.34441853748633" y="247.27469423673992">Upset</text><line class="axis" x1="0" y1="0" x2="1.469576158976824e-14" y2="240"></line><text class="label" x="1.592040838891559e-14" y="260">Enthusiastic</text><line class="axis" x1="0" y1="0" x2="-74.16407864998736" y2="228.25356391083687"></line><text class="label" x="-80.3444185374863" y="247.27469423673995">Attentive</text><line class="axis" x1="0" y1="0" x2="-141.06846055019352" y2="194.1640786499874"></line><text class="label" x="-152.82416559604297" y="210.34441853748635">Determined</text><line class="axis" x1="0" y1="0" x2="-194.16407864998737" y2="141.06846055019358"></line><text class="label" x="-210.34441853748632" y="152.82416559604303">Excited</text><line class="axis" x1="0" y1="0" x2="-228.25356391083685" y2="74.1640786499874"></line><text class="label" x="-247.27469423673992" y="80.34441853748635">Jittery</text><line class="axis" x1="0" y1="0" x2="-240" y2="2.939152317953648e-14"></line><text class="label" x="-260" y="3.184081677783118e-14">Guilty</text><line class="axis" x1="0" y1="0" x2="-228.25356391083685" y2="-74.16407864998746"></line><text class="label" x="-247.27469423673992" y="-80.3444185374864">Alert</text><line class="axis" x1="0" y1="0" x2="-194.1640786499874" y2="-141.06846055019352"></line><text class="label" x="-210.34441853748638" y="-152.82416559604297">Afraid</text><line class="axis" x1="0" y1="0" x2="-141.06846055019358" y2="-194.16407864998737"></line><text class="label" x="-152.82416559604303" y="-210.34441853748632">Active</text><line class="axis" x1="0" y1="0" x2="-74.16407864998742" y2="-228.25356391083685"></line><text class="label" x="-80.34441853748636" y="-247.27469423673992">Distressed</text><line class="axis" x1="0" y1="0" x2="-4.408728476930471e-14" y2="-240"></line><text class="label" x="-4.776122516674677e-14" y="-260">Hostile</text><line class="axis" x1="0" y1="0" x2="74.16407864998733" y2="-228.25356391083687"></line><text class="label" x="80.34441853748628" y="-247.27469423673995">Inspired</text><line class="axis" x1="0" y1="0" x2="141.0684605501935" y2="-194.1640786499874"></line><text class="label" x="152.82416559604295" y="-210.34441853748638">Ashamed</text><line class="axis" x1="0" y1="0" x2="194.16407864998737" y2="-141.0684605501936"></line><text class="label" x="210.34441853748632" y="-152.8241655960431">Scared</text><line class="axis" x1="0" y1="0" x2="228.25356391083685" y2="-74.16407864998745"></line><text class="label" x="247.27469423673992" y="-80.34441853748639">Proud</text><path class="reference" d="M96,0L45.651,14.833L38.833,28.214L28.214,38.833L14.833,45.651L0,48L-29.666,91.301L-28.214,38.833L-38.833,28.214L-45.651,14.833L-96,0L-45.651,-14.833L-77.666,-56.427L-28.214,-38.833L-29.666,-91.301L0,-48L14.833,-45.651L28.214,-38.833L38.833,-28.214L45.651,-14.833Z"></path><path class="current" d="M96,0L45.651,14.833L38.833,28.214L28.214,38.833L14.833,45.651L0,48L-29.666,91.301L-28.214,38.833L-38.833,28.214L-45.651,14.833L-96,0L-45.651,-14.833L-77.666,-56.427L-28.214,-38.833L-29.666,-91.301L0,-48L14.833,-45.651L28.214,-38.833L38.833,-28.214L45.651,-14.833Z"></path><path class="preview"></path><path class="monthly" d="M144,0L45.651,14.833L51.777,37.618L47.023,64.721L29.666,91.301L0,64L-29.666,91.301L-65.832,90.61L-51.777,37.618L-76.085,24.721L-112,0L-76.085,-24.721L-90.61,-65.832L-47.023,-64.721L-34.61,-106.518L0,-64L19.777,-60.868L65.832,-90.61L51.777,-37.618L60.868,-19.777Z"></path><g><circle class="handle" r="6" cx="96" cy="0" style="touch-action: none; -webkit-tap-highlight-color: rgba(0, 0, 0, 0);"></circle><circle class="handle" r="6" cx="45.65071278216737" cy="14.832815729997474" style="touch-action: none; -webkit-tap-highlight-color: rgba(0, 0, 0, 0);"></circle><circle class="handle" r="6" cx="38.83281572999748" cy="28.21369211003871" style="touch-action: none; -webkit-tap-highlight-color: rgba(0, 0, 0, 0);"></circle><circle class="handle" r="6" cx="28.21369211003871" cy="38.83281572999748" style="touch-action: none; -webkit-tap-highlight-color: rgba(0, 0, 0, 0);"></circle><circle class="handle" r="6" cx="14.832815729997478" cy="45.65071278216737" style="touch-action: none; -webkit-tap-highlight-color: rgba(0, 0, 0, 0);"></circle><circle class="handle" r="6" cx="2.9391523179536475e-15" cy="48" style="touch-action: none; -webkit-tap-highlight-color: rgba(0, 0, 0, 0);"></circle><circle class="handle" r="6" cx="-29.665631459994945" cy="91.30142556433475" style="touch-action: none; -webkit-tap-highlight-color: rgba(0, 0, 0, 0);"></circle><circle class="handle" r="6" cx="-28.213692110038707" cy="38.83281572999748" style="touch-action: none; -webkit-tap-highlight-color: rgba(0, 0, 0, 0);"></circle><circle class="handle" r="6" cx="-38.83281572999747" cy="28.213692110038714" style="touch-action: none; -webkit-tap-highlight-color: rgba(0, 0, 0, 0);"></circle><circle class="handle" r="6" cx="-45.65071278216737" cy="14.832815729997481" style="touch-action: none; -webkit-tap-highlight-color: rgba(0, 0, 0, 0);"></circle><circle class="handle" r="6" cx="-96" cy="1.175660927181459e-14" style="touch-action: none; -webkit-tap-highlight-color: rgba(0, 0, 0, 0);"></circle><circle class="handle" r="6" cx="-45.65071278216737" cy="-14.832815729997492" style="touch-action: none; -webkit-tap-highlight-color: rgba(0, 0, 0, 0);"></circle><circle class="handle" r="6" cx="-77.66563145999497" cy="-56.427384220077414" style="touch-action: none; -webkit-tap-highlight-color: rgba(0, 0, 0, 0);"></circle><circle class="handle" r="6" cx="-28.213692110038714" cy="-38.83281572999747" style="touch-action: none; -webkit-tap-highlight-color: rgba(0, 0, 0, 0);"></circle><circle class="handle" r="6" cx="-29.665631459994966" cy="-91.30142556433474" style="touch-action: none; -webkit-tap-highlight-color: rgba(0, 0, 0, 0);"></circle><circle class="handle" r="6" cx="-8.817456953860943e-15" cy="-48" style="touch-action: none; -webkit-tap-highlight-color: rgba(0, 0, 0, 0);"></circle><circle class="handle" r="6" cx="14.832815729997467" cy="-45.650712782167375" style="touch-action: none; -webkit-tap-highlight-color: rgba(0, 0, 0, 0);"></circle><circle class="handle" r="6" cx="28.2136921100387" cy="-38.832815729997485" style="touch-action: none; -webkit-tap-highlight-color: rgba(0, 0, 0, 0);"></circle><circle class="handle" r="6" cx="38.83281572999747" cy="-28.21369211003872" style="touch-action: none; -webkit-tap-highlight-color: rgba(0, 0, 0, 0);"></circle><circle class="handle" r="6" cx="45.65071278216737" cy="-14.832815729997488" style="touch-action: none; -webkit-tap-highlight-color: rgba(0, 0, 0, 0);"></circle></g></g><g transform="translate(310,310)"><circle r="48" class="grid"></circle><circle r="96" class="grid"></circle><circle r="144" class="grid"></circle><circle r="192" class="grid"></circle><circle r="240" class="grid"></circle><line class="axis" x1="0" y1="0" x2="240" y2="0"></line><text class="label" x="260" y="0">Hostile</text><line class="axis" x1="0" y1="0" x2="228.25356391083685" y2="74.16407864998737"></line><text class="label" x="247.27469423673992" y="80.34441853748632">Enthusiastic</text><line class="axis" x1="0" y1="0" x2="194.1640786499874" y2="141.06846055019355"></line><text class="label" x="210.34441853748635" y="152.824165596043">Excited</text><line class="axis" x1="0" y1="0" x2="141.06846055019355" y2="194.1640786499874"></line><text class="label" x="152.824165596043" y="210.34441853748635">Proud</text><line class="axis" x1="0" y1="0" x2="74.16407864998739" y2="228.25356391083685"></line><text class="label" x="80.34441853748633" y="247.27469423673992">Ashamed</text><line class="axis" x1="0" y1="0" x2="1.469576158976824e-14" y2="240"></line><text class="label" x="1.592040838891559e-14" y="260">Interested</text><line class="axis" x1="0" y1="0" x2="-74.16407864998736" y2="228.25356391083687"></line><text class="label" x="-80.3444185374863" y="247.27469423673995">Nervous</text><line class="axis" x1="0" y1="0" x2="-141.06846055019352" y2="194.1640786499874"></line><text class="label" x="-152.82416559604297" y="210.34441853748635">Active</text><line class="axis" x1="0" y1="0" x2="-194.16407864998737" y2="141.06846055019358"></line><text class="label" x="-210.34441853748632" y="152.82416559604303">Attentive</text><line class="axis" x1="0" y1="0" x2="-228.25356391083685" y2="74.1640786499874"></line><text class="label" x="-247.27469423673992" y="80.34441853748635">Determined</text><line class="axis" x1="0" y1="0" x2="-240" y2="2.939152317953648e-14"></line><text class="label" x="-260" y="3.184081677783118e-14">Distressed</text><line class="axis" x1="0" y1="0" x2="-228.25356391083685" y2="-74.16407864998746"></line><text class="label" x="-247.27469423673992" y="-80.3444185374864">Inspired</text><line class="axis" x1="0" y1="0" x2="-194.1640786499874" y2="-141.06846055019352"></line><text class="label" x="-210.34441853748638" y="-152.82416559604297">Irritable</text><line class="axis" x1="0" y1="0" x2="-141.06846055019358" y2="-194.16407864998737"></line><text class="label" x="-152.82416559604303" y="-210.34441853748632">Alert</text><line class="axis" x1="0" y1="0" x2="-74.16407864998742" y2="-228.25356391083685"></line><text class="label" x="-80.34441853748636" y="-247.27469423673992">Strong</text><line class="axis" x1="0" y1="0" x2="-4.408728476930471e-14" y2="-240"></line><text class="label" x="-4.776122516674677e-14" y="-260">Scared</text><line class="axis" x1="0" y1="0" x2="74.16407864998733" y2="-228.25356391083687"></line><text class="label" x="80.34441853748628" y="-247.27469423673995">Afraid</text><line class="axis" x1="0" y1="0" x2="141.0684605501935" y2="-194.1640786499874"></line><text class="label" x="152.82416559604295" y="-210.34441853748638">Jittery</text><line class="axis" x1="0" y1="0" x2="194.16407864998737" y2="-141.0684605501936"></line><text class="label" x="210.34441853748632" y="-152.8241655960431">Guilty</text><line class="axis" x1="0" y1="0" x2="228.25356391083685" y2="-74.16407864998745"></line><text class="label" x="247.27469423673992" y="-80.34441853748639">Upset</text><path class="reference" d="M48,0L45.651,14.833L38.833,28.214L28.214,38.833L14.833,45.651L0,48L-29.666,91.301L-28.214,38.833L-77.666,56.427L-45.651,14.833L-96,0L-45.651,-14.833L-38.833,-28.214L-28.214,-38.833L-14.833,-45.651L0,-48L29.666,-91.301L28.214,-38.833L77.666,-56.427L45.651,-14.833Z"></path><path class="current" d="M48,0L45.651,14.833L38.833,28.214L28.214,38.833L14.833,45.651L0,48L-29.666,91.301L-28.214,38.833L-77.666,56.427L-45.651,14.833L-96,0L-45.651,-14.833L-38.833,-28.214L-28.214,-38.833L-14.833,-45.651L0,-48L29.666,-91.301L28.214,-38.833L77.666,-56.427L45.651,-14.833Z"></path><path class="preview"></path><path class="monthly" d="M60,0L57.063,18.541L48.541,35.267L35.267,48.541L29.666,91.301L0,60L-40.79,125.539L-42.321,58.249L-77.666,56.427L-91.301,29.666L-108,0L-57.063,-18.541L-38.833,-28.214L-42.321,-58.249L-22.249,-68.476L0,-60L33.374,-102.714L42.321,-58.249L87.374,-63.481L79.889,-25.957Z"></path><g><circle class="handle" r="6" cx="48" cy="0" style="touch-action: none; -webkit-tap-highlight-color: rgba(0, 0, 0, 0);"></circle><circle class="handle" r="6" cx="45.65071278216737" cy="14.832815729997474" style="touch-action: none; -webkit-tap-highlight-color: rgba(0, 0, 0, 0);"></circle><circle class="handle" r="6" cx="38.83281572999748" cy="28.21369211003871" style="touch-action: none; -webkit-tap-highlight-color: rgba(0, 0, 0, 0);"></circle><circle class="handle" r="6" cx="28.21369211003871" cy="38.83281572999748" style="touch-action: none; -webkit-tap-highlight-color: rgba(0, 0, 0, 0);"></circle><circle class="handle" r="6" cx="14.832815729997478" cy="45.65071278216737" style="touch-action: none; -webkit-tap-highlight-color: rgba(0, 0, 0, 0);"></circle><circle class="handle" r="6" cx="2.9391523179536475e-15" cy="48" style="touch-action: none; -webkit-tap-highlight-color: rgba(0, 0, 0, 0);"></circle><circle class="handle" r="6" cx="-29.665631459994945" cy="91.30142556433475" style="touch-action: none; -webkit-tap-highlight-color: rgba(0, 0, 0, 0);"></circle><circle class="handle" r="6" cx="-28.213692110038707" cy="38.83281572999748" style="touch-action: none; -webkit-tap-highlight-color: rgba(0, 0, 0, 0);"></circle><circle class="handle" r="6" cx="-77.66563145999494" cy="56.42738422007743" style="touch-action: none; -webkit-tap-highlight-color: rgba(0, 0, 0, 0);"></circle><circle class="handle" r="6" cx="-45.65071278216737" cy="14.832815729997481" style="touch-action: none; -webkit-tap-highlight-color: rgba(0, 0, 0, 0);"></circle><circle class="handle" r="6" cx="-96" cy="1.175660927181459e-14" style="touch-action: none; -webkit-tap-highlight-color: rgba(0, 0, 0, 0);"></circle><circle class="handle" r="6" cx="-45.65071278216737" cy="-14.832815729997492" style="touch-action: none; -webkit-tap-highlight-color: rgba(0, 0, 0, 0);"></circle><circle class="handle" r="6" cx="-38.832815729997485" cy="-28.213692110038707" style="touch-action: none; -webkit-tap-highlight-color: rgba(0, 0, 0, 0);"></circle><circle class="handle" r="6" cx="-28.213692110038714" cy="-38.83281572999747" style="touch-action: none; -webkit-tap-highlight-color: rgba(0, 0, 0, 0);"></circle><circle class="handle" r="6" cx="-14.832815729997483" cy="-45.65071278216737" style="touch-action: none; -webkit-tap-highlight-color: rgba(0, 0, 0, 0);"></circle><circle class="handle" r="6" cx="-8.817456953860943e-15" cy="-48" style="touch-action: none; -webkit-tap-highlight-color: rgba(0, 0, 0, 0);"></circle><circle class="handle" r="6" cx="29.665631459994934" cy="-91.30142556433475" style="touch-action: none; -webkit-tap-highlight-color: rgba(0, 0, 0, 0);"></circle><circle class="handle" r="6" cx="28.2136921100387" cy="-38.832815729997485" style="touch-action: none; -webkit-tap-highlight-color: rgba(0, 0, 0, 0);"></circle><circle class="handle" r="6" cx="77.66563145999494" cy="-56.42738422007744" style="touch-action: none; -webkit-tap-highlight-color: rgba(0, 0, 0, 0);"></circle><circle class="handle" r="6" cx="45.65071278216737" cy="-14.832815729997488" style="touch-action: none; -webkit-tap-highlight-color: rgba(0, 0, 0, 0);"></circle></g></g></svg>
+        <label for="log">Log:</label>
+        <textarea id="log" placeholder="Log..."></textarea>
+
+        <div class="controls">
+            <button id="randomize">Randomize petals</button>
+            <button id="save">Save + Download DB + Page</button>
+            <button id="copyJson">Copy JSON</button>
+            <button id="clear">Clear DB</button>
+        </div>
+
+        <div id="status">30-day average (4 entries)</div>
+    </div>
+
+    <div id="right">
+        <h2>Scores Over Time</h2>
+        <div class="legend">
+            <span class="sw pos"></span> Positive affect &nbsp;&nbsp;
+            <span class="sw neg" style="background:#d62728"></span> Negative affect
+        </div>
+        <svg id="timeseries" viewBox="0,0,760,310"><g transform="translate(70,10)"><g transform="translate(0,250)" fill="none" font-size="10" font-family="sans-serif" text-anchor="middle"><path class="domain" stroke="currentColor" d="M0.5,6V0.5H670.5V6"></path><g class="tick" opacity="1" transform="translate(26.9246360367267,0)"><line stroke="currentColor" y2="6"></line><text fill="currentColor" y="9" dy="0.71em">Aug 24</text></g><g class="tick" opacity="1" transform="translate(72.23026409657477,0)"><line stroke="currentColor" y2="6"></line><text fill="currentColor" y="9" dy="0.71em">Aug 31</text></g><g class="tick" opacity="1" transform="translate(117.53589215642285,0)"><line stroke="currentColor" y2="6"></line><text fill="currentColor" y="9" dy="0.71em">Sep 07</text></g><g class="tick" opacity="1" transform="translate(162.84152021627094,0)"><line stroke="currentColor" y2="6"></line><text fill="currentColor" y="9" dy="0.71em">Sep 14</text></g><g class="tick" opacity="1" transform="translate(208.14714827611903,0)"><line stroke="currentColor" y2="6"></line><text fill="currentColor" y="9" dy="0.71em">Sep 21</text></g><g class="tick" opacity="1" transform="translate(253.4527763359671,0)"><line stroke="currentColor" y2="6"></line><text fill="currentColor" y="9" dy="0.71em">Sep 28</text></g><g class="tick" opacity="1" transform="translate(298.75840439581515,0)"><line stroke="currentColor" y2="6"></line><text fill="currentColor" y="9" dy="0.71em">Oct 05</text></g><g class="tick" opacity="1" transform="translate(344.06403245566327,0)"><line stroke="currentColor" y2="6"></line><text fill="currentColor" y="9" dy="0.71em">Oct 12</text></g><g class="tick" opacity="1" transform="translate(389.3696605155113,0)"><line stroke="currentColor" y2="6"></line><text fill="currentColor" y="9" dy="0.71em">Oct 19</text></g><g class="tick" opacity="1" transform="translate(434.6752885753594,0)"><line stroke="currentColor" y2="6"></line><text fill="currentColor" y="9" dy="0.71em">Oct 26</text></g><g class="tick" opacity="1" transform="translate(480.2505929927065,0)"><line stroke="currentColor" y2="6"></line><text fill="currentColor" y="9" dy="0.71em">Nov 02</text></g><g class="tick" opacity="1" transform="translate(525.5562210525546,0)"><line stroke="currentColor" y2="6"></line><text fill="currentColor" y="9" dy="0.71em">Nov 09</text></g><g class="tick" opacity="1" transform="translate(570.8618491124028,0)"><line stroke="currentColor" y2="6"></line><text fill="currentColor" y="9" dy="0.71em">Nov 16</text></g><g class="tick" opacity="1" transform="translate(616.1674771722508,0)"><line stroke="currentColor" y2="6"></line><text fill="currentColor" y="9" dy="0.71em">Nov 23</text></g><g class="tick" opacity="1" transform="translate(661.4731052320989,0)"><line stroke="currentColor" y2="6"></line><text fill="currentColor" y="9" dy="0.71em">Nov 30</text></g></g><g fill="none" font-size="10" font-family="sans-serif" text-anchor="end"><path class="domain" stroke="currentColor" d="M-6,250.5H0.5V0.5H-6"></path><g class="tick" opacity="1" transform="translate(0,250.5)"><line stroke="currentColor" x2="-6"></line><text fill="currentColor" x="-9" dy="0.32em">0</text></g><g class="tick" opacity="1" transform="translate(0,225.5)"><line stroke="currentColor" x2="-6"></line><text fill="currentColor" x="-9" dy="0.32em">5</text></g><g class="tick" opacity="1" transform="translate(0,200.5)"><line stroke="currentColor" x2="-6"></line><text fill="currentColor" x="-9" dy="0.32em">10</text></g><g class="tick" opacity="1" transform="translate(0,175.5)"><line stroke="currentColor" x2="-6"></line><text fill="currentColor" x="-9" dy="0.32em">15</text></g><g class="tick" opacity="1" transform="translate(0,150.5)"><line stroke="currentColor" x2="-6"></line><text fill="currentColor" x="-9" dy="0.32em">20</text></g><g class="tick" opacity="1" transform="translate(0,125.5)"><line stroke="currentColor" x2="-6"></line><text fill="currentColor" x="-9" dy="0.32em">25</text></g><g class="tick" opacity="1" transform="translate(0,100.5)"><line stroke="currentColor" x2="-6"></line><text fill="currentColor" x="-9" dy="0.32em">30</text></g><g class="tick" opacity="1" transform="translate(0,75.50000000000001)"><line stroke="currentColor" x2="-6"></line><text fill="currentColor" x="-9" dy="0.32em">35</text></g><g class="tick" opacity="1" transform="translate(0,50.499999999999986)"><line stroke="currentColor" x2="-6"></line><text fill="currentColor" x="-9" dy="0.32em">40</text></g><g class="tick" opacity="1" transform="translate(0,25.499999999999993)"><line stroke="currentColor" x2="-6"></line><text fill="currentColor" x="-9" dy="0.32em">45</text></g><g class="tick" opacity="1" transform="translate(0,0.5)"><line stroke="currentColor" x2="-6"></line><text fill="currentColor" x="-9" dy="0.32em">50</text></g></g><path fill="none" stroke="#1f77b4" stroke-width="2" d="M0,90L3.206,120L26.29,150L26.602,140L28.833,155L48.4,90L104.163,85L116.514,105L123.026,105L229.422,105L242.289,190L261.722,115L388.361,135L388.668,135L393.006,120L393.041,115L410.548,90L439.999,160L442.926,165L456.636,105L630.929,175L637.392,140L669.877,195L670,195"></path><path fill="none" stroke="#d62728" stroke-width="2" d="M0,135L3.206,140L26.29,140L26.602,140L28.833,100L48.4,150L104.163,120L116.514,120L123.026,120L229.422,135L242.289,170L261.722,165L388.361,200L388.668,200L393.006,170L393.041,155L410.548,175L439.999,155L442.926,145L456.636,190L630.929,125L637.392,150L669.877,180L670,180"></path><circle class="ptP" cx="0" cy="90" r="4" fill="#1f77b4"></circle><circle class="ptP" cx="3.2059283439802027" cy="120" r="4" fill="#1f77b4"></circle><circle class="ptP" cx="26.2904503998522" cy="150" r="4" fill="#1f77b4"></circle><circle class="ptP" cx="26.60166845256145" cy="140" r="4" fill="#1f77b4"></circle><circle class="ptP" cx="28.83335424912751" cy="155" r="4" fill="#1f77b4"></circle><circle class="ptP" cx="48.3995170388922" cy="90" r="4" fill="#1f77b4"></circle><circle class="ptP" cx="104.16281999169908" cy="84.99999999999999" r="4" fill="#1f77b4"></circle><circle class="ptP" cx="116.51418533932711" cy="105.00000000000001" r="4" fill="#1f77b4"></circle><circle class="ptP" cx="123.02601966767385" cy="105.00000000000001" r="4" fill="#1f77b4"></circle><circle class="ptP" cx="229.4220557943577" cy="105.00000000000001" r="4" fill="#1f77b4"></circle><circle class="ptP" cx="242.28880187610523" cy="190" r="4" fill="#1f77b4"></circle><circle class="ptP" cx="261.7218135374668" cy="114.99999999999999" r="4" fill="#1f77b4"></circle><circle class="ptP" cx="388.361296835124" cy="135" r="4" fill="#1f77b4"></circle><circle class="ptP" cx="388.6680974392773" cy="135" r="4" fill="#1f77b4"></circle><circle class="ptP" cx="393.00637433536633" cy="120" r="4" fill="#1f77b4"></circle><circle class="ptP" cx="393.04062173456674" cy="114.99999999999999" r="4" fill="#1f77b4"></circle><circle class="ptP" cx="410.54786209195083" cy="90" r="4" fill="#1f77b4"></circle><circle class="ptP" cx="439.99868028865546" cy="160" r="4" fill="#1f77b4"></circle><circle class="ptP" cx="442.92609348269934" cy="164.99999999999997" r="4" fill="#1f77b4"></circle><circle class="ptP" cx="456.63563309073436" cy="105.00000000000001" r="4" fill="#1f77b4"></circle><circle class="ptP" cx="630.92884346062" cy="175" r="4" fill="#1f77b4"></circle><circle class="ptP" cx="637.3921991189205" cy="140" r="4" fill="#1f77b4"></circle><circle class="ptP" cx="669.8767755084963" cy="195" r="4" fill="#1f77b4"></circle><circle class="ptP" cx="670" cy="195" r="4" fill="#1f77b4"></circle><circle class="ptN" cx="0" cy="135" r="4" fill="#d62728"></circle><circle class="ptN" cx="3.2059283439802027" cy="140" r="4" fill="#d62728"></circle><circle class="ptN" cx="26.2904503998522" cy="140" r="4" fill="#d62728"></circle><circle class="ptN" cx="26.60166845256145" cy="140" r="4" fill="#d62728"></circle><circle class="ptN" cx="28.83335424912751" cy="100" r="4" fill="#d62728"></circle><circle class="ptN" cx="48.3995170388922" cy="150" r="4" fill="#d62728"></circle><circle class="ptN" cx="104.16281999169908" cy="120" r="4" fill="#d62728"></circle><circle class="ptN" cx="116.51418533932711" cy="120" r="4" fill="#d62728"></circle><circle class="ptN" cx="123.02601966767385" cy="120" r="4" fill="#d62728"></circle><circle class="ptN" cx="229.4220557943577" cy="135" r="4" fill="#d62728"></circle><circle class="ptN" cx="242.28880187610523" cy="169.99999999999997" r="4" fill="#d62728"></circle><circle class="ptN" cx="261.7218135374668" cy="164.99999999999997" r="4" fill="#d62728"></circle><circle class="ptN" cx="388.361296835124" cy="200" r="4" fill="#d62728"></circle><circle class="ptN" cx="388.6680974392773" cy="200" r="4" fill="#d62728"></circle><circle class="ptN" cx="393.00637433536633" cy="169.99999999999997" r="4" fill="#d62728"></circle><circle class="ptN" cx="393.04062173456674" cy="155" r="4" fill="#d62728"></circle><circle class="ptN" cx="410.54786209195083" cy="175" r="4" fill="#d62728"></circle><circle class="ptN" cx="439.99868028865546" cy="155" r="4" fill="#d62728"></circle><circle class="ptN" cx="442.92609348269934" cy="145.00000000000003" r="4" fill="#d62728"></circle><circle class="ptN" cx="456.63563309073436" cy="190" r="4" fill="#d62728"></circle><circle class="ptN" cx="630.92884346062" cy="125" r="4" fill="#d62728"></circle><circle class="ptN" cx="637.3921991189205" cy="150" r="4" fill="#d62728"></circle><circle class="ptN" cx="669.8767755084963" cy="180" r="4" fill="#d62728"></circle><circle class="ptN" cx="670" cy="180" r="4" fill="#d62728"></circle><text x="335" y="288" text-anchor="middle">Date</text><text x="-125" y="-48" text-anchor="middle" transform="rotate(-90)">Score (0–50)</text></g></svg>
+
+        <h2 style="margin-top:1rem">Big Five Aspects Over Time</h2>
+        <svg id="bigfive" viewBox="0,0,760,310"><g transform="translate(70,30)"><g transform="translate(0,230)" fill="none" font-size="10" font-family="sans-serif" text-anchor="middle"><path class="domain" stroke="currentColor" d="M0.5,6V0.5H670.5V6"></path><g class="tick" opacity="1" transform="translate(26.929496874507386,0)"><line stroke="currentColor" y2="6"></line><text fill="currentColor" y="9" dy="0.71em">Aug 24</text></g><g class="tick" opacity="1" transform="translate(72.24345894918333,0)"><line stroke="currentColor" y2="6"></line><text fill="currentColor" y="9" dy="0.71em">Aug 31</text></g><g class="tick" opacity="1" transform="translate(117.55742102385926,0)"><line stroke="currentColor" y2="6"></line><text fill="currentColor" y="9" dy="0.71em">Sep 07</text></g><g class="tick" opacity="1" transform="translate(162.8713830985352,0)"><line stroke="currentColor" y2="6"></line><text fill="currentColor" y="9" dy="0.71em">Sep 14</text></g><g class="tick" opacity="1" transform="translate(208.18534517321115,0)"><line stroke="currentColor" y2="6"></line><text fill="currentColor" y="9" dy="0.71em">Sep 21</text></g><g class="tick" opacity="1" transform="translate(253.4993072478871,0)"><line stroke="currentColor" y2="6"></line><text fill="currentColor" y="9" dy="0.71em">Sep 28</text></g><g class="tick" opacity="1" transform="translate(298.81326932256303,0)"><line stroke="currentColor" y2="6"></line><text fill="currentColor" y="9" dy="0.71em">Oct 05</text></g><g class="tick" opacity="1" transform="translate(344.127231397239,0)"><line stroke="currentColor" y2="6"></line><text fill="currentColor" y="9" dy="0.71em">Oct 12</text></g><g class="tick" opacity="1" transform="translate(389.4411934719149,0)"><line stroke="currentColor" y2="6"></line><text fill="currentColor" y="9" dy="0.71em">Oct 19</text></g><g class="tick" opacity="1" transform="translate(434.75515554659086,0)"><line stroke="currentColor" y2="6"></line><text fill="currentColor" y="9" dy="0.71em">Oct 26</text></g><g class="tick" opacity="1" transform="translate(480.33884358599704,0)"><line stroke="currentColor" y2="6"></line><text fill="currentColor" y="9" dy="0.71em">Nov 02</text></g><g class="tick" opacity="1" transform="translate(525.6528056606729,0)"><line stroke="currentColor" y2="6"></line><text fill="currentColor" y="9" dy="0.71em">Nov 09</text></g><g class="tick" opacity="1" transform="translate(570.9667677353489,0)"><line stroke="currentColor" y2="6"></line><text fill="currentColor" y="9" dy="0.71em">Nov 16</text></g><g class="tick" opacity="1" transform="translate(616.2807298100248,0)"><line stroke="currentColor" y2="6"></line><text fill="currentColor" y="9" dy="0.71em">Nov 23</text></g><g class="tick" opacity="1" transform="translate(661.5946918847008,0)"><line stroke="currentColor" y2="6"></line><text fill="currentColor" y="9" dy="0.71em">Nov 30</text></g></g><g fill="none" font-size="10" font-family="sans-serif" text-anchor="end"><path class="domain" stroke="currentColor" d="M-6,230.5H0.5V0.5H-6"></path><g class="tick" opacity="1" transform="translate(0,230.5)"><line stroke="currentColor" x2="-6"></line><text fill="currentColor" x="-9" dy="0.32em">1.0</text></g><g class="tick" opacity="1" transform="translate(0,201.75)"><line stroke="currentColor" x2="-6"></line><text fill="currentColor" x="-9" dy="0.32em">1.5</text></g><g class="tick" opacity="1" transform="translate(0,173)"><line stroke="currentColor" x2="-6"></line><text fill="currentColor" x="-9" dy="0.32em">2.0</text></g><g class="tick" opacity="1" transform="translate(0,144.25)"><line stroke="currentColor" x2="-6"></line><text fill="currentColor" x="-9" dy="0.32em">2.5</text></g><g class="tick" opacity="1" transform="translate(0,115.5)"><line stroke="currentColor" x2="-6"></line><text fill="currentColor" x="-9" dy="0.32em">3.0</text></g><g class="tick" opacity="1" transform="translate(0,86.75)"><line stroke="currentColor" x2="-6"></line><text fill="currentColor" x="-9" dy="0.32em">3.5</text></g><g class="tick" opacity="1" transform="translate(0,58)"><line stroke="currentColor" x2="-6"></line><text fill="currentColor" x="-9" dy="0.32em">4.0</text></g><g class="tick" opacity="1" transform="translate(0,29.25)"><line stroke="currentColor" x2="-6"></line><text fill="currentColor" x="-9" dy="0.32em">4.5</text></g><g class="tick" opacity="1" transform="translate(0,0.5)"><line stroke="currentColor" x2="-6"></line><text fill="currentColor" x="-9" dy="0.32em">5.0</text></g></g><g transform="translate(10, 10)"><g transform="translate(0, 0)"><line x1="0" x2="20" y1="0" y2="0" stroke="#ff7f0e" stroke-width="2"></line><text x="25" y="0" dy="0.32em" font-size="11px" fill="#333">Extraversion</text></g><g transform="translate(130, 0)"><line x1="0" x2="20" y1="0" y2="0" stroke="#2ca02c" stroke-width="2"></line><text x="25" y="0" dy="0.32em" font-size="11px" fill="#333">Agreeableness</text></g><g transform="translate(260, 0)"><line x1="0" x2="20" y1="0" y2="0" stroke="#9467bd" stroke-width="2"></line><text x="25" y="0" dy="0.32em" font-size="11px" fill="#333">Conscientiousness</text></g><g transform="translate(390, 0)"><line x1="0" x2="20" y1="0" y2="0" stroke="#8c564b" stroke-width="2"></line><text x="25" y="0" dy="0.32em" font-size="11px" fill="#333">Neuroticism</text></g><g transform="translate(520, 0)"><line x1="0" x2="20" y1="0" y2="0" stroke="#e377c2" stroke-width="2"></line><text x="25" y="0" dy="0.32em" font-size="11px" fill="#333">Openness</text></g></g><path fill="none" stroke="#ff7f0e" stroke-width="2" d="M0,115L3.207,143.75L26.295,172.5L26.607,172.5L28.839,186.875L48.408,115L104.182,100.625L116.536,143.75L123.049,143.75L229.464,143.75L242.333,230L261.77,129.375L388.433,201.25L388.74,201.25L393.079,158.125L393.113,143.75L410.623,129.375L440.08,143.75L443.008,172.5L456.72,115L631.045,201.25L637.509,172.5L670,230"></path><path fill="none" stroke="#2ca02c" stroke-width="2" d="M0,43.125L3.207,57.5L26.295,115L26.607,115L28.839,143.75L48.408,71.875L104.182,100.625L116.536,115L123.049,115L229.464,100.625L242.333,129.375L261.77,86.25L388.433,57.5L388.74,57.5L393.079,86.25L393.113,86.25L410.623,57.5L440.08,129.375L443.008,115L456.72,71.875L631.045,115L637.509,86.25L670,100.625"></path><path fill="none" stroke="#9467bd" stroke-width="2" d="M0,57.5L3.207,76.667L26.295,153.333L26.607,153.333L28.839,95.833L48.408,38.333L104.182,38.333L116.536,95.833L123.049,95.833L229.464,76.667L242.333,153.333L261.77,95.833L388.433,95.833L388.74,95.833L393.079,76.667L393.113,76.667L410.623,76.667L440.08,172.5L443.008,153.333L456.72,76.667L631.045,153.333L637.509,115L670,153.333"></path><path fill="none" stroke="#8c564b" stroke-width="2" d="M0,131.429L3.207,131.429L26.295,164.286L26.607,164.286L28.839,106.786L48.408,164.286L104.182,131.429L116.536,139.643L123.049,139.643L229.464,156.071L242.333,197.143L261.77,188.929L388.433,230L388.74,230L393.079,188.929L393.113,164.286L410.623,188.929L440.08,188.929L443.008,156.071L456.72,213.571L631.045,131.429L637.509,164.286L670,197.143"></path><path fill="none" stroke="#e377c2" stroke-width="2" d="M0,143.75L3.207,172.5L26.295,172.5L26.607,115L28.839,230L48.408,143.75L104.182,143.75L116.536,86.25L123.049,86.25L229.464,115L242.333,201.25L261.77,143.75L388.433,115L388.74,115L393.079,115L393.113,115L410.623,28.75L440.08,230L443.008,201.25L456.72,115L631.045,230L637.509,172.5L670,230"></path><circle class="ptextraversion" cx="0" cy="115" r="4" fill="#ff7f0e" style="opacity: 0.01;"></circle><circle class="ptextraversion" cx="3.2065180776512716" cy="143.75" r="4" fill="#ff7f0e" style="opacity: 0.01;"></circle><circle class="ptextraversion" cx="26.29528655405305" cy="172.5" r="4" fill="#ff7f0e" style="opacity: 0.01;"></circle><circle class="ptextraversion" cx="26.606561855629092" cy="172.5" r="4" fill="#ff7f0e" style="opacity: 0.01;"></circle><circle class="ptextraversion" cx="28.83865817299171" cy="186.875" r="4" fill="#ff7f0e" style="opacity: 0.01;"></circle><circle class="ptextraversion" cx="48.4084201776398" cy="115" r="4" fill="#ff7f0e" style="opacity: 0.01;"></circle><circle class="ptextraversion" cx="104.1819808448535" cy="100.625" r="4" fill="#ff7f0e" style="opacity: 0.01;"></circle><circle class="ptextraversion" cx="116.53561823828157" cy="143.75" r="4" fill="#ff7f0e" style="opacity: 0.01;"></circle><circle class="ptextraversion" cx="123.0486504249557" cy="143.75" r="4" fill="#ff7f0e" style="opacity: 0.01;"></circle><circle class="ptextraversion" cx="229.46425820709777" cy="143.75" r="4" fill="#ff7f0e" style="opacity: 0.01;"></circle><circle class="ptextraversion" cx="242.33337113943816" cy="230" r="4" fill="#ff7f0e" style="opacity: 0.01;"></circle><circle class="ptextraversion" cx="261.76995752240214" cy="129.375" r="4" fill="#ff7f0e" style="opacity: 0.01;"></circle><circle class="ptextraversion" cx="388.4327362775288" cy="201.25" r="4" fill="#ff7f0e" style="opacity: 0.01;"></circle><circle class="ptextraversion" cx="388.73959331795487" cy="201.25" r="4" fill="#ff7f0e" style="opacity: 0.01;"></circle><circle class="ptextraversion" cx="393.07866824434456" cy="158.125" r="4" fill="#ff7f0e" style="opacity: 0.01;"></circle><circle class="ptextraversion" cx="393.1129219433877" cy="143.75" r="4" fill="#ff7f0e" style="opacity: 0.01;"></circle><circle class="ptextraversion" cx="410.6233827748493" cy="129.375" r="4" fill="#ff7f0e" style="opacity: 0.01;"></circle><circle class="ptextraversion" cx="440.07961847851834" cy="143.75" r="4" fill="#ff7f0e" style="opacity: 0.01;"></circle><circle class="ptextraversion" cx="443.00757017309763" cy="172.5" r="4" fill="#ff7f0e" style="opacity: 0.01;"></circle><circle class="ptextraversion" cx="456.71963166442333" cy="115" r="4" fill="#ff7f0e" style="opacity: 0.01;"></circle><circle class="ptextraversion" cx="631.0449034417284" cy="201.25" r="4" fill="#ff7f0e" style="opacity: 0.01;"></circle><circle class="ptextraversion" cx="637.5094480406573" cy="172.5" r="4" fill="#ff7f0e" style="opacity: 0.01;"></circle><circle class="ptextraversion" cx="670" cy="230" r="4" fill="#ff7f0e" style="opacity: 0.01;"></circle><circle class="ptagreeableness" cx="0" cy="43.125" r="4" fill="#2ca02c" style="opacity: 0.01;"></circle><circle class="ptagreeableness" cx="3.2065180776512716" cy="57.5" r="4" fill="#2ca02c" style="opacity: 0.01;"></circle><circle class="ptagreeableness" cx="26.29528655405305" cy="115" r="4" fill="#2ca02c" style="opacity: 0.01;"></circle><circle class="ptagreeableness" cx="26.606561855629092" cy="115" r="4" fill="#2ca02c" style="opacity: 0.01;"></circle><circle class="ptagreeableness" cx="28.83865817299171" cy="143.75" r="4" fill="#2ca02c" style="opacity: 0.01;"></circle><circle class="ptagreeableness" cx="48.4084201776398" cy="71.875" r="4" fill="#2ca02c" style="opacity: 0.01;"></circle><circle class="ptagreeableness" cx="104.1819808448535" cy="100.625" r="4" fill="#2ca02c" style="opacity: 0.01;"></circle><circle class="ptagreeableness" cx="116.53561823828157" cy="115" r="4" fill="#2ca02c" style="opacity: 0.01;"></circle><circle class="ptagreeableness" cx="123.0486504249557" cy="115" r="4" fill="#2ca02c" style="opacity: 0.01;"></circle><circle class="ptagreeableness" cx="229.46425820709777" cy="100.625" r="4" fill="#2ca02c" style="opacity: 0.01;"></circle><circle class="ptagreeableness" cx="242.33337113943816" cy="129.375" r="4" fill="#2ca02c" style="opacity: 0.01;"></circle><circle class="ptagreeableness" cx="261.76995752240214" cy="86.25" r="4" fill="#2ca02c" style="opacity: 0.01;"></circle><circle class="ptagreeableness" cx="388.4327362775288" cy="57.5" r="4" fill="#2ca02c" style="opacity: 0.01;"></circle><circle class="ptagreeableness" cx="388.73959331795487" cy="57.5" r="4" fill="#2ca02c" style="opacity: 0.01;"></circle><circle class="ptagreeableness" cx="393.07866824434456" cy="86.25" r="4" fill="#2ca02c" style="opacity: 0.01;"></circle><circle class="ptagreeableness" cx="393.1129219433877" cy="86.25" r="4" fill="#2ca02c" style="opacity: 0.01;"></circle><circle class="ptagreeableness" cx="410.6233827748493" cy="57.5" r="4" fill="#2ca02c" style="opacity: 0.01;"></circle><circle class="ptagreeableness" cx="440.07961847851834" cy="129.375" r="4" fill="#2ca02c" style="opacity: 0.01;"></circle><circle class="ptagreeableness" cx="443.00757017309763" cy="115" r="4" fill="#2ca02c" style="opacity: 0.01;"></circle><circle class="ptagreeableness" cx="456.71963166442333" cy="71.875" r="4" fill="#2ca02c" style="opacity: 0.01;"></circle><circle class="ptagreeableness" cx="631.0449034417284" cy="115" r="4" fill="#2ca02c" style="opacity: 0.01;"></circle><circle class="ptagreeableness" cx="637.5094480406573" cy="86.25" r="4" fill="#2ca02c" style="opacity: 0.01;"></circle><circle class="ptagreeableness" cx="670" cy="100.625" r="4" fill="#2ca02c" style="opacity: 0.01;"></circle><circle class="ptconscientiousness" cx="0" cy="57.5" r="4" fill="#9467bd" style="opacity: 0.01;"></circle><circle class="ptconscientiousness" cx="3.2065180776512716" cy="76.66666666666667" r="4" fill="#9467bd" style="opacity: 0.01;"></circle><circle class="ptconscientiousness" cx="26.29528655405305" cy="153.33333333333331" r="4" fill="#9467bd" style="opacity: 0.01;"></circle><circle class="ptconscientiousness" cx="26.606561855629092" cy="153.33333333333331" r="4" fill="#9467bd" style="opacity: 0.01;"></circle><circle class="ptconscientiousness" cx="28.83865817299171" cy="95.83333333333333" r="4" fill="#9467bd" style="opacity: 0.01;"></circle><circle class="ptconscientiousness" cx="48.4084201776398" cy="38.33333333333335" r="4" fill="#9467bd" style="opacity: 0.01;"></circle><circle class="ptconscientiousness" cx="104.1819808448535" cy="38.33333333333335" r="4" fill="#9467bd" style="opacity: 0.01;"></circle><circle class="ptconscientiousness" cx="116.53561823828157" cy="95.83333333333333" r="4" fill="#9467bd" style="opacity: 0.01;"></circle><circle class="ptconscientiousness" cx="123.0486504249557" cy="95.83333333333333" r="4" fill="#9467bd" style="opacity: 0.01;"></circle><circle class="ptconscientiousness" cx="229.46425820709777" cy="76.66666666666667" r="4" fill="#9467bd" style="opacity: 0.01;"></circle><circle class="ptconscientiousness" cx="242.33337113943816" cy="153.33333333333331" r="4" fill="#9467bd" style="opacity: 0.01;"></circle><circle class="ptconscientiousness" cx="261.76995752240214" cy="95.83333333333333" r="4" fill="#9467bd" style="opacity: 0.01;"></circle><circle class="ptconscientiousness" cx="388.4327362775288" cy="95.83333333333333" r="4" fill="#9467bd" style="opacity: 0.01;"></circle><circle class="ptconscientiousness" cx="388.73959331795487" cy="95.83333333333333" r="4" fill="#9467bd" style="opacity: 0.01;"></circle><circle class="ptconscientiousness" cx="393.07866824434456" cy="76.66666666666667" r="4" fill="#9467bd" style="opacity: 0.01;"></circle><circle class="ptconscientiousness" cx="393.1129219433877" cy="76.66666666666667" r="4" fill="#9467bd" style="opacity: 0.01;"></circle><circle class="ptconscientiousness" cx="410.6233827748493" cy="76.66666666666667" r="4" fill="#9467bd" style="opacity: 0.01;"></circle><circle class="ptconscientiousness" cx="440.07961847851834" cy="172.5" r="4" fill="#9467bd" style="opacity: 0.01;"></circle><circle class="ptconscientiousness" cx="443.00757017309763" cy="153.33333333333331" r="4" fill="#9467bd" style="opacity: 0.01;"></circle><circle class="ptconscientiousness" cx="456.71963166442333" cy="76.66666666666667" r="4" fill="#9467bd" style="opacity: 0.01;"></circle><circle class="ptconscientiousness" cx="631.0449034417284" cy="153.33333333333331" r="4" fill="#9467bd" style="opacity: 0.01;"></circle><circle class="ptconscientiousness" cx="637.5094480406573" cy="115" r="4" fill="#9467bd" style="opacity: 0.01;"></circle><circle class="ptconscientiousness" cx="670" cy="153.33333333333331" r="4" fill="#9467bd" style="opacity: 0.01;"></circle><circle class="ptneuroticism" cx="0" cy="131.42857142857142" r="4" fill="#8c564b" style="opacity: 0.01;"></circle><circle class="ptneuroticism" cx="3.2065180776512716" cy="131.42857142857142" r="4" fill="#8c564b" style="opacity: 0.01;"></circle><circle class="ptneuroticism" cx="26.29528655405305" cy="164.28571428571428" r="4" fill="#8c564b" style="opacity: 0.01;"></circle><circle class="ptneuroticism" cx="26.606561855629092" cy="164.28571428571428" r="4" fill="#8c564b" style="opacity: 0.01;"></circle><circle class="ptneuroticism" cx="28.83865817299171" cy="106.78571428571429" r="4" fill="#8c564b" style="opacity: 0.01;"></circle><circle class="ptneuroticism" cx="48.4084201776398" cy="164.28571428571428" r="4" fill="#8c564b" style="opacity: 0.01;"></circle><circle class="ptneuroticism" cx="104.1819808448535" cy="131.42857142857142" r="4" fill="#8c564b" style="opacity: 0.01;"></circle><circle class="ptneuroticism" cx="116.53561823828157" cy="139.64285714285714" r="4" fill="#8c564b" style="opacity: 0.01;"></circle><circle class="ptneuroticism" cx="123.0486504249557" cy="139.64285714285714" r="4" fill="#8c564b" style="opacity: 0.01;"></circle><circle class="ptneuroticism" cx="229.46425820709777" cy="156.07142857142858" r="4" fill="#8c564b" style="opacity: 0.01;"></circle><circle class="ptneuroticism" cx="242.33337113943816" cy="197.14285714285717" r="4" fill="#8c564b" style="opacity: 0.01;"></circle><circle class="ptneuroticism" cx="261.76995752240214" cy="188.92857142857142" r="4" fill="#8c564b" style="opacity: 0.01;"></circle><circle class="ptneuroticism" cx="388.4327362775288" cy="230" r="4" fill="#8c564b" style="opacity: 0.01;"></circle><circle class="ptneuroticism" cx="388.73959331795487" cy="230" r="4" fill="#8c564b" style="opacity: 0.01;"></circle><circle class="ptneuroticism" cx="393.07866824434456" cy="188.92857142857142" r="4" fill="#8c564b" style="opacity: 0.01;"></circle><circle class="ptneuroticism" cx="393.1129219433877" cy="164.28571428571428" r="4" fill="#8c564b" style="opacity: 0.01;"></circle><circle class="ptneuroticism" cx="410.6233827748493" cy="188.92857142857142" r="4" fill="#8c564b" style="opacity: 0.01;"></circle><circle class="ptneuroticism" cx="440.07961847851834" cy="188.92857142857142" r="4" fill="#8c564b" style="opacity: 0.01;"></circle><circle class="ptneuroticism" cx="443.00757017309763" cy="156.07142857142858" r="4" fill="#8c564b" style="opacity: 0.01;"></circle><circle class="ptneuroticism" cx="456.71963166442333" cy="213.57142857142858" r="4" fill="#8c564b" style="opacity: 0.01;"></circle><circle class="ptneuroticism" cx="631.0449034417284" cy="131.42857142857142" r="4" fill="#8c564b" style="opacity: 0.01;"></circle><circle class="ptneuroticism" cx="637.5094480406573" cy="164.28571428571428" r="4" fill="#8c564b" style="opacity: 0.01;"></circle><circle class="ptneuroticism" cx="670" cy="197.14285714285717" r="4" fill="#8c564b" style="opacity: 0.01;"></circle><circle class="ptopenness" cx="0" cy="143.75" r="4" fill="#e377c2" style="opacity: 0.01;"></circle><circle class="ptopenness" cx="3.2065180776512716" cy="172.5" r="4" fill="#e377c2" style="opacity: 0.01;"></circle><circle class="ptopenness" cx="26.29528655405305" cy="172.5" r="4" fill="#e377c2" style="opacity: 0.01;"></circle><circle class="ptopenness" cx="26.606561855629092" cy="115" r="4" fill="#e377c2" style="opacity: 0.01;"></circle><circle class="ptopenness" cx="28.83865817299171" cy="230" r="4" fill="#e377c2" style="opacity: 0.01;"></circle><circle class="ptopenness" cx="48.4084201776398" cy="143.75" r="4" fill="#e377c2" style="opacity: 0.01;"></circle><circle class="ptopenness" cx="104.1819808448535" cy="143.75" r="4" fill="#e377c2" style="opacity: 0.01;"></circle><circle class="ptopenness" cx="116.53561823828157" cy="86.25" r="4" fill="#e377c2" style="opacity: 0.01;"></circle><circle class="ptopenness" cx="123.0486504249557" cy="86.25" r="4" fill="#e377c2" style="opacity: 0.01;"></circle><circle class="ptopenness" cx="229.46425820709777" cy="115" r="4" fill="#e377c2" style="opacity: 0.01;"></circle><circle class="ptopenness" cx="242.33337113943816" cy="201.25" r="4" fill="#e377c2" style="opacity: 0.01;"></circle><circle class="ptopenness" cx="261.76995752240214" cy="143.75" r="4" fill="#e377c2" style="opacity: 0.01;"></circle><circle class="ptopenness" cx="388.4327362775288" cy="115" r="4" fill="#e377c2" style="opacity: 0.01;"></circle><circle class="ptopenness" cx="388.73959331795487" cy="115" r="4" fill="#e377c2" style="opacity: 0.01;"></circle><circle class="ptopenness" cx="393.07866824434456" cy="115" r="4" fill="#e377c2" style="opacity: 0.01;"></circle><circle class="ptopenness" cx="393.1129219433877" cy="115" r="4" fill="#e377c2" style="opacity: 0.01;"></circle><circle class="ptopenness" cx="410.6233827748493" cy="28.75" r="4" fill="#e377c2" style="opacity: 0.01;"></circle><circle class="ptopenness" cx="440.07961847851834" cy="230" r="4" fill="#e377c2" style="opacity: 0.01;"></circle><circle class="ptopenness" cx="443.00757017309763" cy="201.25" r="4" fill="#e377c2" style="opacity: 0.01;"></circle><circle class="ptopenness" cx="456.71963166442333" cy="115" r="4" fill="#e377c2" style="opacity: 0.01;"></circle><circle class="ptopenness" cx="631.0449034417284" cy="230" r="4" fill="#e377c2" style="opacity: 0.01;"></circle><circle class="ptopenness" cx="637.5094480406573" cy="172.5" r="4" fill="#e377c2" style="opacity: 0.01;"></circle><circle class="ptopenness" cx="670" cy="230" r="4" fill="#e377c2" style="opacity: 0.01;"></circle><text x="335" y="268" text-anchor="middle">Date</text><text x="-115" y="-48" text-anchor="middle" transform="rotate(-90)">Aspect Score (1–5)</text></g></svg>
+    </div>
+
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.10.2/sql-wasm.js"></script>
+    <script>
+        (async function () {
+            // --- PANAS items
+            const ITEMS = ["Interested", "Distressed", "Excited", "Upset", "Strong", "Guilty", "Scared", "Hostile", "Enthusiastic", "Proud", "Irritable", "Alert", "Ashamed", "Inspired", "Nervous", "Determined", "Attentive", "Jittery", "Active", "Afraid"];
+            const POS_IDX = [1, 3, 5, 9, 10, 12, 14, 16, 17, 19];
+            const NEG_IDX = [2, 4, 6, 7, 8, 11, 13, 15, 18, 20];
+
+            // --- Big Five Aspects mapping (all 20 PANAS items used exactly once)
+            // Each aspect has items that contribute positively (+1) or negatively (-1, reversed scoring)
+            // BFAS scoring is distinct from PANAS positive/negative affect scoring
+            const BIG_FIVE_ITEMS = {
+                extraversion: {
+                    "Excited": 1, "Enthusiastic": 1, "Active": 1, "Strong": 1
+                },
+                agreeableness: {
+                    "Attentive": 1, "Proud": 1,
+                    "Hostile": -1, "Irritable": -1
+                },
+                conscientiousness: {
+                    "Determined": 1, "Alert": 1,
+                    "Ashamed": -1
+                },
+                neuroticism: {
+                    "Distressed": 1, "Nervous": 1, "Jittery": 1, "Afraid": 1,
+                    "Upset": 1, "Guilty": 1, "Scared": 1
+                },
+                openness: {
+                    "Interested": 1, "Inspired": 1
+                }
+            };
+            const BIG_FIVE_COLORS = {
+                extraversion: "#ff7f0e",
+                agreeableness: "#2ca02c",
+                conscientiousness: "#9467bd",
+                neuroticism: "#8c564b",
+                openness: "#e377c2"
+            };
+
+            // --- SQLite init
+            const SQL = await initSqlJs({ locateFile: f => `https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.10.2/${f}` });
+            const LSKEY = "panas_db";
+            function base64ToU8(b64) { if (!b64) return new Uint8Array(); const s = atob(b64); const u = new Uint8Array(s.length); for (let i = 0; i < s.length; i++)u[i] = s.charCodeAt(i); return u; }
+            function u8ToBase64(u8) { let s = ""; u8.forEach(b => s += String.fromCharCode(b)); return btoa(s); }
+            function persist() { localStorage.setItem(LSKEY, u8ToBase64(db.export())); }
+
+            let dbBytes = base64ToU8(localStorage.getItem(LSKEY) || "");
+            let db = dbBytes.length ? new SQL.Database(dbBytes) : new SQL.Database();
+
+            // base schema
+            db.exec(`CREATE TABLE IF NOT EXISTS entries (id INTEGER PRIMARY KEY AUTOINCREMENT, ts TEXT)`);
+            const ensureCol = (name, type) => {
+                const info = db.exec(`PRAGMA table_info(entries)`)[0]?.values || [];
+                const names = info.map(r => r[1]);
+                if (!names.includes(name)) { db.exec(`ALTER TABLE entries ADD COLUMN "${name}" ${type}`); }
+            };
+            ensureCol("log", "TEXT");
+            ITEMS.forEach(it => ensureCol(it, "INTEGER NOT NULL DEFAULT 3"));
+            ensureCol("positive_score", "INTEGER");
+            ensureCol("negative_score", "INTEGER");
+            db.exec(`UPDATE entries SET log='' WHERE log IS NULL`);
+            persist();
+
+            // --- Import (.sqlite)
+            const importBox = document.getElementById("importBox");
+            const fileInput = document.getElementById("fileInput");
+            const status = t => document.getElementById("status").textContent = t;
+            const setHover = on => importBox.classList.toggle("hover", !!on);
+
+            ["dragenter", "dragover"].forEach(ev => {
+                importBox.addEventListener(ev, (e) => { e.preventDefault(); e.stopPropagation(); setHover(true); });
+            });
+            ["dragleave", "dragend", "drop"].forEach(ev => {
+                importBox.addEventListener(ev, (e) => { e.preventDefault(); e.stopPropagation(); if (ev !== "drop") setHover(false); });
+            });
+            importBox.addEventListener("click", () => fileInput.click());
+            importBox.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); fileInput.click(); } });
+
+            importBox.addEventListener("drop", (e) => {
+                setHover(false);
+                const f = e.dataTransfer.files?.[0];
+                if (f) importDbFromFile(f);
+            });
+            fileInput.addEventListener("change", () => {
+                const f = fileInput.files?.[0];
+                if (f) importDbFromFile(f);
+                fileInput.value = "";
+            });
+
+            async function importDbFromFile(file) {
+                try {
+                    status(`Importing "${file.name}"...`);
+                    const buf = await file.arrayBuffer();
+                    const u8 = new Uint8Array(buf);
+                    const tmp = new SQL.Database(u8);
+                    const needCols = () => {
+                        const info = tmp.exec(`PRAGMA table_info(entries)`)[0]?.values || [];
+                        const names = new Set(info.map(r => r[1]));
+                        if (!names.has("log")) tmp.exec(`ALTER TABLE entries ADD COLUMN "log" TEXT`);
+                        ITEMS.forEach(it => { if (!names.has(it)) tmp.exec(`ALTER TABLE entries ADD COLUMN "${it}" INTEGER NOT NULL DEFAULT 3`); });
+                        if (!names.has("positive_score")) tmp.exec(`ALTER TABLE entries ADD COLUMN "positive_score" INTEGER`);
+                        if (!names.has("negative_score")) tmp.exec(`ALTER TABLE entries ADD COLUMN "negative_score" INTEGER`);
+                    };
+                    needCols();
+                    db = tmp;
+                    persist();
+                    refreshFromDb();
+                    status(`Imported ${file.name} and refreshed from latest entry.`);
+                } catch (err) {
+                    console.error(err);
+                    status("Import failed: not a valid PANAS SQLite file?");
+                    alert("Import failed. Ensure you're selecting the exported panas.sqlite file.");
+                }
+            }
+
+            // Helpers to read latest entry and refresh UI
+            function getMostRecentEntry() {
+                const res = db.exec(`SELECT ${ITEMS.map(n => `"${n}"`).join(",")} FROM entries ORDER BY id DESC LIMIT 1`);
+                if (!res.length) return null;
+                const row = res[0].values[0];
+                const o = {}; ITEMS.forEach((n, i) => o[n] = row[i]);
+                return o;
+            }
+
+            // --- Windrose setup
+            const size = 620, radius = size / 2 - 70, levels = 5;
+            const svg = d3.select("#radar").attr("viewBox", [0, 0, size, size]).append("g").attr("transform", `translate(${size / 2},${size / 2})`);
+            let labels = d3.shuffle(ITEMS.slice());
+            let values = {};
+
+            const last = getMostRecentEntry();
+            ITEMS.forEach(l => values[l] = last ? (last[l] ?? 3) : 3);
+
+            const step = radius / levels;
+            const angleForIndex = i => (i / labels.length) * 2 * Math.PI;
+            const posOnSpoke = (angle, v) => [Math.cos(angle) * (v * step), Math.sin(angle) * (v * step)];
+
+            for (let l = 1; l <= levels; l++) { svg.append("circle").attr("r", l * step).attr("class", "grid"); }
+
+            function drawAxes() {
+                svg.selectAll(".axis").remove();
+                svg.selectAll(".label").remove();
+                labels.forEach((label, i) => {
+                    const a = angleForIndex(i);
+                    svg.append("line").attr("class", "axis").attr("x1", 0).attr("y1", 0).attr("x2", Math.cos(a) * radius).attr("y2", Math.sin(a) * radius);
+                    svg.append("text").attr("class", "label").attr("x", Math.cos(a) * (radius + 20)).attr("y", Math.sin(a) * (radius + 20)).text(label);
+                });
+            }
+            drawAxes();
+
+            const refPoly = svg.append("path").attr("class", "reference");
+            const curPoly = svg.append("path").attr("class", "current");
+            const previewPoly = svg.append("path").attr("class", "preview");
+            const monthlyPoly = svg.append("path").attr("class", "monthly");
+            const handleGroup = svg.append("g");
+
+            function updateHandlePositions() {
+                handleGroup.selectAll("circle")
+                    .attr("cx", d => posOnSpoke(d.angle, values[d.label])[0])
+                    .attr("cy", d => posOnSpoke(d.angle, values[d.label])[1]);
+            }
+
+            let handles = handleGroup.selectAll("circle")
+                .data(labels.map((label, i) => ({ label, angle: angleForIndex(i) })))
+                .join("circle")
+                .attr("class", "handle")
+                .attr("r", 6)
+                .attr("cx", d => posOnSpoke(d.angle, values[d.label])[0])
+                .attr("cy", d => posOnSpoke(d.angle, values[d.label])[1])
+                .call(d3.drag().on("drag", function (ev, d) {
+                    const r = Math.min(radius, Math.hypot(ev.x, ev.y));
+                    let val = Math.round(r / step);
+                    val = Math.max(1, Math.min(5, val));
+                    values[d.label] = val;
+                    d3.select(this).attr("cx", posOnSpoke(d.angle, val)[0]).attr("cy", posOnSpoke(d.angle, val)[1]);
+                    drawPolygons();
+                    drawMonthlyAverage(); // keep monthly visible while editing
+                }));
+
+            function polygonForVals(valMap) { return labels.map((lbl, i) => posOnSpoke(angleForIndex(i), valMap[lbl])); }
+
+            function drawPolygons() {
+                const ptsCur = polygonForVals(values);
+                curPoly.attr("d", d3.line().curve(d3.curveLinearClosed)(ptsCur));
+                const ref = getMostRecentEntry();
+                if (ref) {
+                    const ptsRef = polygonForVals(ref);
+                    refPoly.attr("d", d3.line().curve(d3.curveLinearClosed)(ptsRef));
+                } else { refPoly.attr("d", null); }
+            }
+
+            function drawPreview(valMapOrNull) {
+                if (!valMapOrNull) { previewPoly.attr("d", null); return; }
+                const pts = polygonForVals(valMapOrNull);
+                previewPoly.attr("d", d3.line().curve(d3.curveLinearClosed)(pts));
+            }
+
+            function computeMonthlyAverage() {
+                const sinceISO = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
+                const q = `SELECT ${ITEMS.map(n => `"${n}"`).join(",")} FROM entries WHERE ts>='${sinceISO}'`;
+                const res = db.exec(q);
+                if (!res.length) return null;
+                const rows = res[0].values;
+                const sums = Object.fromEntries(ITEMS.map(n => [n, 0]));
+                rows.forEach(r => { ITEMS.forEach((n, i) => { sums[n] += (r[i] ?? 3); }); });
+                const cnt = rows.length;
+                const avg = {}; ITEMS.forEach(n => avg[n] = sums[n] / cnt);
+                return { avg, count: cnt };
+            }
+
+            function drawMonthlyAverage() {
+                const m = computeMonthlyAverage();
+                if (!m) { monthlyPoly.attr("d", null); status("No entries in last 30 days."); return; }
+                const pts = polygonForVals(m.avg);
+                monthlyPoly.attr("d", d3.line().curve(d3.curveLinearClosed)(pts));
+                status(`30-day average (${m.count} ${m.count === 1 ? "entry" : "entries"})`);
+            }
+
+            // Initial draw
+            drawPolygons();
+            drawMonthlyAverage();
+
+            // Randomize layout (keep values)
+            document.getElementById("randomize").onclick = () => {
+                labels = d3.shuffle(labels.slice());
+                handles = handleGroup.selectAll("circle")
+                    .data(labels.map((label, i) => ({ label, angle: angleForIndex(i) })))
+                    .join("circle")
+                    .attr("class", "handle")
+                    .attr("r", 6)
+                    .attr("cx", d => posOnSpoke(d.angle, values[d.label])[0])
+                    .attr("cy", d => posOnSpoke(d.angle, values[d.label])[1])
+                    .call(d3.drag().on("drag", function (ev, d) {
+                        const r = Math.min(radius, Math.hypot(ev.x, ev.y));
+                        let val = Math.round(r / step);
+                        val = Math.max(1, Math.min(5, val));
+                        values[d.label] = val;
+                        d3.select(this).attr("cx", posOnSpoke(d.angle, val)[0]).attr("cy", posOnSpoke(d.angle, val)[1]);
+                        drawPolygons();
+                        drawMonthlyAverage();
+                    }));
+                drawAxes();
+                drawPolygons();
+                drawPreview(null);
+                drawMonthlyAverage();
+                status("Petals randomized (values preserved).");
+            };
+
+            // Save
+            document.getElementById("save").onclick = () => {
+                const missing = ITEMS.filter(k => !(values[k] >= 1 && values[k] <= 5));
+                if (missing.length) { status("Please rate all 20 items (1–5)."); return; }
+
+                const ts = new Date().toISOString();
+                const log = document.getElementById("log").value.trim();
+                const getByIndex = i1 => values[ITEMS[i1 - 1]];
+                const posScore = POS_IDX.reduce((s, i) => s + getByIndex(i), 0);
+                const negScore = NEG_IDX.reduce((s, i) => s + getByIndex(i), 0);
+
+                const cols = ["ts", "log", ...ITEMS, "positive_score", "negative_score"];
+                const q = `INSERT INTO entries (${cols.map(c => '"' + c + '"').join(",")}) VALUES (${cols.map(() => "?").join(",")})`;
+                const vals = [ts, log, ...ITEMS.map(k => values[k]), posScore, negScore];
+                const stmt = db.prepare(q); stmt.run(vals); stmt.free(); persist();
+
+                const latest = getMostRecentEntry();
+                ITEMS.forEach(k => values[k] = (latest && latest[k] != null) ? latest[k] : 3);
+                updateHandlePositions();
+                drawPolygons();
+                drawPreview(null);
+                drawTimeSeries();
+                drawMonthlyAverage();
+
+                downloadDBAndPage();
+                status("Saved & downloaded database + page.");
+                document.getElementById("log").value = "";
+            };
+
+            // Clear
+            document.getElementById("clear").onclick = () => {
+                if (!confirm("Delete all saved entries?")) return;
+                db.exec("DELETE FROM entries"); persist();
+                ITEMS.forEach(k => values[k] = 3);
+                updateHandlePositions();
+                drawPolygons(); drawPreview(null); drawTimeSeries(); drawBigFivePlot();
+                monthlyPoly.attr("d", null);
+                status("Database cleared.");
+            };
+
+            // ===== Copy JSON =====
+            function getAllEntries() {
+                const res = db.exec(`SELECT id, ts, log, positive_score, negative_score, ${ITEMS.map(n => `"${n}"`).join(",")} FROM entries ORDER BY ts ASC`);
+                if (!res.length) return [];
+                const rows = res[0].values;
+                return rows.map(r => {
+                    const obj = { id: r[0], ts: r[1], log: r[2] || "", positive_score: r[3], negative_score: r[4], items: {} };
+                    ITEMS.forEach((name, idx) => obj.items[name] = r[5 + idx]);
+                    return obj;
+                });
+            }
+
+            async function copyJSON() {
+                const data = getAllEntries();
+                const text = JSON.stringify(data, null, 2);
+                if (!data.length) { status("No entries to copy."); return; }
+                try {
+                    await navigator.clipboard.writeText(text);
+                    status(`Copied ${data.length} ${data.length === 1 ? "entry" : "entries"} to clipboard as JSON.`);
+                } catch (e) {
+                    // Fallback: try execCommand, then download
+                    try {
+                        const ta = document.createElement("textarea");
+                        ta.value = text; document.body.appendChild(ta); ta.select(); document.execCommand("copy"); document.body.removeChild(ta);
+                        status(`Copied ${data.length} ${data.length === 1 ? "entry" : "entries"} to clipboard as JSON.`);
+                    } catch (err) {
+                        const blob = new Blob([text], { type: "application/json" });
+                        const url = URL.createObjectURL(blob);
+                        const a = document.createElement("a"); a.href = url; a.download = "panas.json"; a.click(); URL.revokeObjectURL(url);
+                        status("Clipboard blocked. Downloaded panas.json instead.");
+                    }
+                }
+            }
+
+            document.getElementById("copyJson").onclick = copyJSON;
+
+            // Timeseries
+            const tsvg = d3.select("#timeseries").attr("viewBox", [0, 0, 760, 310]);
+            const tooltip = d3.select("body").append("div").attr("class", "tooltip").style("opacity", 0);
+
+            function drawTimeSeries() {
+                tsvg.selectAll("*").remove();
+                const res = db.exec(`SELECT ts, positive_score, negative_score, log, ${ITEMS.map(n => `"${n}"`).join(",")} FROM entries ORDER BY ts ASC`);
+                if (!res.length) return;
+                const rows = res[0].values.map(r => {
+                    const itemVals = {}; ITEMS.forEach((name, idx) => itemVals[name] = r[4 + idx]);
+                    return { ts: new Date(r[0]), pos: r[1], neg: r[2], log: r[3] || "", itemVals };
+                });
+
+                const margin = { l: 70, r: 20, t: 10, b: 50 };
+                const W = 760, H = 310, iw = W - margin.l - margin.r, ih = H - margin.t - margin.b;
+                const g = tsvg.append("g").attr("transform", `translate(${margin.l},${margin.t})`);
+                const x = d3.scaleTime().domain(d3.extent(rows, d => d.ts)).range([0, iw]);
+                const y = d3.scaleLinear().domain([0, 50]).range([ih, 0]); // fixed 0–50
+
+                g.append("g").attr("transform", `translate(0,${ih})`).call(d3.axisBottom(x));
+                g.append("g").call(d3.axisLeft(y));
+
+                const linePos = d3.line().x(d => x(d.ts)).y(d => y(d.pos));
+                const lineNeg = d3.line().x(d => x(d.ts)).y(d => y(d.neg));
+
+                g.append("path").datum(rows).attr("fill", "none").attr("stroke", "#1f77b4").attr("stroke-width", 2).attr("d", linePos);
+                g.append("path").datum(rows).attr("fill", "none").attr("stroke", "#d62728").attr("stroke-width", 2).attr("d", lineNeg);
+
+                const showTip = (ev, d) => {
+                    tooltip.style("opacity", 1)
+                        .html(`<b>${d.ts.toLocaleString()}</b><br>Pos: ${d.pos}, Neg: ${d.neg}${d.log ? `<div style="margin-top:4px;opacity:.9">${d.log.replace(/</g, "&lt;")}</div>` : ""}`)
+                        .style("left", (ev.pageX + 10) + "px").style("top", (ev.pageY - 28) + "px");
+                };
+                const hideTip = () => tooltip.style("opacity", 0);
+
+                function onOver(ev, d) {
+                    showTip(ev, d);
+                    drawMonthlyAverage();    // ensure monthly is drawn once (for status), then hide
+                    monthlyPoly.attr("d", null);
+                    drawPreview(d.itemVals);
+                    status(`Previewing ${d.ts.toLocaleString()} on windrose`);
+                }
+                function onMove(ev, d) { showTip(ev, d); }
+                function onOut() {
+                    hideTip();
+                    drawPreview(null);
+                    drawMonthlyAverage();    // restore monthly average on idle
+                }
+
+                g.selectAll(".ptP").data(rows).enter().append("circle").attr("class", "ptP")
+                    .attr("cx", d => x(d.ts)).attr("cy", d => y(d.pos)).attr("r", 4).attr("fill", "#1f77b4")
+                    .on("mouseover", onOver).on("mousemove", onMove).on("mouseout", onOut);
+
+                g.selectAll(".ptN").data(rows).enter().append("circle").attr("class", "ptN")
+                    .attr("cx", d => x(d.ts)).attr("cy", d => y(d.neg)).attr("r", 4).attr("fill", "#d62728")
+                    .on("mouseover", onOver).on("mousemove", onMove).on("mouseout", onOut);
+
+                g.append("text").attr("x", iw / 2).attr("y", ih + 38).attr("text-anchor", "middle").text("Date");
+                g.append("text").attr("x", -ih / 2).attr("y", -48).attr("text-anchor", "middle").attr("transform", "rotate(-90)").text("Score (0–50)");
+            }
+            drawTimeSeries();
+
+            // Big Five plot
+            const bfsvg = d3.select("#bigfive").attr("viewBox", [0, 0, 760, 310]);
+            const bfTooltip = tooltip; // reuse existing tooltip
+
+            function computeBigFiveScores(itemVals) {
+                const bfasScores = {};
+                for (const [aspect, weightedItems] of Object.entries(BIG_FIVE_ITEMS)) {
+                    let weightedSum = 0;
+                    let itemCount = 0;
+                    for (const [item, weight] of Object.entries(weightedItems)) {
+                        const itemValue = itemVals[item] || 3;
+                        // For negative weights, reverse the score: (6 - value)
+                        const contributionToAspect = weight > 0 ? itemValue : (6 - itemValue);
+                        weightedSum += contributionToAspect;
+                        itemCount++;
+                    }
+                    bfasScores[aspect] = weightedSum / itemCount; // normalize to 1-5 range
+                }
+                return bfasScores;
+            }
+
+            function drawBigFivePlot() {
+                bfsvg.selectAll("*").remove();
+                const res = db.exec(`SELECT ts, log, ${ITEMS.map(n => `"${n}"`).join(",")} FROM entries ORDER BY ts ASC`);
+                if (!res.length) return;
+                const rows = res[0].values.map(r => {
+                    const itemVals = {}; ITEMS.forEach((name, idx) => itemVals[name] = r[2 + idx]);
+                    const bf = computeBigFiveScores(itemVals);
+                    return { ts: new Date(r[0]), log: r[1] || "", itemVals, bf };
+                });
+
+                const margin = { l: 70, r: 20, t: 30, b: 50 };
+                const W = 760, H = 310, iw = W - margin.l - margin.r, ih = H - margin.t - margin.b;
+                const g = bfsvg.append("g").attr("transform", `translate(${margin.l},${margin.t})`);
+                const x = d3.scaleTime().domain(d3.extent(rows, d => d.ts)).range([0, iw]);
+                const y = d3.scaleLinear().domain([1, 5]).range([ih, 0]); // normalized to 1-5 range
+
+                g.append("g").attr("transform", `translate(0,${ih})`).call(d3.axisBottom(x));
+                g.append("g").call(d3.axisLeft(y));
+
+                // Add legend inside plot
+                const legendData = [
+                    { label: "Extraversion", color: BIG_FIVE_COLORS.extraversion },
+                    { label: "Agreeableness", color: BIG_FIVE_COLORS.agreeableness },
+                    { label: "Conscientiousness", color: BIG_FIVE_COLORS.conscientiousness },
+                    { label: "Neuroticism", color: BIG_FIVE_COLORS.neuroticism },
+                    { label: "Openness", color: BIG_FIVE_COLORS.openness }
+                ];
+                const legend = g.append("g").attr("transform", `translate(10, 10)`);
+                legendData.forEach((d, i) => {
+                    const lg = legend.append("g").attr("transform", `translate(${i * 130}, 0)`);
+                    lg.append("line").attr("x1", 0).attr("x2", 20).attr("y1", 0).attr("y2", 0)
+                        .attr("stroke", d.color).attr("stroke-width", 2);
+                    lg.append("text").attr("x", 25).attr("y", 0).attr("dy", "0.32em")
+                        .attr("font-size", "11px").attr("fill", "#333").text(d.label);
+                });
+
+                // Draw lines for each aspect
+                for (const [aspect, color] of Object.entries(BIG_FIVE_COLORS)) {
+                    const line = d3.line().x(d => x(d.ts)).y(d => y(d.bf[aspect]));
+                    g.append("path").datum(rows).attr("fill", "none").attr("stroke", color).attr("stroke-width", 2).attr("d", line);
+                }
+
+                // Add interactive points
+                const showBFTip = (ev, d) => {
+                    const lines = ["<b>" + d.ts.toLocaleString() + "</b>"];
+                    for (const aspect of Object.keys(BIG_FIVE_COLORS)) {
+                        lines.push(`${aspect.charAt(0).toUpperCase() + aspect.slice(1)}: ${d.bf[aspect]}`);
+                    }
+                    if (d.log) lines.push(`<div style="margin-top:4px;opacity:.9">${d.log.replace(/</g, "&lt;")}</div>`);
+                    bfTooltip.style("opacity", 1).html(lines.join("<br>"))
+                        .style("left", (ev.pageX + 10) + "px").style("top", (ev.pageY - 28) + "px");
+                };
+                const hideBFTip = () => bfTooltip.style("opacity", 0);
+
+                function onBFOver(ev, d) {
+                    showBFTip(ev, d);
+                    drawMonthlyAverage();
+                    monthlyPoly.attr("d", null);
+                    drawPreview(d.itemVals);
+                    status(`Previewing ${d.ts.toLocaleString()} on windrose`);
+                }
+                function onBFMove(ev, d) { showBFTip(ev, d); }
+                function onBFOut() {
+                    hideBFTip();
+                    drawPreview(null);
+                    drawMonthlyAverage();
+                }
+
+                // Add one set of circles per aspect for interactivity
+                for (const aspect of Object.keys(BIG_FIVE_COLORS)) {
+                    g.selectAll(".pt" + aspect).data(rows).enter().append("circle").attr("class", "pt" + aspect)
+                        .attr("cx", d => x(d.ts)).attr("cy", d => y(d.bf[aspect])).attr("r", 4)
+                        .attr("fill", BIG_FIVE_COLORS[aspect]).style("opacity", 0.01) // nearly invisible but interactive
+                        .on("mouseover", onBFOver).on("mousemove", onBFMove).on("mouseout", onBFOut);
+                }
+
+                g.append("text").attr("x", iw / 2).attr("y", ih + 38).attr("text-anchor", "middle").text("Date");
+                g.append("text").attr("x", -ih / 2).attr("y", -48).attr("text-anchor", "middle").attr("transform", "rotate(-90)").text("Aspect Score (1–5)");
+            }
+            drawBigFivePlot();
+
+            function refreshFromDb() {
+                const latest = getMostRecentEntry();
+                ITEMS.forEach(k => values[k] = (latest && latest[k] != null) ? latest[k] : 3);
+                updateHandlePositions();
+                drawPolygons();
+                drawPreview(null);
+                drawTimeSeries();
+                drawBigFivePlot();
+                drawMonthlyAverage();
+            }
+
+            function downloadDBAndPage() {
+                const dbBlob = new Blob([db.export()], { type: "application/x-sqlite3" });
+                const dbUrl = URL.createObjectURL(dbBlob);
+                const adb = document.createElement("a");
+                adb.href = dbUrl; adb.download = "panas.sqlite"; adb.click();
+                URL.revokeObjectURL(dbUrl);
+                const html = document.documentElement.outerHTML;
+                const pageBlob = new Blob([html], { type: "text/html" });
+                const pageUrl = URL.createObjectURL(pageBlob);
+                const ap = document.createElement("a");
+                ap.href = pageUrl; ap.download = "panas.html"; ap.click();
+                URL.revokeObjectURL(pageUrl);
+            }
+
+            // Initial alignment
+            updateHandlePositions();
+            drawPolygons();
+        })();
+    </script>
+
+
+    <div class="tooltip" style="opacity: 0;"></div>
+
+
+<div class="tooltip" style="opacity: 0;"></div><div class="tooltip" style="opacity: 0;"></div></body></html>
