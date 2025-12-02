@@ -839,5 +839,34 @@
       "Active": 2,
       "Afraid": 3
     }
+  },
+  {
+    "id": 63,
+    "ts": "2025-12-02T22:52:03.743Z",
+    "log": "I need to talk to kevin about the monster energy, it might not be as bad as smoking but it sure also is a hell of a withdrawal, please ask me how much monster energy I'm on; from now I intend 0. shit is bad.",
+    "positive_score": 27,
+    "negative_score": 28,
+    "items": {
+      "Interested": 2,
+      "Distressed": 3,
+      "Excited": 3,
+      "Upset": 1,
+      "Strong": 3,
+      "Guilty": 4,
+      "Scared": 3,
+      "Hostile": 2,
+      "Enthusiastic": 2,
+      "Proud": 4,
+      "Irritable": 4,
+      "Alert": 3,
+      "Ashamed": 4,
+      "Inspired": 2,
+      "Nervous": 4,
+      "Determined": 3,
+      "Attentive": 2,
+      "Jittery": 2,
+      "Active": 3,
+      "Afraid": 1
+    }
   }
 ]
