@@ -810,5 +810,34 @@
       "Active": 1,
       "Afraid": 2
     }
+  },
+  {
+    "id": 62,
+    "ts": "2025-12-02T22:12:24.023Z",
+    "log": "nervous test",
+    "positive_score": 10,
+    "negative_score": 14,
+    "items": {
+      "Interested": 1,
+      "Distressed": 1,
+      "Excited": 1,
+      "Upset": 1,
+      "Strong": 1,
+      "Guilty": 1,
+      "Scared": 1,
+      "Hostile": 1,
+      "Enthusiastic": 1,
+      "Proud": 1,
+      "Irritable": 1,
+      "Alert": 1,
+      "Ashamed": 1,
+      "Inspired": 1,
+      "Nervous": 5,
+      "Determined": 1,
+      "Attentive": 1,
+      "Jittery": 1,
+      "Active": 1,
+      "Afraid": 1
+    }
   }
 ]
