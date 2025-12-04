@@ -868,5 +868,34 @@
       "Active": 3,
       "Afraid": 1
     }
+  },
+  {
+    "id": 64,
+    "ts": "2025-12-04T10:08:20.695Z",
+    "log": "test",
+    "positive_score": 50,
+    "negative_score": 11,
+    "items": {
+      "Interested": 5,
+      "Distressed": 1,
+      "Excited": 5,
+      "Upset": 1,
+      "Strong": 5,
+      "Guilty": 1,
+      "Scared": 1,
+      "Hostile": 1,
+      "Enthusiastic": 5,
+      "Proud": 5,
+      "Irritable": 1,
+      "Alert": 5,
+      "Ashamed": 1,
+      "Inspired": 5,
+      "Nervous": 2,
+      "Determined": 5,
+      "Attentive": 5,
+      "Jittery": 1,
+      "Active": 5,
+      "Afraid": 1
+    }
   }
 ]
