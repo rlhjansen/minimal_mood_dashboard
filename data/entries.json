@@ -897,5 +897,34 @@
       "Active": 3,
       "Afraid": 2
     }
+  },
+  {
+    "id": 65,
+    "ts": "2025-12-07T22:28:54.828Z",
+    "log": "it was an intense week; model panic, driving on the highway (which went quite well I'd have to say. nog steeds daan terugbellen en john antwoorden, baal daar best wel van - dingen lopen weer door elkaar...\n\nbest wel door elkaar, 3 uur geleden met dir bericht begonnen gewoon echt scatterbrain. is ook niet gek, maar moet er wel mee kappen zo weinig te slapen. waarom bargain ik met mezelf om de 6 uur, waarom ben ik hier niet gewoon consequentieel in? alsof ik aan het wachten ben voor ik mag gaan slapen, voor ik mag loslaten.\n\ngekke gewoonte dit.",
+    "positive_score": 33,
+    "negative_score": 24,
+    "items": {
+      "Interested": 3,
+      "Distressed": 1,
+      "Excited": 4,
+      "Upset": 1,
+      "Strong": 3,
+      "Guilty": 3,
+      "Scared": 3,
+      "Hostile": 1,
+      "Enthusiastic": 3,
+      "Proud": 3,
+      "Irritable": 1,
+      "Alert": 3,
+      "Ashamed": 4,
+      "Inspired": 3,
+      "Nervous": 4,
+      "Determined": 4,
+      "Attentive": 4,
+      "Jittery": 3,
+      "Active": 3,
+      "Afraid": 3
+    }
   }
 ]
