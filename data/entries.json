@@ -984,5 +984,34 @@
       "Active": 3,
       "Afraid": 3
     }
+  },
+  {
+    "id": 68,
+    "ts": "2025-12-09T23:36:01.710Z",
+    "log": "fucking shit I forgot to fill in my scores just now, was more distressed earlier; I'm not sure why in the days before this I put my distressedness so low; I was literally walking against my own stress response today; that's not normal.",
+    "positive_score": 28,
+    "negative_score": 26,
+    "items": {
+      "Interested": 3,
+      "Distressed": 4,
+      "Excited": 3,
+      "Upset": 2,
+      "Strong": 2,
+      "Guilty": 2,
+      "Scared": 4,
+      "Hostile": 1,
+      "Enthusiastic": 3,
+      "Proud": 3,
+      "Irritable": 2,
+      "Alert": 2,
+      "Ashamed": 4,
+      "Inspired": 3,
+      "Nervous": 2,
+      "Determined": 3,
+      "Attentive": 4,
+      "Jittery": 3,
+      "Active": 2,
+      "Afraid": 2
+    }
   }
 ]
