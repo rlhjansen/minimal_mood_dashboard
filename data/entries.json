@@ -955,5 +955,34 @@
       "Active": 3,
       "Afraid": 3
     }
+  },
+  {
+    "id": 67,
+    "ts": "2025-12-09T23:32:43.073Z",
+    "log": "for now we separate the migration & make the dashboard ready; new model architecture; if at all, will be 2.0, possibly.\n\nlong stretches of lacking reports and weird timeslots to fill in a diary a bit of an overly enthousiastic and overly committed period; a sign to slow down a little bit; it might be good to make an active system for this at some point.\n\nmistakes can be fixed and will likely come later that you'd like to fix; time spent this way is not practical. over exertuion just leads to bad decisions. if you're worried talk to kevin; volatility & withdrawal makes you less predictable and your output a gamble; don't do that. stability is where it is at. why did you unilaterally decide to stop taking your time with shit. be lazier you fuck.",
+    "positive_score": 33,
+    "negative_score": 24,
+    "items": {
+      "Interested": 3,
+      "Distressed": 1,
+      "Excited": 4,
+      "Upset": 1,
+      "Strong": 3,
+      "Guilty": 3,
+      "Scared": 3,
+      "Hostile": 1,
+      "Enthusiastic": 3,
+      "Proud": 3,
+      "Irritable": 1,
+      "Alert": 3,
+      "Ashamed": 4,
+      "Inspired": 3,
+      "Nervous": 4,
+      "Determined": 4,
+      "Attentive": 4,
+      "Jittery": 3,
+      "Active": 3,
+      "Afraid": 3
+    }
   }
 ]
