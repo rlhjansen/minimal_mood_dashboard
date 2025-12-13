@@ -1129,5 +1129,34 @@
       "Active": 1,
       "Afraid": 3
     }
+  },
+  {
+    "id": 73,
+    "ts": "2025-12-13T19:40:03.114Z",
+    "log": "gym was good but the thing about smell just really ruined my mood, thing is, would be doing that at one time or another, better I know now; gotta do something about it... tired, shouldnt have insisted for double mohit & maruina but the gate wouldn't close. I hate that I'm using these words, the entities talk was poisonous.",
+    "positive_score": 26,
+    "negative_score": 26,
+    "items": {
+      "Interested": 3,
+      "Distressed": 1,
+      "Excited": 3,
+      "Upset": 2,
+      "Strong": 2,
+      "Guilty": 3,
+      "Scared": 2,
+      "Hostile": 1,
+      "Enthusiastic": 3,
+      "Proud": 2,
+      "Irritable": 1,
+      "Alert": 3,
+      "Ashamed": 5,
+      "Inspired": 4,
+      "Nervous": 4,
+      "Determined": 3,
+      "Attentive": 2,
+      "Jittery": 4,
+      "Active": 1,
+      "Afraid": 3
+    }
   }
 ]
