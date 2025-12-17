@@ -1187,5 +1187,34 @@
       "Active": 2,
       "Afraid": 3
     }
+  },
+  {
+    "id": 75,
+    "ts": "2025-12-17T08:26:43.304Z",
+    "log": "you want money, go make it, do the kaggle challenges when at home. it's literally the most time agnostic thing you can do with no monetary risk. except for compute cost.",
+    "positive_score": 29,
+    "negative_score": 25,
+    "items": {
+      "Interested": 4,
+      "Distressed": 3,
+      "Excited": 3,
+      "Upset": 1,
+      "Strong": 3,
+      "Guilty": 2,
+      "Scared": 3,
+      "Hostile": 1,
+      "Enthusiastic": 3,
+      "Proud": 3,
+      "Irritable": 2,
+      "Alert": 3,
+      "Ashamed": 2,
+      "Inspired": 3,
+      "Nervous": 4,
+      "Determined": 3,
+      "Attentive": 2,
+      "Jittery": 3,
+      "Active": 2,
+      "Afraid": 4
+    }
   }
 ]
