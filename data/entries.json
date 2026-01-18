@@ -1274,5 +1274,34 @@
       "Active": 4,
       "Afraid": 2
     }
+  },
+  {
+    "id": 78,
+    "ts": "2026-01-18T23:49:37.846Z",
+    "log": "I feel kind of scared, but that's because I decide things without considering circumstance in ways that other people don't understand. I want to succeed with something I believe in. but that requires succeeding and doing a thing you believe in, neither of which I'm currently doing, or well, things take a long time & driving is hard, but I'm trying to learn to adapt better.strangely, the hardest part of that seems to be to adapt to myself.",
+    "positive_score": 26,
+    "negative_score": 27,
+    "items": {
+      "Interested": 4,
+      "Distressed": 4,
+      "Excited": 2,
+      "Upset": 3,
+      "Strong": 2,
+      "Guilty": 3,
+      "Scared": 3,
+      "Hostile": 2,
+      "Enthusiastic": 2,
+      "Proud": 1,
+      "Irritable": 2,
+      "Alert": 4,
+      "Ashamed": 2,
+      "Inspired": 3,
+      "Nervous": 4,
+      "Determined": 2,
+      "Attentive": 3,
+      "Jittery": 1,
+      "Active": 3,
+      "Afraid": 3
+    }
   }
 ]
