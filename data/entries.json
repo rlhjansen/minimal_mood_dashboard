@@ -1506,5 +1506,34 @@
       "Active": 2,
       "Afraid": 4
     }
+  },
+  {
+    "id": 86,
+    "ts": "2026-01-20T21:21:07.940Z",
+    "log": "A question to figure out the answer to: what is the last thing I notice that could be a signal before I start stutter-walking? also, my static in the gap song is actually better and more applicable than I realised, I should make more mnemonic songs, now's sleepytime, though.\n\nI've considered adding agency as an extra direct axis on the PANAS, but since it is something I moralize it is not something  can always be equally be honest about with myself, and since I don't want to make this writing an adversarial process vs my future self I decided not to incldue it; if things go well it'll become better in the future.",
+    "positive_score": 23,
+    "negative_score": 31,
+    "items": {
+      "Interested": 3,
+      "Distressed": 3,
+      "Excited": 1,
+      "Upset": 3,
+      "Strong": 2,
+      "Guilty": 4,
+      "Scared": 4,
+      "Hostile": 3,
+      "Enthusiastic": 2,
+      "Proud": 3,
+      "Irritable": 2,
+      "Alert": 2,
+      "Ashamed": 3,
+      "Inspired": 3,
+      "Nervous": 4,
+      "Determined": 2,
+      "Attentive": 3,
+      "Jittery": 2,
+      "Active": 2,
+      "Afraid": 3
+    }
   }
 ]
