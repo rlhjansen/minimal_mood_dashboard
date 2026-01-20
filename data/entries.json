@@ -1535,5 +1535,34 @@
       "Active": 2,
       "Afraid": 3
     }
+  },
+  {
+    "id": 87,
+    "ts": "2026-01-20T21:26:32.233Z",
+    "log": "hmm, maybe the answer (for the stutter walk question) is somewhere in the direciton of this: it happens more when my midn is not preoccupied but inbetween states; when it is (to quote a twitter thread) in an autoregressive rather than recurrent mode; when context gets polluted by things that aren't relevant in the present moment. who knows.",
+    "positive_score": 23,
+    "negative_score": 31,
+    "items": {
+      "Interested": 3,
+      "Distressed": 3,
+      "Excited": 1,
+      "Upset": 3,
+      "Strong": 2,
+      "Guilty": 4,
+      "Scared": 4,
+      "Hostile": 3,
+      "Enthusiastic": 2,
+      "Proud": 3,
+      "Irritable": 2,
+      "Alert": 2,
+      "Ashamed": 3,
+      "Inspired": 3,
+      "Nervous": 4,
+      "Determined": 2,
+      "Attentive": 3,
+      "Jittery": 2,
+      "Active": 2,
+      "Afraid": 3
+    }
   }
 ]
