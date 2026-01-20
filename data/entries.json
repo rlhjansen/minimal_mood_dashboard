@@ -1419,5 +1419,34 @@
       "Active": 2,
       "Afraid": 4
     }
+  },
+  {
+    "id": 83,
+    "ts": "2026-01-20T20:32:57.759Z",
+    "log": "net vergeten het vorig rondje van panas scale af te maken, en dingen volledig verder door te schrijven, oepsie. vind het annoying dat shit nog neit beter is, maar again druk weekend nogal wiedes",
+    "positive_score": 16,
+    "negative_score": 40,
+    "items": {
+      "Interested": 2,
+      "Distressed": 5,
+      "Excited": 1,
+      "Upset": 4,
+      "Strong": 1,
+      "Guilty": 5,
+      "Scared": 5,
+      "Hostile": 2,
+      "Enthusiastic": 1,
+      "Proud": 1,
+      "Irritable": 2,
+      "Alert": 2,
+      "Ashamed": 3,
+      "Inspired": 2,
+      "Nervous": 5,
+      "Determined": 2,
+      "Attentive": 2,
+      "Jittery": 4,
+      "Active": 2,
+      "Afraid": 5
+    }
   }
 ]
