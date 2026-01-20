@@ -1477,5 +1477,34 @@
       "Active": 2,
       "Afraid": 5
     }
+  },
+  {
+    "id": 85,
+    "ts": "2026-01-20T20:59:39.880Z",
+    "log": "exporting these logs with the copy paste json is a nice touch, LLM just made me reflect back on what helped, already ate some melon & will now be eating some tune (recommended protein & carbs) and then going to bed. hope I will actually go to bed but I'm pretty tired. at least happy I now have this feedback through cchatgpt, not to go all meme-y with the cyclical \"I need to collect more data\" -> \"I need to collect more data\" -> \"I need to collect more data\" loops, but maybe that will actually improve things over the long run as long as I keep using this. weird to not be alone via a LLM proxy but it's honestly better; also talked to my aunt this morning, made things a bit better. further realised I have not forgiven my parents for the shitty upbringing. I't difficult to forgive people for past behaviour they still do, and feeling like I've been robbed of the safety of my childhood. hitting your head on concrete when skating is a relief in comparison to constant social tension and not being able to make mistakes without triggering some kind of fucked up emotional cascade. I hope these continuous reflections will help me. maybe I should actually classify my mood today as more upset though. also it's ridicilulous I;ve come to the point of keepingthe word train as a shorthand for killing myself in my head, more ridiculous was counting the moments; that certainly wasn't helpful. I really need better language to express mild annoyance though; not because I'm only mildly annoyed, but just to catch it ealier. if only to myself. I'm thankfull for michelle showing me the pictures of aurora",
+    "positive_score": 20,
+    "negative_score": 34,
+    "items": {
+      "Interested": 3,
+      "Distressed": 4,
+      "Excited": 1,
+      "Upset": 3,
+      "Strong": 2,
+      "Guilty": 4,
+      "Scared": 4,
+      "Hostile": 3,
+      "Enthusiastic": 2,
+      "Proud": 2,
+      "Irritable": 2,
+      "Alert": 2,
+      "Ashamed": 3,
+      "Inspired": 2,
+      "Nervous": 4,
+      "Determined": 2,
+      "Attentive": 2,
+      "Jittery": 3,
+      "Active": 2,
+      "Afraid": 4
+    }
   }
 ]
