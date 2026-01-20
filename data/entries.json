@@ -1361,5 +1361,63 @@
       "Active": 2,
       "Afraid": 4
     }
+  },
+  {
+    "id": 81,
+    "ts": "2026-01-20T08:11:58.058Z",
+    "log": "I have not eaten anything since waking up and had 2 full coffee, no wonder I feel like shit/anxious though...",
+    "positive_score": 17,
+    "negative_score": 32,
+    "items": {
+      "Interested": 3,
+      "Distressed": 4,
+      "Excited": 1,
+      "Upset": 3,
+      "Strong": 1,
+      "Guilty": 4,
+      "Scared": 4,
+      "Hostile": 1,
+      "Enthusiastic": 1,
+      "Proud": 1,
+      "Irritable": 2,
+      "Alert": 3,
+      "Ashamed": 3,
+      "Inspired": 2,
+      "Nervous": 5,
+      "Determined": 1,
+      "Attentive": 2,
+      "Jittery": 2,
+      "Active": 2,
+      "Afraid": 4
+    }
+  },
+  {
+    "id": 82,
+    "ts": "2026-01-20T20:29:55.329Z",
+    "log": "wat \"fast food\" (= ez programeer taakjes) gedaan op advies voor geen voldoening. heeft wel wat geholpen maar ook erg druk weekend gehad, nog neit effectief maar relatief okee aan het voorbereiden op vroeg moeten opstaan voor overmorgen en overovermorgen m.b.t. florensis afspraak & rijtheorie",
+    "positive_score": 17,
+    "negative_score": 32,
+    "items": {
+      "Interested": 3,
+      "Distressed": 4,
+      "Excited": 1,
+      "Upset": 3,
+      "Strong": 1,
+      "Guilty": 4,
+      "Scared": 4,
+      "Hostile": 1,
+      "Enthusiastic": 1,
+      "Proud": 1,
+      "Irritable": 2,
+      "Alert": 3,
+      "Ashamed": 3,
+      "Inspired": 2,
+      "Nervous": 5,
+      "Determined": 1,
+      "Attentive": 2,
+      "Jittery": 2,
+      "Active": 2,
+      "Afraid": 4
+    }
   }
 ]
