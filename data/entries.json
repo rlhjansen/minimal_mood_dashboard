@@ -1448,5 +1448,34 @@
       "Active": 2,
       "Afraid": 5
     }
+  },
+  {
+    "id": 84,
+    "ts": "2026-01-20T20:35:15.437Z",
+    "log": "damn, I'm looking at the graph and I really do feel like shit today. it's a weird experience for it to not consciously register that despite the fact you think of killing yourself multiple times a day I don't treat that with much alarm. just another fucking tuesday. kinda feel like it shouldn't but I don't have the energy to call the psychologist yet. but eh, I have too many fucking reponsibilities to kill myself untill may anyway.",
+    "positive_score": 16,
+    "negative_score": 40,
+    "items": {
+      "Interested": 2,
+      "Distressed": 5,
+      "Excited": 1,
+      "Upset": 4,
+      "Strong": 1,
+      "Guilty": 5,
+      "Scared": 5,
+      "Hostile": 2,
+      "Enthusiastic": 1,
+      "Proud": 1,
+      "Irritable": 2,
+      "Alert": 2,
+      "Ashamed": 3,
+      "Inspired": 2,
+      "Nervous": 5,
+      "Determined": 2,
+      "Attentive": 2,
+      "Jittery": 4,
+      "Active": 2,
+      "Afraid": 5
+    }
   }
 ]
