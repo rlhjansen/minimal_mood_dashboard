@@ -1593,5 +1593,34 @@
       "Active": 2,
       "Afraid": 2
     }
+  },
+  {
+    "id": 89,
+    "ts": "2026-01-24T08:02:22.903Z",
+    "log": "got driving theory exam done yesterday and slept for like 9 hours tonight, but late for my appointment with a friend today, but honestly what the fuck did I expect? gonna go to the city and buy jacket + new shoes & head to the gym on the way back. don't feel like playing legend of zelda in the afternoon but I'll give it a try thought I'm more excited about getting a new jacket...; missing the yoga session again but I guess I planned this haphazardly and that's kind of what I get then..;.",
+    "positive_score": 28,
+    "negative_score": 25,
+    "items": {
+      "Interested": 3,
+      "Distressed": 2,
+      "Excited": 2,
+      "Upset": 2,
+      "Strong": 3,
+      "Guilty": 4,
+      "Scared": 3,
+      "Hostile": 2,
+      "Enthusiastic": 2,
+      "Proud": 3,
+      "Irritable": 2,
+      "Alert": 3,
+      "Ashamed": 2,
+      "Inspired": 3,
+      "Nervous": 3,
+      "Determined": 3,
+      "Attentive": 3,
+      "Jittery": 3,
+      "Active": 3,
+      "Afraid": 2
+    }
   }
 ]
