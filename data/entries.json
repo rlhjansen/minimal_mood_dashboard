@@ -1622,5 +1622,34 @@
       "Active": 3,
       "Afraid": 2
     }
+  },
+  {
+    "id": 90,
+    "ts": "2026-01-25T16:35:55.528Z",
+    "log": "driving stressfull, had to keep telling instructor to hold off for a bit, but he didn't seem to mind, I got ntoicably distracted less because I explicitly focused mroe on the driving and less on what he said, but worded it as that I was scared because I do not notice things. I might notice it if the rest wasn't so overburdening, I'm tired, so fucking tired, but guy said I did it better.\n\nwas ready earlier, slept more ade healthier. could very well be but I still feel like shit. I still have to make the overview of when I can do what with every one and its going to suck ass. I don't feel proud of things/I don't trust myself since I'm following my own goals less, ugh, just so fucking tired.",
+    "positive_score": 19,
+    "negative_score": 33,
+    "items": {
+      "Interested": 2,
+      "Distressed": 5,
+      "Excited": 1,
+      "Upset": 3,
+      "Strong": 2,
+      "Guilty": 4,
+      "Scared": 4,
+      "Hostile": 2,
+      "Enthusiastic": 2,
+      "Proud": 2,
+      "Irritable": 2,
+      "Alert": 1,
+      "Ashamed": 3,
+      "Inspired": 2,
+      "Nervous": 4,
+      "Determined": 2,
+      "Attentive": 3,
+      "Jittery": 3,
+      "Active": 2,
+      "Afraid": 3
+    }
   }
 ]
