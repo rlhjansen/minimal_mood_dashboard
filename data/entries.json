@@ -1680,5 +1680,34 @@
       "Active": 2,
       "Afraid": 3
     }
+  },
+  {
+    "id": 92,
+    "ts": "2026-01-26T21:24:55.244Z",
+    "log": "this is what I mean to write in the morning, too bad I don't have have the panas scale of it. trying to start the day healthy with meat & veggies, feel like shit I don't want to do any of the fucking things on my fuucking list of shit to fucking do. & that's a lie it's not that I dont want to it's just that I have no fucking moment to relax- wrong I had one yesterday but I spiralled into agony after stress form dirving leson & having.\n\nin the days/ time I was off my colleague fixed this issue I was stuck on for 2 weeks. I was kind of worrying for nothing in that sense, but seriously \"X has to be done asap\" completely fucking blocks my mind I can't work like this. Ima be honest here, every day I keep having the thought if wanting to kill my self, not to be dramatic, I already stated before It's my language use is shit, I've made an appointment to talk to my gp to get a psychologist or psychiatrist. I don't have much I look forward to, eating some stuff with jasper will be nice . left work relatively early & went to the gym, didnt do the runnning & bearcrawl exercises on my schedule cause I was tired and I do the thing for fun, not going to fuck myself up for no sense of progress outside of work too.",
+    "positive_score": 15,
+    "negative_score": 30,
+    "items": {
+      "Interested": 1,
+      "Distressed": 3,
+      "Excited": 1,
+      "Upset": 3,
+      "Strong": 2,
+      "Guilty": 4,
+      "Scared": 3,
+      "Hostile": 3,
+      "Enthusiastic": 1,
+      "Proud": 2,
+      "Irritable": 3,
+      "Alert": 1,
+      "Ashamed": 3,
+      "Inspired": 2,
+      "Nervous": 3,
+      "Determined": 2,
+      "Attentive": 2,
+      "Jittery": 2,
+      "Active": 1,
+      "Afraid": 3
+    }
   }
 ]
