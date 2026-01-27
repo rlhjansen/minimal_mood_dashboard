@@ -1738,5 +1738,34 @@
       "Active": 1,
       "Afraid": 3
     }
+  },
+  {
+    "id": 94,
+    "ts": "2026-01-27T08:23:16.169Z",
+    "log": "don't wanna go to work; another fucking day of feeling useless.",
+    "positive_score": 12,
+    "negative_score": 29,
+    "items": {
+      "Interested": 1,
+      "Distressed": 3,
+      "Excited": 1,
+      "Upset": 4,
+      "Strong": 1,
+      "Guilty": 3,
+      "Scared": 3,
+      "Hostile": 3,
+      "Enthusiastic": 1,
+      "Proud": 1,
+      "Irritable": 4,
+      "Alert": 1,
+      "Ashamed": 2,
+      "Inspired": 1,
+      "Nervous": 3,
+      "Determined": 1,
+      "Attentive": 2,
+      "Jittery": 1,
+      "Active": 2,
+      "Afraid": 3
+    }
   }
 ]
