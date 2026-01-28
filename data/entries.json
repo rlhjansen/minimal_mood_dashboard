@@ -1883,5 +1883,34 @@
       "Active": 1,
       "Afraid": 4
     }
+  },
+  {
+    "id": 99,
+    "ts": "2026-01-28T08:35:40.822Z",
+    "log": "I refuse to pretend this is a bossman problem & this can be solved by applying elsewhere in industry, this is a me problem, been in & out of psychological help 8 times over the past 13 years. I know my skills are unbalanced with executive function & working memory low-average (95-105 IQ range) (not helped by sleep depth either), while verbal & spatial intelligence are high (125-135 IQ range), scored in a sleep-depreived state. This keeps creating mismatches in perception in others between what I say being relatively complex & my ability to execute on things, because the complexity does not generalise to the execution being fast & my ability to stick to rules that aren't literally a part of me.\n\nthe last time I was reasonably happy was when I was delivering mail, but I had to stop that because I was still living in student housing. I'm starting to think it was a mistake to \"move on to a real job\", but I didn't really know what else to do with the hopusing market as is & looming student debt. considering becoming a garbage man or something else nobody wants to do so I get some fucking slack.\n\nneed to think more in this direction.",
+    "positive_score": 17,
+    "negative_score": 33,
+    "items": {
+      "Interested": 2,
+      "Distressed": 4,
+      "Excited": 1,
+      "Upset": 4,
+      "Strong": 2,
+      "Guilty": 4,
+      "Scared": 4,
+      "Hostile": 2,
+      "Enthusiastic": 1,
+      "Proud": 2,
+      "Irritable": 3,
+      "Alert": 2,
+      "Ashamed": 3,
+      "Inspired": 1,
+      "Nervous": 3,
+      "Determined": 2,
+      "Attentive": 2,
+      "Jittery": 2,
+      "Active": 2,
+      "Afraid": 4
+    }
   }
 ]
