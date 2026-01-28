@@ -1854,5 +1854,34 @@
       "Active": 1,
       "Afraid": 4
     }
+  },
+  {
+    "id": 98,
+    "ts": "2026-01-28T08:05:46.237Z",
+    "log": "I'm trying to not do things that are not mindful, so if I catch myself thinking about stuff that's irrelevant to my current situation I attempt a kind of mix of acknowledging that things worry me but also that it is not useful to think about the thing at the time. at the same time, it never feels particularly productive.\n\nthe thing that is witholding me from talking to kevin more often is that I cannot express uncertainty around him because he'll just make a decision. this means I cannot be part of who I (historically) am at work. I feel unsafe, thrown for the wolves with a packleader throwing me live hyenas instead of food & just tell me \"eat\", like bich this thing is alive fuck you.\n\nanyway, that's rambling again, ugh, probably the double coffee. should probably replace one of the two glasses with water. let's just go and aim to get my working hours to a stable 9-5 & then see further. hopefully that'll enable me to charge my mental battery to over 30% sometime. will probably be more rambling inbetween but at least I'm making the attempt. tired",
+    "positive_score": 13,
+    "negative_score": 33,
+    "items": {
+      "Interested": 1,
+      "Distressed": 4,
+      "Excited": 1,
+      "Upset": 4,
+      "Strong": 1,
+      "Guilty": 3,
+      "Scared": 4,
+      "Hostile": 3,
+      "Enthusiastic": 1,
+      "Proud": 1,
+      "Irritable": 3,
+      "Alert": 2,
+      "Ashamed": 2,
+      "Inspired": 1,
+      "Nervous": 4,
+      "Determined": 2,
+      "Attentive": 2,
+      "Jittery": 2,
+      "Active": 1,
+      "Afraid": 4
+    }
   }
 ]
