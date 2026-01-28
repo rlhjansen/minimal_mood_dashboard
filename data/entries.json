@@ -1825,5 +1825,34 @@
       "Active": 2,
       "Afraid": 3
     }
+  },
+  {
+    "id": 97,
+    "ts": "2026-01-28T07:58:25.457Z",
+    "log": "still feel like a useless piece of work, trying to stabilise without break; means taking off some gas, no coffee during the day only when waking up is the idea; feel like shit, never hear I'm fucking doing well only that things need to happen faster, no matter whether I feel like things are good ideas either to do at all or good to do for me. Constantly thinking that \"if this is the work that needs to be done, why have you hired me?\" seems to me you're better of hiring someone else that just a typical hardworking conscientious person that executes on your ideas without question.\n\nthe fact you(kevin) don't seem to want to discuss things makes it impossible for me to have a clear vision of what you want/don't want, I'm continuously stressed & scared; I know you don't want me to be but man I don't know how to function in this environment. there is stress all the fucking time, you don't seem to understand how I function. When in the job interview - I like to take my time, the breaks inbetween are necessary, I feel like I have no breaks now, no slack. I told you I needed to slow down and you basicalyl looked at me weird saying \"we're pats, there's always stuff happening\". I take a long time to make decisions, but this has pushed me over the 50% mark - I don't know where exactly - of the point of thinking pats is not a good company for me; I don't know what will be, and I might be fucking myself up completely by going elsewhere, but unless I learn to chill the fuck out this is not sustainable. I don't fucking smoke and the smell is disgusting to me at this point, but I dissociatively scrolling fucking twitter because I'm too anxious to do anything else.\n\nI can't talk to marina because she'll talk for fucking hours if I only want to mention a couple things/ ask for help with specifics so now I'm stucking talking to a fucking LLM (please don't take offense, I'm just expressing my frustration at the people & myself) because talking to the designated person for this stuff takes so much time it makes me feel more stressed/rushed.\n\nother than all that shit had a good chat with a friend this morning, copnsidering learning chinese because I sure as hell don't think this country is developing in a sustainable manner. I don't feel as passionate about the company mission as bossman does & the past days of cycling to work I've been considering working as a fireman or garbageman instead. I do not like this mental pressure.",
+    "positive_score": 12,
+    "negative_score": 33,
+    "items": {
+      "Interested": 1,
+      "Distressed": 4,
+      "Excited": 1,
+      "Upset": 4,
+      "Strong": 1,
+      "Guilty": 3,
+      "Scared": 4,
+      "Hostile": 3,
+      "Enthusiastic": 1,
+      "Proud": 1,
+      "Irritable": 3,
+      "Alert": 2,
+      "Ashamed": 2,
+      "Inspired": 1,
+      "Nervous": 4,
+      "Determined": 1,
+      "Attentive": 2,
+      "Jittery": 2,
+      "Active": 1,
+      "Afraid": 4
+    }
   }
 ]
