@@ -1912,5 +1912,34 @@
       "Active": 2,
       "Afraid": 4
     }
+  },
+  {
+    "id": 100,
+    "ts": "2026-01-29T08:03:23.440Z",
+    "log": "did some chatGPT-therapy today/just now: main take-aways:\n\n- External rails help more than willpower (e.g. gym closing time); already knew this but might have to rediscover periodically, especially when I start running on low sleep and forget this.\n- Problem isn’t selfishness → it’s over-ownership: I take on needs/tasks that aren’t mine.\n- Core vulnerability is social rejection, not physical effort → conflict feels unsafe.\n- Boss won’t provide emotional support → only operational language works (capacity / tradeoffs).\n- Boundaries fail because I treat them as negotiations → need mechanical exits, not explanations.\n- Biggest driver is chronic sleep debt → worsens anxiety, paralysis, prioritization.\n- Immediate stabilizers: water + food before caffeine, hard stop on work hours, but the hard stop is only a crutch for lack of emotional strength to to negotiate & clearly outline capacity.\n\nslept 6:30 hourse because I woke up from a nightmare (prof from uni pressuring me to do work, which I was fine with/felt like I gave guidance, but also under immense time pressure. this professor specifically I had the experience with that he posted a question on the blackboard, nobody responded, then he asked why nobody raised their hand, then I told himk \"well, it seems relatively straightforward, but because you ask it as a question people might think it is not and become reluctant\" and instead of  going into that he said \"are you saying I'm dumb\", which was the most useless possible response he could give to that. I've never liked him after even though he didn't seem to remember me & this is an experience I'd like to avoid with my boss but I'm starting to feel like I have no choice.\n\nI'm daily considering to become a garbage man or firefighter instead of my technical job as AI engineer, because the poeople leading there expect less emotional maturity & thereby allow me to feel lighter. I wokr myself into unnecessary overcommitment because I'm afraid of letting people make mistakes because I'm afraid that that will backfire on me. and it does, because I have shares in the company. yet most people who work here only care about their goddamn salery and I don't follow wha the fuck the boss is thinking about. the way you get yes-man is by not respecting your employees while they express needs to you. call me a fucking child I don't care, I never got to be one.\n\ntake-aways chatgpt therapy.\n- External rails help more than willpower (e.g. gym closing time); already knew this but might have to rediscover periodically, especially when I start running on low sleep and forget this.\n- Problem isn’t selfishness → it’s over-ownership: I take on needs/tasks that aren’t mine.\n- Core vulnerability is social rejection, not physical effort → conflict feels unsafe.\n- Boss won’t provide emotional support → only operational language works (capacity / tradeoffs).\n- Boundaries fail because I treat them as negotiations → need mechanical exits, not explanations.\n- Biggest driver is chronic sleep debt → worsens anxiety, paralysis, prioritization.\n- Immediate stabilizers: water + food before caffeine, hard stop on work hours, but the hard stop is only a crutch for lack of emotional strength to to negotiate & clearly outline capacity.",
+    "positive_score": 18,
+    "negative_score": 34,
+    "items": {
+      "Interested": 2,
+      "Distressed": 3,
+      "Excited": 2,
+      "Upset": 5,
+      "Strong": 1,
+      "Guilty": 3,
+      "Scared": 3,
+      "Hostile": 4,
+      "Enthusiastic": 1,
+      "Proud": 1,
+      "Irritable": 4,
+      "Alert": 3,
+      "Ashamed": 2,
+      "Inspired": 1,
+      "Nervous": 3,
+      "Determined": 3,
+      "Attentive": 2,
+      "Jittery": 3,
+      "Active": 2,
+      "Afraid": 4
+    }
   }
 ]
