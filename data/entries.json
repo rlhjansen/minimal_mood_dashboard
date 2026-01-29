@@ -1941,5 +1941,34 @@
       "Active": 2,
       "Afraid": 4
     }
+  },
+  {
+    "id": 101,
+    "ts": "2026-01-29T08:13:55.015Z",
+    "log": "I also have to say, as response rto thing recurringly coming back that I really dislike the concept of the \"powerup\" because I feel incredibly obligated to overwork myself because of it; I'mn noticing its (overworking) ineffectiveness, but I cannot deny it adds fuel to the fire and I hate it. I'm repeatedly thinking \"of you want the fuckign 25 euros extra, fuck it, I'll kill myself, you can have whatever is on my bank account that I saved so far if you care so much about fucking 25 I hate fuck fuck why do you say this I want to like you maaaaaaan\". ugh. I'm tired, stressed and evidently quite agitateable...\n\nthis process is a weird kind of catholocism but I guess I can see why it was effective for my grandma (borderline). I'm kind of mad at my dad for hielding me from his mom, I kinda get it from the stories, but it's like he never learned to deal with the downsides and mitigated by giving up his own desires to do anything, the same way I am doing now, following his burnout pattern. I'm tired of it; I won't give up the fight.",
+    "positive_score": 19,
+    "negative_score": 37,
+    "items": {
+      "Interested": 2,
+      "Distressed": 4,
+      "Excited": 1,
+      "Upset": 5,
+      "Strong": 2,
+      "Guilty": 3,
+      "Scared": 5,
+      "Hostile": 2,
+      "Enthusiastic": 1,
+      "Proud": 2,
+      "Irritable": 4,
+      "Alert": 2,
+      "Ashamed": 4,
+      "Inspired": 1,
+      "Nervous": 2,
+      "Determined": 4,
+      "Attentive": 2,
+      "Jittery": 4,
+      "Active": 2,
+      "Afraid": 4
+    }
   }
 ]
