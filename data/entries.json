@@ -2057,5 +2057,34 @@
       "Active": 2,
       "Afraid": 3
     }
+  },
+  {
+    "id": 105,
+    "ts": "2026-02-01T20:39:22.264Z",
+    "log": "maybe it's a good idea to make sure I live in a way that does not want to make me run from myself. good talk to jochem (old roommate); haven't spoken in quite a while - he's got adhd medication, somewhat happy with it he says. keep hearing I'm a bit of an adhd type from people. jochem mentioned me being in the middle of stress or kind of inbetween stresfull things sounds like a default state of affairs knowing me, said I'd like it to not be the case, he understood/affirmed. taking sleep seriously is a big one. likely going to sleep at a reasonable time today. but yeah, tomorrow, meeting. the fact I want to talk about this is good to adress and me not communicating well enough is not practical for the company either, but it felt like a risc since spending time on the conversation is not spending time on the things that need to be done.",
+    "positive_score": 27,
+    "negative_score": 24,
+    "items": {
+      "Interested": 2,
+      "Distressed": 3,
+      "Excited": 3,
+      "Upset": 1,
+      "Strong": 3,
+      "Guilty": 2,
+      "Scared": 4,
+      "Hostile": 2,
+      "Enthusiastic": 3,
+      "Proud": 3,
+      "Irritable": 2,
+      "Alert": 1,
+      "Ashamed": 2,
+      "Inspired": 2,
+      "Nervous": 4,
+      "Determined": 4,
+      "Attentive": 4,
+      "Jittery": 2,
+      "Active": 2,
+      "Afraid": 2
+    }
   }
 ]
