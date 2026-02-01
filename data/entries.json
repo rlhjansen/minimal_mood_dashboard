@@ -2086,5 +2086,34 @@
       "Active": 2,
       "Afraid": 2
     }
+  },
+  {
+    "id": 106,
+    "ts": "2026-02-01T20:54:03.096Z",
+    "log": "wel nice met taylor ook eerste brainstorm voor bacheloretta party gedaan vandaag, nog wel zeker wat aan uitgeplanned worden maar er is een redelijke timeline.",
+    "positive_score": 27,
+    "negative_score": 24,
+    "items": {
+      "Interested": 2,
+      "Distressed": 3,
+      "Excited": 3,
+      "Upset": 1,
+      "Strong": 3,
+      "Guilty": 2,
+      "Scared": 4,
+      "Hostile": 2,
+      "Enthusiastic": 3,
+      "Proud": 3,
+      "Irritable": 2,
+      "Alert": 1,
+      "Ashamed": 2,
+      "Inspired": 2,
+      "Nervous": 4,
+      "Determined": 4,
+      "Attentive": 4,
+      "Jittery": 2,
+      "Active": 2,
+      "Afraid": 2
+    }
   }
 ]
