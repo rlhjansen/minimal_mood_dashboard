@@ -2115,5 +2115,34 @@
       "Active": 2,
       "Afraid": 2
     }
+  },
+  {
+    "id": 107,
+    "ts": "2026-02-01T21:35:18.802Z",
+    "log": "gesprek kevin voorbereid",
+    "positive_score": 26,
+    "negative_score": 24,
+    "items": {
+      "Interested": 2,
+      "Distressed": 4,
+      "Excited": 2,
+      "Upset": 1,
+      "Strong": 2,
+      "Guilty": 2,
+      "Scared": 4,
+      "Hostile": 1,
+      "Enthusiastic": 3,
+      "Proud": 4,
+      "Irritable": 3,
+      "Alert": 2,
+      "Ashamed": 1,
+      "Inspired": 2,
+      "Nervous": 4,
+      "Determined": 3,
+      "Attentive": 4,
+      "Jittery": 2,
+      "Active": 2,
+      "Afraid": 2
+    }
   }
 ]
