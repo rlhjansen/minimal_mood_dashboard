@@ -2144,5 +2144,34 @@
       "Active": 2,
       "Afraid": 2
     }
+  },
+  {
+    "id": 108,
+    "ts": "2026-02-04T09:35:56.221Z",
+    "log": "I'm leaving for work really late, but I'm getting quite some things done in the house; I haaaaaaaaaaaaaaaaaaaaaaate taking time into accoutn because it just short circuits my ability to think. I used to just do things immedietly so I got them out of my head again, but if things pile on and *if I pile on appointments* the rest will never come. I should at least start recording when I make a tradeoff in time spent, so today. boardgamez < dinner w/ michelle. damned if I am too tired, I want to, she's nice. also series with violance & screams are strangely calming. some fuckign american psycho bullshit, but eh, that's not new. guess it is still hip to be square. I'm in a way looking forward to the mindfulnes book, but mostly it'll be things to talk about; if you write a word on a page, nothing happens in the words of russel barkley, but if you write a word on a page and you talk about it things do change, if only relationally, and through the relational change cybernetically. trust the process. exhausted, or rather I am exhausting, breathing out now. I should breathe out, and possibly also in, a bit more. smoking really was meditative and I need an alternative since not smoking and als a result of that not stepping back once in a while is really not good for me. I was right in the past, smoking really was better than not, but eh, people have opinions so we cant do that no more...",
+    "positive_score": 23,
+    "negative_score": 25,
+    "items": {
+      "Interested": 1,
+      "Distressed": 3,
+      "Excited": 1,
+      "Upset": 3,
+      "Strong": 1,
+      "Guilty": 1,
+      "Scared": 4,
+      "Hostile": 1,
+      "Enthusiastic": 2,
+      "Proud": 3,
+      "Irritable": 3,
+      "Alert": 2,
+      "Ashamed": 1,
+      "Inspired": 3,
+      "Nervous": 5,
+      "Determined": 4,
+      "Attentive": 3,
+      "Jittery": 1,
+      "Active": 3,
+      "Afraid": 3
+    }
   }
 ]
