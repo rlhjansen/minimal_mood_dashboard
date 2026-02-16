@@ -1,6 +1,4 @@
-<html lang="en">
-
-<head>
+<html lang="en"><head>
     <meta charset="utf-8">
     <title>PANAS-GEN Windrose + History</title>
     <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -253,6 +251,139 @@
             font-size: 12px;
             color: #666;
         }
+
+        /* ---- Intent Calibration section ---- */
+        #intent-section {
+            border-top: 2px solid #eee;
+            padding-top: 1rem;
+            margin-top: .8rem;
+        }
+
+        .sleep-row {
+            display: flex;
+            align-items: center;
+            gap: .5rem;
+            margin-top: .4rem;
+        }
+        .sleep-row label { font-size: 13px; font-weight: 600; white-space: nowrap; }
+        .sleep-row input[type="number"] {
+            width: 70px;
+            padding: .3rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-family: inherit;
+            font-size: 14px;
+        }
+        #last-entry-date {
+            font-size: 11px;
+            color: #888;
+            margin-left: auto;
+        }
+        #last-entry-date .fresh { color: #2a7; }
+        #last-entry-date .stale { color: #c63; }
+        #intent-section h2 { margin: 0 0 .8rem; }
+
+        .intent-form {
+            display: grid;
+            gap: .55rem;
+            max-width: 640px;
+        }
+        .intent-field label {
+            display: block;
+            font-weight: 600;
+            font-size: 13px;
+            margin-bottom: .15rem;
+        }
+        .intent-field textarea,
+        .intent-field input[type="text"] {
+            width: 100%;
+            padding: .4rem;
+            font-family: inherit;
+            font-size: 14px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        .intent-field--inline {
+            display: flex;
+            align-items: center;
+            gap: .5rem;
+        }
+        .intent-field--inline label { margin: 0; white-space: nowrap; }
+        .intent-field--inline input[type="number"] {
+            width: 80px;
+            padding: .35rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-family: inherit;
+            font-size: 14px;
+        }
+        .intent-actions {
+            display: flex;
+            align-items: center;
+            gap: .6rem;
+            margin-top: .2rem;
+        }
+        .intent-status {
+            font-size: 12px;
+            color: #666;
+        }
+
+        /* notification / warning banners */
+        .intent-note {
+            background: #fff3cd;
+            border: 1px solid #ffc107;
+            border-radius: 6px;
+            padding: .7rem 1rem;
+            margin-bottom: .7rem;
+            font-size: 14px;
+        }
+        .intent-drift {
+            background: #f0f0f0;
+            border-left: 3px solid #999;
+            padding: .55rem 1rem;
+            margin-bottom: .7rem;
+            font-size: 13px;
+        }
+        .intent-collapse {
+            border-left: 3px solid #d9534f;
+            padding: .55rem 1rem;
+            margin-bottom: .7rem;
+            font-size: 13px;
+            background: #fff0f0;
+        }
+
+        /* history entries */
+        .intent-history { margin-top: 1rem; max-width: 640px; }
+        .intent-history summary { cursor: pointer; }
+        .intent-entry {
+            border-bottom: 1px solid #eee;
+            padding: .45rem 0;
+            font-size: 13px;
+        }
+        .intent-entry-head {
+            display: flex;
+            align-items: center;
+            gap: .5rem;
+            flex-wrap: wrap;
+        }
+        .ie-time   { color: #555; font-weight: 600; }
+        .ie-align  { color: #888; font-size: 12px; }
+        .ie-text   { margin-top: .15rem; color: #444; }
+        .ie-sleep  { margin-top: .1rem; font-size: 12px; color: #888; }
+        .ie-badge  {
+            display: inline-block;
+            padding: 1px 6px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+        .ie-badge--drift  { background: #fdd; color: #a33; }
+        .ie-badge--target { background: #e8e0f0; color: #5b3a7a; }
+
+        /* gentle pulse when check-in is due */
+        @keyframes intent-pulse { 0%,100%{border-color:#eee} 50%{border-color:#ffc107} }
+        #intent-section.intent-highlight { animation: intent-pulse 2s ease-in-out 3; }
     </style>
 </head>
 
@@ -287,113 +418,20 @@
                 <strong>Import database (.sqlite)</strong>
                 Drop file here or click to choose
                 <div class="import-help">Replaces the in-browser database; UI refreshes from the newest entry.</div>
-                <input id="fileInput" type="file" accept=".sqlite,application/x-sqlite3,application/octet-stream"
-                    style="display:none">
+                <input id="fileInput" type="file" accept=".sqlite,application/x-sqlite3,application/octet-stream" style="display:none">
             </div>
         </div>
 
         <svg id="radar" viewBox="0,0,620,620">
-            <g transform="translate(310,310)">
-                <circle r="48" class="grid"></circle>
-                <circle r="96" class="grid"></circle>
-                <circle r="144" class="grid"></circle>
-                <circle r="192" class="grid"></circle>
-                <circle r="240" class="grid"></circle>
-                <line class="axis" x1="0" y1="0" x2="240" y2="0"></line><text class="label" x="260" y="0">Nervous</text>
-                <line class="axis" x1="0" y1="0" x2="228.25356391083685" y2="74.16407864998737"></line><text
-                    class="label" x="247.27469423673992" y="80.34441853748632">Irritable</text>
-                <line class="axis" x1="0" y1="0" x2="194.1640786499874" y2="141.06846055019355"></line><text
-                    class="label" x="210.34441853748635" y="152.824165596043">Interested</text>
-                <line class="axis" x1="0" y1="0" x2="141.06846055019355" y2="194.1640786499874"></line><text
-                    class="label" x="152.824165596043" y="210.34441853748635">Strong</text>
-                <line class="axis" x1="0" y1="0" x2="74.16407864998739" y2="228.25356391083685"></line><text
-                    class="label" x="80.34441853748633" y="247.27469423673992">Upset</text>
-                <line class="axis" x1="0" y1="0" x2="1.469576158976824e-14" y2="240"></line><text class="label"
-                    x="1.592040838891559e-14" y="260">Enthusiastic</text>
-                <line class="axis" x1="0" y1="0" x2="-74.16407864998736" y2="228.25356391083687"></line><text
-                    class="label" x="-80.3444185374863" y="247.27469423673995">Attentive</text>
-                <line class="axis" x1="0" y1="0" x2="-141.06846055019352" y2="194.1640786499874"></line><text
-                    class="label" x="-152.82416559604297" y="210.34441853748635">Determined</text>
-                <line class="axis" x1="0" y1="0" x2="-194.16407864998737" y2="141.06846055019358"></line><text
-                    class="label" x="-210.34441853748632" y="152.82416559604303">Excited</text>
-                <line class="axis" x1="0" y1="0" x2="-228.25356391083685" y2="74.1640786499874"></line><text
-                    class="label" x="-247.27469423673992" y="80.34441853748635">Jittery</text>
-                <line class="axis" x1="0" y1="0" x2="-240" y2="2.939152317953648e-14"></line><text class="label"
-                    x="-260" y="3.184081677783118e-14">Guilty</text>
-                <line class="axis" x1="0" y1="0" x2="-228.25356391083685" y2="-74.16407864998746"></line><text
-                    class="label" x="-247.27469423673992" y="-80.3444185374864">Alert</text>
-                <line class="axis" x1="0" y1="0" x2="-194.1640786499874" y2="-141.06846055019352"></line><text
-                    class="label" x="-210.34441853748638" y="-152.82416559604297">Afraid</text>
-                <line class="axis" x1="0" y1="0" x2="-141.06846055019358" y2="-194.16407864998737"></line><text
-                    class="label" x="-152.82416559604303" y="-210.34441853748632">Active</text>
-                <line class="axis" x1="0" y1="0" x2="-74.16407864998742" y2="-228.25356391083685"></line><text
-                    class="label" x="-80.34441853748636" y="-247.27469423673992">Distressed</text>
-                <line class="axis" x1="0" y1="0" x2="-4.408728476930471e-14" y2="-240"></line><text class="label"
-                    x="-4.776122516674677e-14" y="-260">Hostile</text>
-                <line class="axis" x1="0" y1="0" x2="74.16407864998733" y2="-228.25356391083687"></line><text
-                    class="label" x="80.34441853748628" y="-247.27469423673995">Inspired</text>
-                <line class="axis" x1="0" y1="0" x2="141.0684605501935" y2="-194.1640786499874"></line><text
-                    class="label" x="152.82416559604295" y="-210.34441853748638">Ashamed</text>
-                <line class="axis" x1="0" y1="0" x2="194.16407864998737" y2="-141.0684605501936"></line><text
-                    class="label" x="210.34441853748632" y="-152.8241655960431">Scared</text>
-                <line class="axis" x1="0" y1="0" x2="228.25356391083685" y2="-74.16407864998745"></line><text
-                    class="label" x="247.27469423673992" y="-80.34441853748639">Proud</text>
-                <path class="reference"
-                    d="M96,0L45.651,14.833L38.833,28.214L28.214,38.833L14.833,45.651L0,48L-29.666,91.301L-28.214,38.833L-38.833,28.214L-45.651,14.833L-96,0L-45.651,-14.833L-77.666,-56.427L-28.214,-38.833L-29.666,-91.301L0,-48L14.833,-45.651L28.214,-38.833L38.833,-28.214L45.651,-14.833Z">
-                </path>
-                <path class="current"
-                    d="M96,0L45.651,14.833L38.833,28.214L28.214,38.833L14.833,45.651L0,48L-29.666,91.301L-28.214,38.833L-38.833,28.214L-45.651,14.833L-96,0L-45.651,-14.833L-77.666,-56.427L-28.214,-38.833L-29.666,-91.301L0,-48L14.833,-45.651L28.214,-38.833L38.833,-28.214L45.651,-14.833Z">
-                </path>
-                <path class="preview"></path>
-                <path class="monthly"
-                    d="M144,0L45.651,14.833L51.777,37.618L47.023,64.721L29.666,91.301L0,64L-29.666,91.301L-65.832,90.61L-51.777,37.618L-76.085,24.721L-112,0L-76.085,-24.721L-90.61,-65.832L-47.023,-64.721L-34.61,-106.518L0,-64L19.777,-60.868L65.832,-90.61L51.777,-37.618L60.868,-19.777Z">
-                </path>
-                <g>
-                    <circle class="handle" r="6" cx="96" cy="0"
-                        style="touch-action: none; -webkit-tap-highlight-color: rgba(0, 0, 0, 0);"></circle>
-                    <circle class="handle" r="6" cx="45.65071278216737" cy="14.832815729997474"
-                        style="touch-action: none; -webkit-tap-highlight-color: rgba(0, 0, 0, 0);"></circle>
-                    <circle class="handle" r="6" cx="38.83281572999748" cy="28.21369211003871"
-                        style="touch-action: none; -webkit-tap-highlight-color: rgba(0, 0, 0, 0);"></circle>
-                    <circle class="handle" r="6" cx="28.21369211003871" cy="38.83281572999748"
-                        style="touch-action: none; -webkit-tap-highlight-color: rgba(0, 0, 0, 0);"></circle>
-                    <circle class="handle" r="6" cx="14.832815729997478" cy="45.65071278216737"
-                        style="touch-action: none; -webkit-tap-highlight-color: rgba(0, 0, 0, 0);"></circle>
-                    <circle class="handle" r="6" cx="2.9391523179536475e-15" cy="48"
-                        style="touch-action: none; -webkit-tap-highlight-color: rgba(0, 0, 0, 0);"></circle>
-                    <circle class="handle" r="6" cx="-29.665631459994945" cy="91.30142556433475"
-                        style="touch-action: none; -webkit-tap-highlight-color: rgba(0, 0, 0, 0);"></circle>
-                    <circle class="handle" r="6" cx="-28.213692110038707" cy="38.83281572999748"
-                        style="touch-action: none; -webkit-tap-highlight-color: rgba(0, 0, 0, 0);"></circle>
-                    <circle class="handle" r="6" cx="-38.83281572999747" cy="28.213692110038714"
-                        style="touch-action: none; -webkit-tap-highlight-color: rgba(0, 0, 0, 0);"></circle>
-                    <circle class="handle" r="6" cx="-45.65071278216737" cy="14.832815729997481"
-                        style="touch-action: none; -webkit-tap-highlight-color: rgba(0, 0, 0, 0);"></circle>
-                    <circle class="handle" r="6" cx="-96" cy="1.175660927181459e-14"
-                        style="touch-action: none; -webkit-tap-highlight-color: rgba(0, 0, 0, 0);"></circle>
-                    <circle class="handle" r="6" cx="-45.65071278216737" cy="-14.832815729997492"
-                        style="touch-action: none; -webkit-tap-highlight-color: rgba(0, 0, 0, 0);"></circle>
-                    <circle class="handle" r="6" cx="-77.66563145999497" cy="-56.427384220077414"
-                        style="touch-action: none; -webkit-tap-highlight-color: rgba(0, 0, 0, 0);"></circle>
-                    <circle class="handle" r="6" cx="-28.213692110038714" cy="-38.83281572999747"
-                        style="touch-action: none; -webkit-tap-highlight-color: rgba(0, 0, 0, 0);"></circle>
-                    <circle class="handle" r="6" cx="-29.665631459994966" cy="-91.30142556433474"
-                        style="touch-action: none; -webkit-tap-highlight-color: rgba(0, 0, 0, 0);"></circle>
-                    <circle class="handle" r="6" cx="-8.817456953860943e-15" cy="-48"
-                        style="touch-action: none; -webkit-tap-highlight-color: rgba(0, 0, 0, 0);"></circle>
-                    <circle class="handle" r="6" cx="14.832815729997467" cy="-45.650712782167375"
-                        style="touch-action: none; -webkit-tap-highlight-color: rgba(0, 0, 0, 0);"></circle>
-                    <circle class="handle" r="6" cx="28.2136921100387" cy="-38.832815729997485"
-                        style="touch-action: none; -webkit-tap-highlight-color: rgba(0, 0, 0, 0);"></circle>
-                    <circle class="handle" r="6" cx="38.83281572999747" cy="-28.21369211003872"
-                        style="touch-action: none; -webkit-tap-highlight-color: rgba(0, 0, 0, 0);"></circle>
-                    <circle class="handle" r="6" cx="45.65071278216737" cy="-14.832815729997488"
-                        style="touch-action: none; -webkit-tap-highlight-color: rgba(0, 0, 0, 0);"></circle>
-                </g>
-            </g>
-        </svg>
+            
+        <g transform="translate(310,310)"><circle r="48" class="grid"></circle><circle r="96" class="grid"></circle><circle r="144" class="grid"></circle><circle r="192" class="grid"></circle><circle r="240" class="grid"></circle><g class="wedges"><path d="M237.045,-37.544A240,240,0,0,1,237.045,37.544L0,0Z" fill="rgb(240, 240, 240)"></path><path d="M237.045,37.544A240,240,0,0,1,213.842,108.958L0,0Z" fill="rgb(180, 145, 200)"></path><path d="M213.842,108.958A240,240,0,0,1,169.706,169.706L0,0Z" fill="rgb(120, 50, 160)"></path><path d="M169.706,169.706A240,240,0,0,1,108.958,213.842L0,0Z" fill="rgb(240, 240, 240)"></path><path d="M108.958,213.842A240,240,0,0,1,37.544,237.045L0,0Z" fill="rgb(240, 240, 240)"></path><path d="M37.544,237.045A240,240,0,0,1,-37.544,237.045L0,0Z" fill="rgb(210, 193, 220)"></path><path d="M-37.544,237.045A240,240,0,0,1,-108.958,213.842L0,0Z" fill="rgb(240, 240, 240)"></path><path d="M-108.958,213.842A240,240,0,0,1,-169.706,169.706L0,0Z" fill="rgb(240, 240, 240)"></path><path d="M-169.706,169.706A240,240,0,0,1,-213.842,108.958L0,0Z" fill="rgb(240, 240, 240)"></path><path d="M-213.842,108.958A240,240,0,0,1,-237.045,37.544L0,0Z" fill="rgb(240, 240, 240)"></path><path d="M-237.045,37.544A240,240,0,0,1,-237.045,-37.544L0,0Z" fill="rgb(248, 230, 140)"></path><path d="M-237.045,-37.544A240,240,0,0,1,-213.842,-108.958L0,0Z" fill="rgb(240, 240, 240)"></path><path d="M-213.842,-108.958A240,240,0,0,1,-169.706,-169.706L0,0Z" fill="rgb(240, 240, 240)"></path><path d="M-169.706,-169.706A240,240,0,0,1,-108.958,-213.842L0,0Z" fill="rgb(240, 240, 240)"></path><path d="M-108.958,-213.842A240,240,0,0,1,-37.544,-237.045L0,0Z" fill="rgb(180, 145, 200)"></path><path d="M-37.544,-237.045A240,240,0,0,1,37.544,-237.045L0,0Z" fill="rgb(150, 98, 180)"></path><path d="M37.544,-237.045A240,240,0,0,1,108.958,-213.842L0,0Z" fill="rgb(244, 235, 190)"></path><path d="M108.958,-213.842A240,240,0,0,1,169.706,-169.706L0,0Z" fill="rgb(244, 235, 190)"></path><path d="M169.706,-169.706A240,240,0,0,1,213.842,-108.958L0,0Z" fill="rgb(244, 235, 190)"></path><path d="M213.842,-108.958A240,240,0,0,1,237.045,-37.544L0,0Z" fill="rgb(240, 240, 240)"></path></g><line class="axis" x1="0" y1="0" x2="240" y2="0"></line><text class="label" x="260" y="0">Interested</text><line class="axis" x1="0" y1="0" x2="228.25356391083685" y2="74.16407864998737"></line><text class="label" x="247.27469423673992" y="80.34441853748632">Distressed</text><line class="axis" x1="0" y1="0" x2="194.1640786499874" y2="141.06846055019355"></line><text class="label" x="210.34441853748635" y="152.824165596043">Nervous</text><line class="axis" x1="0" y1="0" x2="141.06846055019355" y2="194.1640786499874"></line><text class="label" x="152.824165596043" y="210.34441853748635">Active</text><line class="axis" x1="0" y1="0" x2="74.16407864998739" y2="228.25356391083685"></line><text class="label" x="80.34441853748633" y="247.27469423673992">Jittery</text><line class="axis" x1="0" y1="0" x2="1.469576158976824e-14" y2="240"></line><text class="label" x="1.592040838891559e-14" y="260">Upset</text><line class="axis" x1="0" y1="0" x2="-74.16407864998736" y2="228.25356391083687"></line><text class="label" x="-80.3444185374863" y="247.27469423673995">Strong</text><line class="axis" x1="0" y1="0" x2="-141.06846055019352" y2="194.1640786499874"></line><text class="label" x="-152.82416559604297" y="210.34441853748635">Ashamed</text><line class="axis" x1="0" y1="0" x2="-194.16407864998737" y2="141.06846055019358"></line><text class="label" x="-210.34441853748632" y="152.82416559604303">Proud</text><line class="axis" x1="0" y1="0" x2="-228.25356391083685" y2="74.1640786499874"></line><text class="label" x="-247.27469423673992" y="80.34441853748635">Excited</text><line class="axis" x1="0" y1="0" x2="-240" y2="2.939152317953648e-14"></line><text class="label" x="-260" y="3.184081677783118e-14">Determined</text><line class="axis" x1="0" y1="0" x2="-228.25356391083685" y2="-74.16407864998746"></line><text class="label" x="-247.27469423673992" y="-80.3444185374864">Enthusiastic</text><line class="axis" x1="0" y1="0" x2="-194.1640786499874" y2="-141.06846055019352"></line><text class="label" x="-210.34441853748638" y="-152.82416559604297">Hostile</text><line class="axis" x1="0" y1="0" x2="-141.06846055019358" y2="-194.16407864998737"></line><text class="label" x="-152.82416559604303" y="-210.34441853748632">Irritable</text><line class="axis" x1="0" y1="0" x2="-74.16407864998742" y2="-228.25356391083685"></line><text class="label" x="-80.34441853748636" y="-247.27469423673992">Afraid</text><line class="axis" x1="0" y1="0" x2="-4.408728476930471e-14" y2="-240"></line><text class="label" x="-4.776122516674677e-14" y="-260">Scared</text><line class="axis" x1="0" y1="0" x2="74.16407864998733" y2="-228.25356391083687"></line><text class="label" x="80.34441853748628" y="-247.27469423673995">Inspired</text><line class="axis" x1="0" y1="0" x2="141.0684605501935" y2="-194.1640786499874"></line><text class="label" x="152.82416559604295" y="-210.34441853748638">Alert</text><line class="axis" x1="0" y1="0" x2="194.16407864998737" y2="-141.0684605501936"></line><text class="label" x="210.34441853748632" y="-152.8241655960431">Attentive</text><line class="axis" x1="0" y1="0" x2="228.25356391083685" y2="-74.16407864998745"></line><text class="label" x="247.27469423673992" y="-80.34441853748639">Guilty</text><path class="reference" d="M48,0L136.952,44.498L194.164,141.068L28.214,38.833L14.833,45.651L0,96L-14.833,45.651L-28.214,38.833L-38.833,28.214L-45.651,14.833L-144,0L-45.651,-14.833L-38.833,-28.214L-28.214,-38.833L-44.498,-136.952L0,-192L29.666,-91.301L56.427,-77.666L77.666,-56.427L45.651,-14.833Z"></path><path class="current" d="M48,0L136.952,44.498L194.164,141.068L28.214,38.833L14.833,45.651L0,96L-14.833,45.651L-28.214,38.833L-38.833,28.214L-45.651,14.833L-144,0L-45.651,-14.833L-38.833,-28.214L-28.214,-38.833L-44.498,-136.952L0,-192L29.666,-91.301L56.427,-77.666L77.666,-56.427L45.651,-14.833Z"></path><path class="preview"></path><path class="monthly" d="M104.727,0L161.853,52.589L148.271,107.725L55.572,76.489L30.565,94.068L0,142.545L-27.868,85.768L-65.832,90.61L-76.489,55.572L-65.018,21.126L-113.455,0L-77.468,-25.171L-81.196,-58.992L-69.252,-95.317L-48.544,-149.402L0,-178.909L29.666,-91.301L55.572,-76.489L102.377,-74.382L142.486,-46.296Z"></path><g><circle class="handle" r="6" cx="48" cy="0"></circle><circle class="handle" r="6" cx="136.9521383465021" cy="44.498447189992426"></circle><circle class="handle" r="6" cx="194.1640786499874" cy="141.06846055019355"></circle><circle class="handle" r="6" cx="28.21369211003871" cy="38.83281572999748"></circle><circle class="handle" r="6" cx="14.832815729997478" cy="45.65071278216737"></circle><circle class="handle" r="6" cx="5.878304635907295e-15" cy="96"></circle><circle class="handle" r="6" cx="-14.832815729997472" cy="45.650712782167375"></circle><circle class="handle" r="6" cx="-28.213692110038707" cy="38.83281572999748"></circle><circle class="handle" r="6" cx="-38.83281572999747" cy="28.213692110038714"></circle><circle class="handle" r="6" cx="-45.65071278216737" cy="14.832815729997481"></circle><circle class="handle" r="6" cx="-144" cy="1.7634913907721887e-14"></circle><circle class="handle" r="6" cx="-45.65071278216737" cy="-14.832815729997492"></circle><circle class="handle" r="6" cx="-38.832815729997485" cy="-28.213692110038707"></circle><circle class="handle" r="6" cx="-28.213692110038714" cy="-38.83281572999747"></circle><circle class="handle" r="6" cx="-44.49844718999245" cy="-136.9521383465021"></circle><circle class="handle" r="6" cx="-3.5269827815443773e-14" cy="-192"></circle><circle class="handle" r="6" cx="29.665631459994934" cy="-91.30142556433475"></circle><circle class="handle" r="6" cx="56.4273842200774" cy="-77.66563145999497"></circle><circle class="handle" r="6" cx="77.66563145999494" cy="-56.42738422007744"></circle><circle class="handle" r="6" cx="45.65071278216737" cy="-14.832815729997488"></circle></g></g></svg>
         <label for="log">Log:</label>
         <textarea id="log" placeholder="Log..."></textarea>
+        <div class="sleep-row">
+            <label for="hours-slept">Sleep (h):</label>
+            <input type="number" id="hours-slept" step="0.5" min="0" max="24" placeholder="7.5">
+            <span id="last-entry-date"></span>
+        </div>
 
         <div class="controls">
             <button id="randomize">Randomize petals</button>
@@ -402,184 +440,20 @@
             <button id="clear">Clear DB</button>
         </div>
 
-        <div id="status">30-day average (3 entries)</div>
+        <div id="status">30-day average (33 entries)</div>
     </div>
 
     <div id="right">
         <h2>Scores Over Time</h2>
         <div class="legend">
-            <span
-                style="display:inline-block;width:80px;height:12px;border-radius:2px;background:linear-gradient(to right, #7832a0, #a0a0a0, #ffdc28);vertical-align:middle"></span>
+            <span style="display:inline-block;width:80px;height:12px;border-radius:2px;background:linear-gradient(to right, #7832a0, #a0a0a0, #ffdc28);vertical-align:middle"></span>
             <span style="font-size:11px">Neg ← Color → Pos</span> &nbsp;|&nbsp; Height = Balance, Saturation = Intensity
         </div>
         <svg id="timeseries" viewBox="0,0,760,310">
-            <g transform="translate(70,10)">
-                <g transform="translate(0,250)" fill="none" font-size="10" font-family="sans-serif"
-                    text-anchor="middle">
-                    <path class="domain" stroke="currentColor" d="M0.5,6V0.5H670.5V6"></path>
-                    <g class="tick" opacity="1" transform="translate(26.929496874507386,0)">
-                        <line stroke="currentColor" y2="6"></line><text fill="currentColor" y="9" dy="0.71em">Aug
-                            24</text>
-                    </g>
-                    <g class="tick" opacity="1" transform="translate(72.24345894918333,0)">
-                        <line stroke="currentColor" y2="6"></line><text fill="currentColor" y="9" dy="0.71em">Aug
-                            31</text>
-                    </g>
-                    <g class="tick" opacity="1" transform="translate(117.55742102385926,0)">
-                        <line stroke="currentColor" y2="6"></line><text fill="currentColor" y="9" dy="0.71em">Sep
-                            07</text>
-                    </g>
-                    <g class="tick" opacity="1" transform="translate(162.8713830985352,0)">
-                        <line stroke="currentColor" y2="6"></line><text fill="currentColor" y="9" dy="0.71em">Sep
-                            14</text>
-                    </g>
-                    <g class="tick" opacity="1" transform="translate(208.18534517321115,0)">
-                        <line stroke="currentColor" y2="6"></line><text fill="currentColor" y="9" dy="0.71em">Sep
-                            21</text>
-                    </g>
-                    <g class="tick" opacity="1" transform="translate(253.4993072478871,0)">
-                        <line stroke="currentColor" y2="6"></line><text fill="currentColor" y="9" dy="0.71em">Sep
-                            28</text>
-                    </g>
-                    <g class="tick" opacity="1" transform="translate(298.81326932256303,0)">
-                        <line stroke="currentColor" y2="6"></line><text fill="currentColor" y="9" dy="0.71em">Oct
-                            05</text>
-                    </g>
-                    <g class="tick" opacity="1" transform="translate(344.127231397239,0)">
-                        <line stroke="currentColor" y2="6"></line><text fill="currentColor" y="9" dy="0.71em">Oct
-                            12</text>
-                    </g>
-                    <g class="tick" opacity="1" transform="translate(389.4411934719149,0)">
-                        <line stroke="currentColor" y2="6"></line><text fill="currentColor" y="9" dy="0.71em">Oct
-                            19</text>
-                    </g>
-                    <g class="tick" opacity="1" transform="translate(434.75515554659086,0)">
-                        <line stroke="currentColor" y2="6"></line><text fill="currentColor" y="9" dy="0.71em">Oct
-                            26</text>
-                    </g>
-                    <g class="tick" opacity="1" transform="translate(480.33884358599704,0)">
-                        <line stroke="currentColor" y2="6"></line><text fill="currentColor" y="9" dy="0.71em">Nov
-                            02</text>
-                    </g>
-                    <g class="tick" opacity="1" transform="translate(525.6528056606729,0)">
-                        <line stroke="currentColor" y2="6"></line><text fill="currentColor" y="9" dy="0.71em">Nov
-                            09</text>
-                    </g>
-                    <g class="tick" opacity="1" transform="translate(570.9667677353489,0)">
-                        <line stroke="currentColor" y2="6"></line><text fill="currentColor" y="9" dy="0.71em">Nov
-                            16</text>
-                    </g>
-                    <g class="tick" opacity="1" transform="translate(616.2807298100248,0)">
-                        <line stroke="currentColor" y2="6"></line><text fill="currentColor" y="9" dy="0.71em">Nov
-                            23</text>
-                    </g>
-                    <g class="tick" opacity="1" transform="translate(661.5946918847008,0)">
-                        <line stroke="currentColor" y2="6"></line><text fill="currentColor" y="9" dy="0.71em">Nov
-                            30</text>
-                    </g>
-                </g>
-                <g fill="none" font-size="10" font-family="sans-serif" text-anchor="end">
-                    <path class="domain" stroke="currentColor" d="M-6,250.5H0.5V0.5H-6"></path>
-                    <g class="tick" opacity="1" transform="translate(0,250.5)">
-                        <line stroke="currentColor" x2="-6"></line><text fill="currentColor" x="-9" dy="0.32em">0</text>
-                    </g>
-                    <g class="tick" opacity="1" transform="translate(0,225.5)">
-                        <line stroke="currentColor" x2="-6"></line><text fill="currentColor" x="-9" dy="0.32em">5</text>
-                    </g>
-                    <g class="tick" opacity="1" transform="translate(0,200.5)">
-                        <line stroke="currentColor" x2="-6"></line><text fill="currentColor" x="-9"
-                            dy="0.32em">10</text>
-                    </g>
-                    <g class="tick" opacity="1" transform="translate(0,175.5)">
-                        <line stroke="currentColor" x2="-6"></line><text fill="currentColor" x="-9"
-                            dy="0.32em">15</text>
-                    </g>
-                    <g class="tick" opacity="1" transform="translate(0,150.5)">
-                        <line stroke="currentColor" x2="-6"></line><text fill="currentColor" x="-9"
-                            dy="0.32em">20</text>
-                    </g>
-                    <g class="tick" opacity="1" transform="translate(0,125.5)">
-                        <line stroke="currentColor" x2="-6"></line><text fill="currentColor" x="-9"
-                            dy="0.32em">25</text>
-                    </g>
-                    <g class="tick" opacity="1" transform="translate(0,100.5)">
-                        <line stroke="currentColor" x2="-6"></line><text fill="currentColor" x="-9"
-                            dy="0.32em">30</text>
-                    </g>
-                    <g class="tick" opacity="1" transform="translate(0,75.50000000000001)">
-                        <line stroke="currentColor" x2="-6"></line><text fill="currentColor" x="-9"
-                            dy="0.32em">35</text>
-                    </g>
-                    <g class="tick" opacity="1" transform="translate(0,50.499999999999986)">
-                        <line stroke="currentColor" x2="-6"></line><text fill="currentColor" x="-9"
-                            dy="0.32em">40</text>
-                    </g>
-                    <g class="tick" opacity="1" transform="translate(0,25.499999999999993)">
-                        <line stroke="currentColor" x2="-6"></line><text fill="currentColor" x="-9"
-                            dy="0.32em">45</text>
-                    </g>
-                    <g class="tick" opacity="1" transform="translate(0,0.5)">
-                        <line stroke="currentColor" x2="-6"></line><text fill="currentColor" x="-9"
-                            dy="0.32em">50</text>
-                    </g>
-                </g>
-                <path fill="none" stroke="#1f77b4" stroke-width="2"
-                    d="M0,90L3.207,120L26.295,150L26.607,140L28.839,155L48.408,90L104.182,85L116.536,105L123.049,105L229.464,105L242.333,190L261.77,115L388.433,135L388.74,135L393.079,120L393.113,115L410.623,90L440.08,160L443.008,165L456.72,105L631.045,175L637.509,140L670,195">
-                </path>
-                <path fill="none" stroke="#d62728" stroke-width="2"
-                    d="M0,135L3.207,140L26.295,140L26.607,140L28.839,100L48.408,150L104.182,120L116.536,120L123.049,120L229.464,135L242.333,170L261.77,165L388.433,200L388.74,200L393.079,170L393.113,155L410.623,175L440.08,155L443.008,145L456.72,190L631.045,125L637.509,150L670,180">
-                </path>
-                <circle class="ptP" cx="0" cy="90" r="4" fill="#1f77b4"></circle>
-                <circle class="ptP" cx="3.2065180776512716" cy="120" r="4" fill="#1f77b4"></circle>
-                <circle class="ptP" cx="26.29528655405305" cy="150" r="4" fill="#1f77b4"></circle>
-                <circle class="ptP" cx="26.606561855629092" cy="140" r="4" fill="#1f77b4"></circle>
-                <circle class="ptP" cx="28.83865817299171" cy="155" r="4" fill="#1f77b4"></circle>
-                <circle class="ptP" cx="48.4084201776398" cy="90" r="4" fill="#1f77b4"></circle>
-                <circle class="ptP" cx="104.1819808448535" cy="84.99999999999999" r="4" fill="#1f77b4"></circle>
-                <circle class="ptP" cx="116.53561823828157" cy="105.00000000000001" r="4" fill="#1f77b4"></circle>
-                <circle class="ptP" cx="123.0486504249557" cy="105.00000000000001" r="4" fill="#1f77b4"></circle>
-                <circle class="ptP" cx="229.46425820709777" cy="105.00000000000001" r="4" fill="#1f77b4"></circle>
-                <circle class="ptP" cx="242.33337113943816" cy="190" r="4" fill="#1f77b4"></circle>
-                <circle class="ptP" cx="261.76995752240214" cy="114.99999999999999" r="4" fill="#1f77b4"></circle>
-                <circle class="ptP" cx="388.4327362775288" cy="135" r="4" fill="#1f77b4"></circle>
-                <circle class="ptP" cx="388.73959331795487" cy="135" r="4" fill="#1f77b4"></circle>
-                <circle class="ptP" cx="393.07866824434456" cy="120" r="4" fill="#1f77b4"></circle>
-                <circle class="ptP" cx="393.1129219433877" cy="114.99999999999999" r="4" fill="#1f77b4"></circle>
-                <circle class="ptP" cx="410.6233827748493" cy="90" r="4" fill="#1f77b4"></circle>
-                <circle class="ptP" cx="440.07961847851834" cy="160" r="4" fill="#1f77b4"></circle>
-                <circle class="ptP" cx="443.00757017309763" cy="164.99999999999997" r="4" fill="#1f77b4"></circle>
-                <circle class="ptP" cx="456.71963166442333" cy="105.00000000000001" r="4" fill="#1f77b4"></circle>
-                <circle class="ptP" cx="631.0449034417284" cy="175" r="4" fill="#1f77b4"></circle>
-                <circle class="ptP" cx="637.5094480406573" cy="140" r="4" fill="#1f77b4"></circle>
-                <circle class="ptP" cx="670" cy="195" r="4" fill="#1f77b4"></circle>
-                <circle class="ptN" cx="0" cy="135" r="4" fill="#d62728"></circle>
-                <circle class="ptN" cx="3.2065180776512716" cy="140" r="4" fill="#d62728"></circle>
-                <circle class="ptN" cx="26.29528655405305" cy="140" r="4" fill="#d62728"></circle>
-                <circle class="ptN" cx="26.606561855629092" cy="140" r="4" fill="#d62728"></circle>
-                <circle class="ptN" cx="28.83865817299171" cy="100" r="4" fill="#d62728"></circle>
-                <circle class="ptN" cx="48.4084201776398" cy="150" r="4" fill="#d62728"></circle>
-                <circle class="ptN" cx="104.1819808448535" cy="120" r="4" fill="#d62728"></circle>
-                <circle class="ptN" cx="116.53561823828157" cy="120" r="4" fill="#d62728"></circle>
-                <circle class="ptN" cx="123.0486504249557" cy="120" r="4" fill="#d62728"></circle>
-                <circle class="ptN" cx="229.46425820709777" cy="135" r="4" fill="#d62728"></circle>
-                <circle class="ptN" cx="242.33337113943816" cy="169.99999999999997" r="4" fill="#d62728"></circle>
-                <circle class="ptN" cx="261.76995752240214" cy="164.99999999999997" r="4" fill="#d62728"></circle>
-                <circle class="ptN" cx="388.4327362775288" cy="200" r="4" fill="#d62728"></circle>
-                <circle class="ptN" cx="388.73959331795487" cy="200" r="4" fill="#d62728"></circle>
-                <circle class="ptN" cx="393.07866824434456" cy="169.99999999999997" r="4" fill="#d62728"></circle>
-                <circle class="ptN" cx="393.1129219433877" cy="155" r="4" fill="#d62728"></circle>
-                <circle class="ptN" cx="410.6233827748493" cy="175" r="4" fill="#d62728"></circle>
-                <circle class="ptN" cx="440.07961847851834" cy="155" r="4" fill="#d62728"></circle>
-                <circle class="ptN" cx="443.00757017309763" cy="145.00000000000003" r="4" fill="#d62728"></circle>
-                <circle class="ptN" cx="456.71963166442333" cy="190" r="4" fill="#d62728"></circle>
-                <circle class="ptN" cx="631.0449034417284" cy="125" r="4" fill="#d62728"></circle>
-                <circle class="ptN" cx="637.5094480406573" cy="150" r="4" fill="#d62728"></circle>
-                <circle class="ptN" cx="670" cy="180" r="4" fill="#d62728"></circle><text x="335" y="288"
-                    text-anchor="middle">Date</text><text x="-125" y="-48" text-anchor="middle"
-                    transform="rotate(-90)">Score (0–50)</text>
-            </g>
-        </svg>
+            
+        <g transform="translate(70,10)"><g transform="translate(0,250)" fill="none" font-size="10" font-family="sans-serif" text-anchor="middle"><path class="domain" stroke="currentColor" d="M0.5,6V0.5H670.5V6"></path><g class="tick" opacity="1" transform="translate(47.401705116878226,0)"><line stroke="currentColor" y2="6"></line><text fill="currentColor" y="9" dy="0.71em">September</text></g><g class="tick" opacity="1" transform="translate(163.85274829885682,0)"><line stroke="currentColor" y2="6"></line><text fill="currentColor" y="9" dy="0.71em">October</text></g><g class="tick" opacity="1" transform="translate(284.3472304802097,0)"><line stroke="currentColor" y2="6"></line><text fill="currentColor" y="9" dy="0.71em">November</text></g><g class="tick" opacity="1" transform="translate(400.79827366218836,0)"><line stroke="currentColor" y2="6"></line><text fill="currentColor" y="9" dy="0.71em">December</text></g><g class="tick" opacity="1" transform="translate(521.1310182835662,0)"><line stroke="currentColor" y2="6"></line><text fill="currentColor" y="9" dy="0.71em">2026</text></g><g class="tick" opacity="1" transform="translate(641.4637629049441,0)"><line stroke="currentColor" y2="6"></line><text fill="currentColor" y="9" dy="0.71em">February</text></g></g><g fill="none" font-size="10" font-family="sans-serif" text-anchor="end"><path class="domain" stroke="currentColor" d="M-6,250.5H0.5V0.5H-6"></path><g class="tick" opacity="1" transform="translate(0,250.5)"><line stroke="currentColor" x2="-6"></line><text fill="currentColor" x="-9" dy="0.32em">−40</text></g><g class="tick" opacity="1" transform="translate(0,219.25)"><line stroke="currentColor" x2="-6"></line><text fill="currentColor" x="-9" dy="0.32em">−30</text></g><g class="tick" opacity="1" transform="translate(0,188)"><line stroke="currentColor" x2="-6"></line><text fill="currentColor" x="-9" dy="0.32em">−20</text></g><g class="tick" opacity="1" transform="translate(0,156.75)"><line stroke="currentColor" x2="-6"></line><text fill="currentColor" x="-9" dy="0.32em">−10</text></g><g class="tick" opacity="1" transform="translate(0,125.5)"><line stroke="currentColor" x2="-6"></line><text fill="currentColor" x="-9" dy="0.32em">0</text></g><g class="tick" opacity="1" transform="translate(0,94.25)"><line stroke="currentColor" x2="-6"></line><text fill="currentColor" x="-9" dy="0.32em">10</text></g><g class="tick" opacity="1" transform="translate(0,63)"><line stroke="currentColor" x2="-6"></line><text fill="currentColor" x="-9" dy="0.32em">20</text></g><g class="tick" opacity="1" transform="translate(0,31.75)"><line stroke="currentColor" x2="-6"></line><text fill="currentColor" x="-9" dy="0.32em">30</text></g><g class="tick" opacity="1" transform="translate(0,0.5)"><line stroke="currentColor" x2="-6"></line><text fill="currentColor" x="-9" dy="0.32em">40</text></g></g><line x1="0" x2="670" y1="125" y2="125" stroke="#999" stroke-dasharray="4,4" opacity="0.7"></line><rect class="bar" x="-3.0855263157894735" y="96.87499999999999" width="6.171052631578947" height="28.125000000000014" fill="rgb(204, 163, 89)" opacity="0.7"></rect><rect class="bar" x="-1.162780723188928" y="112.49999999999999" width="6.171052631578947" height="12.500000000000014" fill="rgb(186, 153, 113)" opacity="0.7"></rect><rect class="bar" x="12.682089865875007" y="125" width="6.171052631578947" height="6.25" fill="rgb(171, 144, 133)" opacity="0.7"></rect><rect class="bar" x="12.868741928859524" y="125" width="6.171052631578947" height="0" fill="rgb(176, 146, 126)" opacity="0.7"></rect><rect class="bar" x="14.207188571771493" y="125" width="6.171052631578947" height="34.375" fill="rgb(158, 116, 137)" opacity="0.7"></rect><rect class="bar" x="25.941934090574378" y="87.5" width="6.171052631578947" height="37.5" fill="rgb(207, 171, 90)" opacity="0.7"></rect><rect class="bar" x="59.38580228640717" y="103.125" width="6.171052631578947" height="21.875" fill="rgb(203, 155, 86)" opacity="0.7"></rect><rect class="bar" x="66.79349539013599" y="115.625" width="6.171052631578947" height="9.375" fill="rgb(191, 146, 102)" opacity="0.7"></rect><rect class="bar" x="70.6989478554363" y="115.625" width="6.171052631578947" height="9.375" fill="rgb(191, 146, 102)" opacity="0.7"></rect><rect class="bar" x="134.50964091627068" y="106.25000000000001" width="6.171052631578947" height="18.749999999999986" fill="rgb(194, 155, 101)" opacity="0.7"></rect><rect class="bar" x="142.22643201868067" y="125" width="6.171052631578947" height="12.5" fill="rgb(161, 156, 156)" opacity="0.7"></rect><rect class="bar" x="153.881320560715" y="93.75" width="6.171052631578947" height="31.25" fill="rgb(192, 168, 111)" opacity="0.7"></rect><rect class="bar" x="229.83295834981098" y="84.375" width="6.171052631578947" height="40.625" fill="rgb(180, 171, 134)" opacity="0.7"></rect><rect class="bar" x="230.01696106170894" y="84.375" width="6.171052631578947" height="40.625" fill="rgb(180, 171, 134)" opacity="0.7"></rect><rect class="bar" x="232.6188291905144" y="93.75" width="6.171052631578947" height="31.25" fill="rgb(190, 168, 116)" opacity="0.7"></rect><rect class="bar" x="232.63936896208918" y="100" width="6.171052631578947" height="25" fill="rgb(192, 163, 110)" opacity="0.7"></rect><rect class="bar" x="243.1392821304437" y="71.875" width="6.171052631578947" height="53.125" fill="rgb(210, 185, 92)" opacity="0.7"></rect><rect class="bar" x="260.80231910771164" y="125" width="6.171052631578947" height="3.125" fill="rgb(168, 149, 140)" opacity="0.7"></rect><rect class="bar" x="262.55802610195485" y="125" width="6.171052631578947" height="12.5" fill="rgb(165, 144, 142)" opacity="0.7"></rect><rect class="bar" x="270.7802800108509" y="71.875" width="6.171052631578947" height="53.125" fill="rgb(200, 183, 107)" opacity="0.7"></rect><rect class="bar" x="375.3120929841999" y="125" width="6.171052631578947" height="31.25" fill="rgb(157, 130, 147)" opacity="0.7"></rect><rect class="bar" x="379.188470517323" y="118.75" width="6.171052631578947" height="6.25" fill="rgb(177, 152, 127)" opacity="0.7"></rect><rect class="bar" x="398.6709945724328" y="125" width="6.171052631578947" height="9.375" fill="rgb(160, 160, 160)" opacity="0.7"></rect><rect class="bar" x="398.7448980794728" y="125" width="6.171052631578947" height="9.375" fill="rgb(160, 160, 160)" opacity="0.7"></rect><rect class="bar" x="398.7781380233821" y="125" width="6.171052631578947" height="9.375" fill="rgb(160, 160, 160)" opacity="0.7"></rect><rect class="bar" x="398.78337746671036" y="125" width="6.171052631578947" height="9.375" fill="rgb(160, 160, 160)" opacity="0.7"></rect><rect class="bar" x="398.8025681673266" y="125" width="6.171052631578947" height="9.375" fill="rgb(160, 160, 160)" opacity="0.7"></rect><rect class="bar" x="398.81330695725666" y="125" width="6.171052631578947" height="9.375" fill="rgb(160, 160, 160)" opacity="0.7"></rect><rect class="bar" x="404.86966073311555" y="125" width="6.171052631578947" height="9.375" fill="rgb(173, 135, 123)" opacity="0.7"></rect><rect class="bar" x="404.954753379336" y="125" width="6.171052631578947" height="3.125" fill="rgb(182, 135, 109)" opacity="0.7"></rect><rect class="bar" x="410.6769421259998" y="93.75" width="6.171052631578947" height="31.25" fill="rgb(210, 164, 81)" opacity="0.7"></rect><rect class="bar" x="424.3008606532456" y="96.87499999999999" width="6.171052631578947" height="28.125000000000014" fill="rgb(206, 162, 86)" opacity="0.7"></rect><rect class="bar" x="424.30606060565304" y="96.87499999999999" width="6.171052631578947" height="28.125000000000014" fill="rgb(206, 162, 86)" opacity="0.7"></rect><rect class="bar" x="432.2451796623184" y="118.75" width="6.171052631578947" height="6.25" fill="rgb(187, 144, 105)" opacity="0.7"></rect><rect class="bar" x="432.26298216047195" y="118.75" width="6.171052631578947" height="6.25" fill="rgb(187, 144, 105)" opacity="0.7"></rect><rect class="bar" x="432.2772095397164" y="118.75" width="6.171052631578947" height="6.25" fill="rgb(187, 144, 105)" opacity="0.7"></rect><rect class="bar" x="432.28083677406147" y="106.25000000000001" width="6.171052631578947" height="18.749999999999986" fill="rgb(194, 155, 101)" opacity="0.7"></rect><rect class="bar" x="432.3037378690848" y="106.25000000000001" width="6.171052631578947" height="18.749999999999986" fill="rgb(194, 155, 101)" opacity="0.7"></rect><rect class="bar" x="447.13588076166235" y="125" width="6.171052631578947" height="0" fill="rgb(182, 140, 112)" opacity="0.7"></rect><rect class="bar" x="450.20223319485217" y="96.87499999999999" width="6.171052631578947" height="28.125000000000014" fill="rgb(206, 162, 86)" opacity="0.7"></rect><rect class="bar" x="455.5101061123182" y="112.49999999999999" width="6.171052631578947" height="12.500000000000014" fill="rgb(192, 149, 101)" opacity="0.7"></rect><rect class="bar" x="460.8476402156894" y="112.49999999999999" width="6.171052631578947" height="12.500000000000014" fill="rgb(192, 149, 101)" opacity="0.7"></rect><rect class="bar" x="491.0242890707643" y="106.25000000000001" width="6.171052631578947" height="18.749999999999986" fill="rgb(194, 155, 101)" opacity="0.7"></rect><rect class="bar" x="571.739387241793" y="81.24999999999999" width="6.171052631578947" height="43.750000000000014" fill="rgb(217, 176, 78)" opacity="0.7"></rect><rect class="bar" x="587.5499038619698" y="125" width="6.171052631578947" height="3.125" fill="rgb(181, 137, 112)" opacity="0.7"></rect><rect class="bar" x="587.5692626348671" y="125" width="6.171052631578947" height="3.125" fill="rgb(181, 137, 112)" opacity="0.7"></rect><rect class="bar" x="592.7834145217778" y="125" width="6.171052631578947" height="46.875" fill="rgb(149, 105, 144)" opacity="0.7"></rect><rect class="bar" x="592.7857176197048" y="125" width="6.171052631578947" height="46.875" fill="rgb(149, 105, 144)" opacity="0.7"></rect><rect class="bar" x="594.774967001341" y="125" width="6.171052631578947" height="46.875" fill="rgb(149, 105, 144)" opacity="0.7"></rect><rect class="bar" x="594.7831630521927" y="125" width="6.171052631578947" height="75" fill="rgb(129, 67, 155)" opacity="0.7"></rect><rect class="bar" x="594.7893485254656" y="125" width="6.171052631578947" height="75" fill="rgb(129, 67, 155)" opacity="0.7"></rect><rect class="bar" x="594.8551417025607" y="125" width="6.171052631578947" height="43.75" fill="rgb(153, 100, 135)" opacity="0.7"></rect><rect class="bar" x="594.9130105029777" y="125" width="6.171052631578947" height="25" fill="rgb(167, 117, 124)" opacity="0.7"></rect><rect class="bar" x="594.9275800470158" y="125" width="6.171052631578947" height="25" fill="rgb(167, 117, 124)" opacity="0.7"></rect><rect class="bar" x="598.5068497708309" y="121.87500000000001" width="6.171052631578947" height="3.124999999999986" fill="rgb(181, 144, 116)" opacity="0.7"></rect><rect class="bar" x="608.2866833311053" y="115.625" width="6.171052631578947" height="9.375" fill="rgb(189, 148, 105)" opacity="0.7"></rect><rect class="bar" x="613.5527066549279" y="125" width="6.171052631578947" height="43.75" fill="rgb(153, 104, 139)" opacity="0.7"></rect><rect class="bar" x="613.9970916080987" y="125" width="6.171052631578947" height="43.75" fill="rgb(153, 104, 139)" opacity="0.7"></rect><rect class="bar" x="618.2134312489102" y="125" width="6.171052631578947" height="46.875" fill="rgb(149, 111, 149)" opacity="0.7"></rect><rect class="bar" x="618.2525498589265" y="125" width="6.171052631578947" height="46.875" fill="rgb(149, 111, 149)" opacity="0.7"></rect><rect class="bar" x="619.9880932562031" y="125" width="6.171052631578947" height="53.125" fill="rgb(145, 113, 156)" opacity="0.7"></rect><rect class="bar" x="619.9897343083845" y="125" width="6.171052631578947" height="53.125" fill="rgb(145, 113, 156)" opacity="0.7"></rect><rect class="bar" x="620.0081292152786" y="125" width="6.171052631578947" height="53.125" fill="rgb(145, 113, 156)" opacity="0.7"></rect><rect class="bar" x="623.8028213285176" y="125" width="6.171052631578947" height="65.625" fill="rgb(136, 95, 160)" opacity="0.7"></rect><rect class="bar" x="623.8226242956525" y="125" width="6.171052631578947" height="62.5" fill="rgb(138, 96, 157)" opacity="0.7"></rect><rect class="bar" x="623.9032497953935" y="125" width="6.171052631578947" height="50" fill="rgb(148, 100, 145)" opacity="0.7"></rect><rect class="bar" x="627.7099333110374" y="125" width="6.171052631578947" height="50" fill="rgb(148, 100, 145)" opacity="0.7"></rect><rect class="bar" x="627.7262851131322" y="125" width="6.171052631578947" height="56.25" fill="rgb(145, 86, 142)" opacity="0.7"></rect><rect class="bar" x="633.8733757717108" y="125" width="6.171052631578947" height="9.375" fill="rgb(172, 137, 126)" opacity="0.7"></rect><rect class="bar" x="633.8774428872919" y="125" width="6.171052631578947" height="9.375" fill="rgb(172, 137, 126)" opacity="0.7"></rect><rect class="bar" x="636.6287277681703" y="103.125" width="6.171052631578947" height="21.875" fill="rgb(197, 158, 97)" opacity="0.7"></rect><rect class="bar" x="641.380855019567" y="115.625" width="6.171052631578947" height="9.375" fill="rgb(187, 149, 109)" opacity="0.7"></rect><rect class="bar" x="641.420428246908" y="115.625" width="6.171052631578947" height="9.375" fill="rgb(187, 149, 109)" opacity="0.7"></rect><rect class="bar" x="641.5316545379234" y="118.75" width="6.171052631578947" height="6.25" fill="rgb(184, 147, 112)" opacity="0.7"></rect><rect class="bar" x="651.2375892635763" y="125" width="6.171052631578947" height="6.25" fill="rgb(175, 138, 123)" opacity="0.7"></rect><rect class="bar" x="666.9144736842105" y="125" width="6.171052631578947" height="21.875" fill="rgb(161, 140, 147)" opacity="0.7"></rect><path fill="none" stroke="#333" stroke-width="1.5" d="M0,96.875L1.923,112.5L15.768,131.25L15.954,125L17.293,159.375L29.027,87.5L62.471,103.125L69.879,115.625L73.784,115.625L137.595,106.25L145.312,137.5L156.967,93.75L232.918,84.375L233.102,84.375L235.704,93.75L235.725,100L246.225,71.875L263.888,128.125L265.644,137.5L273.866,71.875L378.398,156.25L382.274,118.75L401.757,134.375L401.83,134.375L401.864,134.375L401.869,134.375L401.888,134.375L401.899,134.375L407.955,134.375L408.04,128.125L413.762,93.75L427.386,96.875L427.392,96.875L435.331,118.75L435.349,118.75L435.363,118.75L435.366,106.25L435.389,106.25L450.221,125L453.288,96.875L458.596,112.5L463.933,112.5L494.11,106.25L574.825,81.25L590.635,128.125L590.655,128.125L595.869,171.875L595.871,171.875L597.86,171.875L597.869,200L597.875,200L597.941,168.75L597.999,150L598.013,150L601.592,121.875L611.372,115.625L616.638,168.75L617.083,168.75L621.299,171.875L621.338,171.875L623.074,178.125L623.075,178.125L623.094,178.125L626.888,190.625L626.908,187.5L626.989,175L630.795,175L630.812,181.25L636.959,134.375L636.963,134.375L639.714,103.125L644.466,115.625L644.506,115.625L644.617,118.75L654.323,131.25L670,146.875"></path><circle class="pt" cx="0" cy="96.87499999999999" r="5" fill="rgb(204, 163, 89)" stroke="#333" stroke-width="1"></circle><circle class="pt" cx="1.9227455926005455" cy="112.49999999999999" r="5" fill="rgb(186, 153, 113)" stroke="#333" stroke-width="1"></circle><circle class="pt" cx="15.767616181664481" cy="131.25" r="5" fill="rgb(171, 144, 133)" stroke="#333" stroke-width="1"></circle><circle class="pt" cx="15.954268244648997" cy="125" r="5" fill="rgb(176, 146, 126)" stroke="#333" stroke-width="1"></circle><circle class="pt" cx="17.292714887560965" cy="159.375" r="5" fill="rgb(158, 116, 137)" stroke="#333" stroke-width="1"></circle><circle class="pt" cx="29.02746040636385" cy="87.5" r="5" fill="rgb(207, 171, 90)" stroke="#333" stroke-width="1"></circle><circle class="pt" cx="62.47132860219664" cy="103.125" r="5" fill="rgb(203, 155, 86)" stroke="#333" stroke-width="1"></circle><circle class="pt" cx="69.87902170592547" cy="115.625" r="5" fill="rgb(191, 146, 102)" stroke="#333" stroke-width="1"></circle><circle class="pt" cx="73.78447417122578" cy="115.625" r="5" fill="rgb(191, 146, 102)" stroke="#333" stroke-width="1"></circle><circle class="pt" cx="137.59516723206016" cy="106.25000000000001" r="5" fill="rgb(194, 155, 101)" stroke="#333" stroke-width="1"></circle><circle class="pt" cx="145.31195833447015" cy="137.5" r="5" fill="rgb(161, 156, 156)" stroke="#333" stroke-width="1"></circle><circle class="pt" cx="156.9668468765045" cy="93.75" r="5" fill="rgb(192, 168, 111)" stroke="#333" stroke-width="1"></circle><circle class="pt" cx="232.91848466560046" cy="84.375" r="5" fill="rgb(180, 171, 134)" stroke="#333" stroke-width="1"></circle><circle class="pt" cx="233.10248737749842" cy="84.375" r="5" fill="rgb(180, 171, 134)" stroke="#333" stroke-width="1"></circle><circle class="pt" cx="235.70435550630387" cy="93.75" r="5" fill="rgb(190, 168, 116)" stroke="#333" stroke-width="1"></circle><circle class="pt" cx="235.72489527787866" cy="100" r="5" fill="rgb(192, 163, 110)" stroke="#333" stroke-width="1"></circle><circle class="pt" cx="246.22480844623317" cy="71.875" r="5" fill="rgb(210, 185, 92)" stroke="#333" stroke-width="1"></circle><circle class="pt" cx="263.8878454235011" cy="128.125" r="5" fill="rgb(168, 149, 140)" stroke="#333" stroke-width="1"></circle><circle class="pt" cx="265.64355241774433" cy="137.5" r="5" fill="rgb(165, 144, 142)" stroke="#333" stroke-width="1"></circle><circle class="pt" cx="273.8658063266404" cy="71.875" r="5" fill="rgb(200, 183, 107)" stroke="#333" stroke-width="1"></circle><circle class="pt" cx="378.3976192999894" cy="156.25" r="5" fill="rgb(157, 130, 147)" stroke="#333" stroke-width="1"></circle><circle class="pt" cx="382.2739968331125" cy="118.75" r="5" fill="rgb(177, 152, 127)" stroke="#333" stroke-width="1"></circle><circle class="pt" cx="401.75652088822227" cy="134.375" r="5" fill="rgb(160, 160, 160)" stroke="#333" stroke-width="1"></circle><circle class="pt" cx="401.8304243952623" cy="134.375" r="5" fill="rgb(160, 160, 160)" stroke="#333" stroke-width="1"></circle><circle class="pt" cx="401.8636643391716" cy="134.375" r="5" fill="rgb(160, 160, 160)" stroke="#333" stroke-width="1"></circle><circle class="pt" cx="401.86890378249984" cy="134.375" r="5" fill="rgb(160, 160, 160)" stroke="#333" stroke-width="1"></circle><circle class="pt" cx="401.8880944831161" cy="134.375" r="5" fill="rgb(160, 160, 160)" stroke="#333" stroke-width="1"></circle><circle class="pt" cx="401.89883327304614" cy="134.375" r="5" fill="rgb(160, 160, 160)" stroke="#333" stroke-width="1"></circle><circle class="pt" cx="407.95518704890503" cy="134.375" r="5" fill="rgb(173, 135, 123)" stroke="#333" stroke-width="1"></circle><circle class="pt" cx="408.0402796951255" cy="128.125" r="5" fill="rgb(182, 135, 109)" stroke="#333" stroke-width="1"></circle><circle class="pt" cx="413.7624684417893" cy="93.75" r="5" fill="rgb(210, 164, 81)" stroke="#333" stroke-width="1"></circle><circle class="pt" cx="427.3863869690351" cy="96.87499999999999" r="5" fill="rgb(206, 162, 86)" stroke="#333" stroke-width="1"></circle><circle class="pt" cx="427.3915869214425" cy="96.87499999999999" r="5" fill="rgb(206, 162, 86)" stroke="#333" stroke-width="1"></circle><circle class="pt" cx="435.33070597810786" cy="118.75" r="5" fill="rgb(187, 144, 105)" stroke="#333" stroke-width="1"></circle><circle class="pt" cx="435.34850847626143" cy="118.75" r="5" fill="rgb(187, 144, 105)" stroke="#333" stroke-width="1"></circle><circle class="pt" cx="435.3627358555059" cy="118.75" r="5" fill="rgb(187, 144, 105)" stroke="#333" stroke-width="1"></circle><circle class="pt" cx="435.36636308985095" cy="106.25000000000001" r="5" fill="rgb(194, 155, 101)" stroke="#333" stroke-width="1"></circle><circle class="pt" cx="435.38926418487426" cy="106.25000000000001" r="5" fill="rgb(194, 155, 101)" stroke="#333" stroke-width="1"></circle><circle class="pt" cx="450.22140707745183" cy="125" r="5" fill="rgb(182, 140, 112)" stroke="#333" stroke-width="1"></circle><circle class="pt" cx="453.28775951064165" cy="96.87499999999999" r="5" fill="rgb(206, 162, 86)" stroke="#333" stroke-width="1"></circle><circle class="pt" cx="458.5956324281077" cy="112.49999999999999" r="5" fill="rgb(192, 149, 101)" stroke="#333" stroke-width="1"></circle><circle class="pt" cx="463.9331665314789" cy="112.49999999999999" r="5" fill="rgb(192, 149, 101)" stroke="#333" stroke-width="1"></circle><circle class="pt" cx="494.1098153865538" cy="106.25000000000001" r="5" fill="rgb(194, 155, 101)" stroke="#333" stroke-width="1"></circle><circle class="pt" cx="574.8249135575825" cy="81.24999999999999" r="5" fill="rgb(217, 176, 78)" stroke="#333" stroke-width="1"></circle><circle class="pt" cx="590.6354301777593" cy="128.125" r="5" fill="rgb(181, 137, 112)" stroke="#333" stroke-width="1"></circle><circle class="pt" cx="590.6547889506566" cy="128.125" r="5" fill="rgb(181, 137, 112)" stroke="#333" stroke-width="1"></circle><circle class="pt" cx="595.8689408375673" cy="171.875" r="5" fill="rgb(149, 105, 144)" stroke="#333" stroke-width="1"></circle><circle class="pt" cx="595.8712439354942" cy="171.875" r="5" fill="rgb(149, 105, 144)" stroke="#333" stroke-width="1"></circle><circle class="pt" cx="597.8604933171305" cy="171.875" r="5" fill="rgb(149, 105, 144)" stroke="#333" stroke-width="1"></circle><circle class="pt" cx="597.8686893679821" cy="200" r="5" fill="rgb(129, 67, 155)" stroke="#333" stroke-width="1"></circle><circle class="pt" cx="597.8748748412551" cy="200" r="5" fill="rgb(129, 67, 155)" stroke="#333" stroke-width="1"></circle><circle class="pt" cx="597.9406680183502" cy="168.75" r="5" fill="rgb(153, 100, 135)" stroke="#333" stroke-width="1"></circle><circle class="pt" cx="597.9985368187672" cy="150" r="5" fill="rgb(167, 117, 124)" stroke="#333" stroke-width="1"></circle><circle class="pt" cx="598.0131063628053" cy="150" r="5" fill="rgb(167, 117, 124)" stroke="#333" stroke-width="1"></circle><circle class="pt" cx="601.5923760866203" cy="121.87500000000001" r="5" fill="rgb(181, 144, 116)" stroke="#333" stroke-width="1"></circle><circle class="pt" cx="611.3722096468948" cy="115.625" r="5" fill="rgb(189, 148, 105)" stroke="#333" stroke-width="1"></circle><circle class="pt" cx="616.6382329707174" cy="168.75" r="5" fill="rgb(153, 104, 139)" stroke="#333" stroke-width="1"></circle><circle class="pt" cx="617.0826179238882" cy="168.75" r="5" fill="rgb(153, 104, 139)" stroke="#333" stroke-width="1"></circle><circle class="pt" cx="621.2989575646997" cy="171.875" r="5" fill="rgb(149, 111, 149)" stroke="#333" stroke-width="1"></circle><circle class="pt" cx="621.338076174716" cy="171.875" r="5" fill="rgb(149, 111, 149)" stroke="#333" stroke-width="1"></circle><circle class="pt" cx="623.0736195719926" cy="178.125" r="5" fill="rgb(145, 113, 156)" stroke="#333" stroke-width="1"></circle><circle class="pt" cx="623.075260624174" cy="178.125" r="5" fill="rgb(145, 113, 156)" stroke="#333" stroke-width="1"></circle><circle class="pt" cx="623.0936555310681" cy="178.125" r="5" fill="rgb(145, 113, 156)" stroke="#333" stroke-width="1"></circle><circle class="pt" cx="626.888347644307" cy="190.625" r="5" fill="rgb(136, 95, 160)" stroke="#333" stroke-width="1"></circle><circle class="pt" cx="626.908150611442" cy="187.5" r="5" fill="rgb(138, 96, 157)" stroke="#333" stroke-width="1"></circle><circle class="pt" cx="626.988776111183" cy="175" r="5" fill="rgb(148, 100, 145)" stroke="#333" stroke-width="1"></circle><circle class="pt" cx="630.7954596268269" cy="175" r="5" fill="rgb(148, 100, 145)" stroke="#333" stroke-width="1"></circle><circle class="pt" cx="630.8118114289217" cy="181.25" r="5" fill="rgb(145, 86, 142)" stroke="#333" stroke-width="1"></circle><circle class="pt" cx="636.9589020875003" cy="134.375" r="5" fill="rgb(172, 137, 126)" stroke="#333" stroke-width="1"></circle><circle class="pt" cx="636.9629692030813" cy="134.375" r="5" fill="rgb(172, 137, 126)" stroke="#333" stroke-width="1"></circle><circle class="pt" cx="639.7142540839598" cy="103.125" r="5" fill="rgb(197, 158, 97)" stroke="#333" stroke-width="1"></circle><circle class="pt" cx="644.4663813353565" cy="115.625" r="5" fill="rgb(187, 149, 109)" stroke="#333" stroke-width="1"></circle><circle class="pt" cx="644.5059545626975" cy="115.625" r="5" fill="rgb(187, 149, 109)" stroke="#333" stroke-width="1"></circle><circle class="pt" cx="644.6171808537129" cy="118.75" r="5" fill="rgb(184, 147, 112)" stroke="#333" stroke-width="1"></circle><circle class="pt" cx="654.3231155793658" cy="131.25" r="5" fill="rgb(175, 138, 123)" stroke="#333" stroke-width="1"></circle><circle class="pt" cx="670" cy="146.875" r="5" fill="rgb(161, 140, 147)" stroke="#333" stroke-width="1"></circle><text x="335" y="288" text-anchor="middle">Date</text><text x="-125" y="-48" text-anchor="middle" transform="rotate(-90)">Balance (−40 to +40)</text></g></svg>
 
+        <div id="intent-anchor"></div>
 
     </div>
 
@@ -766,6 +640,7 @@
             ITEMS.forEach(it => ensureCol(it, "INTEGER NOT NULL DEFAULT 3"));
             ensureCol("positive_score", "INTEGER");
             ensureCol("negative_score", "INTEGER");
+            ensureCol("hours_slept", "REAL");
             db.exec(`UPDATE entries SET log='' WHERE log IS NULL`);
             persist();
 
@@ -1046,13 +921,15 @@
 
                 const ts = new Date().toISOString();
                 const log = document.getElementById("log").value.trim();
+                const sleepEl = document.getElementById("hours-slept");
+                const hourSlept = sleepEl.value ? parseFloat(sleepEl.value) : null;
                 const getByIndex = i1 => values[ITEMS[i1 - 1]];
                 const posScore = POS_IDX.reduce((s, i) => s + getByIndex(i), 0);
                 const negScore = NEG_IDX.reduce((s, i) => s + getByIndex(i), 0);
 
-                const cols = ["ts", "log", ...ITEMS, "positive_score", "negative_score"];
+                const cols = ["ts", "log", ...ITEMS, "positive_score", "negative_score", "hours_slept"];
                 const q = `INSERT INTO entries (${cols.map(c => '"' + c + '"').join(",")}) VALUES (${cols.map(() => "?").join(",")})`;
-                const vals = [ts, log, ...ITEMS.map(k => values[k]), posScore, negScore];
+                const vals = [ts, log, ...ITEMS.map(k => values[k]), posScore, negScore, hourSlept];
                 const stmt = db.prepare(q); stmt.run(vals); stmt.free(); persist();
 
                 const latest = getMostRecentEntry();
@@ -1066,6 +943,8 @@
                 downloadDBAndPage();
                 status("Saved & downloaded database + page.");
                 document.getElementById("log").value = "";
+                document.getElementById("hours-slept").value = "";
+                updateLastEntryDate();
 
                 // Auto-sync to GitHub after save
                 await syncToGitHub();
@@ -1252,14 +1131,40 @@
             // Initial alignment
             updateHandlePositions();
             drawPolygons();
+
+            // Show whether last PANAS entry is from today
+            function updateLastEntryDate() {
+                const el = document.getElementById('last-entry-date');
+                if (!el) return;
+                const res = db.exec('SELECT ts FROM entries ORDER BY id DESC LIMIT 1');
+                if (!res.length || !res[0].values.length) { el.innerHTML = '<span class="stale">No entries yet</span>'; return; }
+                const lastTs = new Date(res[0].values[0][0]);
+                const today = new Date();
+                const isToday = lastTs.toDateString() === today.toDateString();
+                const label = lastTs.toLocaleDateString() + ' ' + lastTs.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
+                el.innerHTML = isToday
+                    ? '<span class="fresh">✓ Last entry: ' + label + '</span>'
+                    : '<span class="stale">⚠ Last entry: ' + label + '</span>';
+            }
+            updateLastEntryDate();
+
+            // Expose shared state for external modules (js/intent.js etc.)
+            window.panasDB = db;
+            window.panasPersist = persist;
+            window.panasGetSleep = function() {
+                var el = document.getElementById('hours-slept');
+                return el && el.value ? parseFloat(el.value) : null;
+            };
+            window.dispatchEvent(new CustomEvent('panas-db-ready'));
         })();
     </script>
+    <script src="js/intent.js"></script>
 
 
     <div class="tooltip" style="opacity: 0;"></div>
 
 
     <div class="tooltip" style="opacity: 0;"></div>
-</body>
 
-</html>
+
+<div class="tooltip" style="opacity: 0;"></div></body></html>
