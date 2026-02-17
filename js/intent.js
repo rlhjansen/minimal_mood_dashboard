@@ -19,18 +19,18 @@
        Configuration (all user-tuneable knobs in one place)
        =================================================================== */
     const CFG = {
-        intervalHours:     3,
-        windowStart:       8,      // earliest hour for check-in prompts
-        windowEnd:         20,     // latest  hour for check-in prompts
-        alignThreshold:    0.35,   // below this → drift flag
+        intervalHours: 3,
+        windowStart: 8,      // earliest hour for check-in prompts
+        windowEnd: 20,     // latest  hour for check-in prompts
+        alignThreshold: 0.35,   // below this → drift flag
         driftWindowBlocks: 5,      // look-back for alignment trend
-        pollMs:            5 * 60 * 1000,  // how often to check if check-in is due
-        lsLastNotify:      'intent_last_notify',
+        pollMs: 5 * 60 * 1000,  // how often to check if check-in is due
+        lsLastNotify: 'intent_last_notify',
     };
 
     let db, persist;
-    let embedModel      = null;
-    let embeddingsReady  = false;
+    let embedModel = null;
+    let embeddingsReady = false;
     let embeddingsLoading = false;
 
     /* ===================================================================
@@ -126,8 +126,8 @@
         var dot = 0, nA = 0, nB = 0;
         for (var i = 0; i < a.length; i++) {
             dot += a[i] * b[i];
-            nA  += a[i] * a[i];
-            nB  += b[i] * b[i];
+            nA += a[i] * a[i];
+            nB += b[i] * b[i];
         }
         var denom = Math.sqrt(nA) * Math.sqrt(nB);
         return denom === 0 ? 0 : dot / denom;
@@ -159,9 +159,9 @@
         var retroEmbed = null, prospectEmbed = null, targetEmbed = null;
 
         if (embeddingsReady) {
-            retroEmbed    = await getEmbedding(retro);
+            retroEmbed = await getEmbedding(retro);
             prospectEmbed = await getEmbedding(prospect);
-            targetEmbed   = await getEmbedding(target);
+            targetEmbed = await getEmbedding(target);
 
             if (prev && prev.prospect_embedding) {
                 try {
@@ -182,11 +182,11 @@
         }
 
         return {
-            alignRetro:    alignRetro,
+            alignRetro: alignRetro,
             alignProspect: alignProspect,
-            retroEmbed:    retroEmbed,
+            retroEmbed: retroEmbed,
             prospectEmbed: prospectEmbed,
-            targetEmbed:   targetEmbed
+            targetEmbed: targetEmbed
         };
     }
 
@@ -205,7 +205,7 @@
             );
             if (sr.length && sr[0].values.length >= 3) {
                 var vals = sr[0].values.map(function (r) { return r[0]; });
-                var avg  = vals.reduce(function (a, b) { return a + b; }, 0) / vals.length;
+                var avg = vals.reduce(function (a, b) { return a + b; }, 0) / vals.length;
                 if (avg < 6.5) {
                     flags.push({
                         type: 'sleep',
@@ -223,12 +223,12 @@
                 "WHERE ts >= datetime('now','-7 days') ORDER BY ts ASC"
             );
             if (nr.length && nr[0].values.length >= 4) {
-                var nv  = nr[0].values.map(function (r) { return r[0]; });
+                var nv = nr[0].values.map(function (r) { return r[0]; });
                 var mid = Math.floor(nv.length / 2);
                 var earlier = nv.slice(0, mid);
-                var recent  = nv.slice(mid);
+                var recent = nv.slice(mid);
                 var avgE = earlier.reduce(function (a, b) { return a + b; }, 0) / earlier.length;
-                var avgR = recent.reduce(function (a, b)  { return a + b; }, 0) / recent.length;
+                var avgR = recent.reduce(function (a, b) { return a + b; }, 0) / recent.length;
                 if (avgR > avgE * 1.2) {
                     flags.push({
                         type: 'strain',
@@ -246,11 +246,11 @@
                 'WHERE alignment_retro IS NOT NULL ORDER BY id DESC LIMIT ' + CFG.driftWindowBlocks
             );
             if (ar.length && ar[0].values.length >= 3) {
-                var av   = ar[0].values.map(function (r) { return r[0]; }).reverse();
+                var av = ar[0].values.map(function (r) { return r[0]; }).reverse();
                 var mid2 = Math.floor(av.length / 2);
-                var first  = av.slice(0, mid2);
+                var first = av.slice(0, mid2);
                 var second = av.slice(mid2);
-                var avgF = first.reduce(function (a, b)  { return a + b; }, 0) / first.length;
+                var avgF = first.reduce(function (a, b) { return a + b; }, 0) / first.length;
                 var avgS = second.reduce(function (a, b) { return a + b; }, 0) / second.length;
                 if (avgS < avgF * 0.8) {
                     flags.push({
@@ -315,7 +315,7 @@
         setInterval(function () {
             if (!shouldCheckIn()) return;
             var last = localStorage.getItem(CFG.lsLastNotify);
-            var now  = Date.now();
+            var now = Date.now();
             if (!last || (now - parseInt(last, 10)) > CFG.intervalHours * 3600000 / 2) {
                 fireNotification();
                 localStorage.setItem(CFG.lsLastNotify, now.toString());
@@ -397,10 +397,10 @@
        Check-in handler
        =================================================================== */
     async function handleCheckin() {
-        var retro    = document.getElementById('intent-retro').value.trim();
+        var retro = document.getElementById('intent-retro').value.trim();
         var prospect = document.getElementById('intent-prospect').value.trim();
         /* Sleep comes from the PANAS-side input */
-        var sleep    = window.panasGetSleep ? window.panasGetSleep() : null;
+        var sleep = window.panasGetSleep ? window.panasGetSleep() : null;
 
         if (!retro && !prospect) {
             setStatus('Please fill in at least one field.');
@@ -424,15 +424,15 @@
         stmt.run([
             ts, retro, prospect, '', sleep,
             result.alignRetro, result.alignProspect, driftFlag,
-            result.retroEmbed    ? JSON.stringify(result.retroEmbed)    : null,
+            result.retroEmbed ? JSON.stringify(result.retroEmbed) : null,
             result.prospectEmbed ? JSON.stringify(result.prospectEmbed) : null,
-            result.targetEmbed   ? JSON.stringify(result.targetEmbed)   : null
+            result.targetEmbed ? JSON.stringify(result.targetEmbed) : null
         ]);
         stmt.free();
         persist();
 
         /* clear form */
-        document.getElementById('intent-retro').value   = '';
+        document.getElementById('intent-retro').value = '';
         document.getElementById('intent-prospect').value = '';
 
         /* hide due-banner */
@@ -477,14 +477,14 @@
         var el = document.getElementById('collapse-warning');
 
         if (collapse.downshift) {
-            el.style.display   = 'block';
+            el.style.display = 'block';
             el.style.background = '#fff0f0';
             el.style.borderColor = '#d9534f';
             el.innerHTML =
                 '<strong>⚡ Consider a 10 % downshift</strong><br>' +
                 collapse.flags.map(function (f) { return '<span>• ' + esc(f.msg) + '</span>'; }).join('<br>');
         } else if (collapse.flags.length === 1) {
-            el.style.display   = 'block';
+            el.style.display = 'block';
             el.style.background = '#fffbe6';
             el.style.borderColor = '#e6c300';
             el.innerHTML =
@@ -541,15 +541,15 @@
         try {
             var r1 = db.exec("SELECT ts, hours_slept FROM entries WHERE hours_slept IS NOT NULL ORDER BY ts ASC");
             if (r1.length) r1[0].values.forEach(function (r) { rows.push({ ts: new Date(r[0]), val: r[1] }); });
-        } catch (_) {}
+        } catch (_) { }
         try {
             var r2 = db.exec("SELECT ts, hours_slept FROM intent_checkins WHERE hours_slept IS NOT NULL ORDER BY ts ASC");
             if (r2.length) r2[0].values.forEach(function (r) { rows.push({ ts: new Date(r[0]), val: r[1] }); });
-        } catch (_) {}
+        } catch (_) { }
         try {
             var r3 = db.exec("SELECT ts, hours_slept FROM sleep_log WHERE hours_slept IS NOT NULL ORDER BY ts ASC");
             if (r3.length) r3[0].values.forEach(function (r) { rows.push({ ts: new Date(r[0]), val: r[1] }); });
-        } catch (_) {}
+        } catch (_) { }
 
         /* De-duplicate by date (keep last value per calendar day) */
         rows.sort(function (a, b) { return a.ts - b.ts; });
@@ -602,7 +602,7 @@
         try {
             var r = db.exec("SELECT ts, alignment_retro FROM intent_checkins WHERE alignment_retro IS NOT NULL ORDER BY ts ASC");
             if (r.length) r[0].values.forEach(function (v) { rows.push({ ts: new Date(v[0]), val: v[1] }); });
-        } catch (_) {}
+        } catch (_) { }
 
         if (!rows.length) {
             svg.append('text').attr('class', 'intent-chart-empty')
@@ -652,7 +652,7 @@
        Initialization
        =================================================================== */
     function boot() {
-        db      = window.panasDB;
+        db = window.panasDB;
         persist = window.panasPersist;
         if (!db || !persist) {
             console.error('Intent module: PANAS DB not available');
