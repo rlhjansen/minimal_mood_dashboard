@@ -1242,6 +1242,8 @@
                 drawPreview(null);
                 drawTimeSeries();
                 drawMonthlyAverage();
+                /* Also refresh intent module (may have new rows from cloud merge) */
+                if (window.panasRefreshIntent) window.panasRefreshIntent();
             }
 
             function downloadDBAndPage() {

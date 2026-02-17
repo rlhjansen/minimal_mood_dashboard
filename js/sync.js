@@ -359,8 +359,6 @@ window.PanasSync = (function () {
         }
 
         renderReady();
-        /* Auto-pull on sign in */
-        mergeFromCloud();
     }
 
     /* ================================================================
@@ -433,6 +431,8 @@ window.PanasSync = (function () {
         if (initClient()) {
             checkSession().then(function () {
                 refreshUI();
+                /* Pull cloud data once on page load */
+                if (currentUser) mergeFromCloud();
             });
         } else {
             refreshUI();

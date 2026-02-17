@@ -669,6 +669,14 @@
         initEmbeddings();
     }
 
+    /* Expose a refresh hook so cloud sync can re-render after merge */
+    window.panasRefreshIntent = function () {
+        if (!db) return;
+        renderLastIntent();
+        renderCollapseWarning();
+        drawCharts();
+    };
+
     if (window.panasDB) {
         boot();
     } else {
