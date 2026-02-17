@@ -424,6 +424,12 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="js/crypto.js"></script>
     <script>
+        // Toggle settings visibility (outside async block so it works even if WASM loading stalls)
+        document.getElementById("toggleSettings").onclick = () => {
+            document.getElementById("settingsBox").classList.toggle("expanded");
+        };
+    </script>
+    <script>
         (async function () {
             // --- PANAS items
             const ITEMS = ["Interested", "Distressed", "Excited", "Upset", "Strong", "Guilty", "Scared", "Hostile", "Enthusiastic", "Proud", "Irritable", "Alert", "Ashamed", "Inspired", "Nervous", "Determined", "Attentive", "Jittery", "Active", "Afraid"];
@@ -469,11 +475,6 @@
             persist();
 
 
-
-            // Toggle settings visibility
-            document.getElementById("toggleSettings").onclick = () => {
-                document.getElementById("settingsBox").classList.toggle("expanded");
-            };
 
             // --- Import (.sqlite)
             const importBox = document.getElementById("importBox");
