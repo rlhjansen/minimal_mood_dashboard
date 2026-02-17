@@ -280,6 +280,8 @@
 
             '<div id="intent-notification" class="intent-note" style="display:none"></div>',
 
+            '<div id="last-intent-display" class="intent-last" style="display:none"></div>',
+
             '<div class="intent-form">',
             '  <div class="intent-field">',
             '    <label for="intent-retro">What did I actually do since the last check-in?</label>',
@@ -362,10 +364,30 @@
         if (sec) sec.classList.remove('intent-highlight');
 
         drawCharts();
+        renderLastIntent();
         setStatus('Checked in.');
     }
 
 
+
+    /* ===================================================================
+       Last stated intent (shown above retro field)
+       =================================================================== */
+    function renderLastIntent() {
+        var el = document.getElementById('last-intent-display');
+        if (!el) return;
+        var last = getLastCheckin();
+        if (!last || !last.prospective) {
+            el.style.display = 'none';
+            return;
+        }
+        var ts = new Date(last.ts);
+        el.style.display = 'block';
+        el.innerHTML =
+            '<strong>Last stated intent</strong>' +
+            '<div class="il-text">' + esc(last.prospective) + '</div>' +
+            '<div class="il-meta">' + fmt(ts) + '</div>';
+    }
 
     /* ===================================================================
        Mini-charts: Sleep trend & Alignment trend
@@ -558,6 +580,7 @@
         initSchema();
         injectChartStyles();
         buildUI();
+        renderLastIntent();
         drawCharts();
         startNotifyLoop();
         /* load embedding model async — non-blocking */
@@ -567,6 +590,7 @@
     /* Expose a refresh hook so cloud sync can re-render after merge */
     window.panasRefreshIntent = function () {
         if (!db) return;
+        renderLastIntent();
         drawCharts();
     };
 
