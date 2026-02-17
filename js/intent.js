@@ -191,81 +191,6 @@
     }
 
     /* ===================================================================
-       Collapse early-warning heuristic
-       =================================================================== */
-    function computeCollapseWarning() {
-        var flags = [];
-
-        /* 1. Rolling 7-day sleep average */
-        try {
-            var sr = db.exec(
-                "SELECT hours_slept FROM intent_checkins " +
-                "WHERE hours_slept IS NOT NULL AND ts >= datetime('now','-7 days') " +
-                "ORDER BY ts DESC"
-            );
-            if (sr.length && sr[0].values.length >= 3) {
-                var vals = sr[0].values.map(function (r) { return r[0]; });
-                var avg = vals.reduce(function (a, b) { return a + b; }, 0) / vals.length;
-                if (avg < 6.5) {
-                    flags.push({
-                        type: 'sleep',
-                        msg: '7-day sleep avg: ' + avg.toFixed(1) + 'h',
-                        severity: avg < 5.5 ? 'high' : 'medium'
-                    });
-                }
-            }
-        } catch (_) { /* no entries */ }
-
-        /* 2. Strain: increase in negative PANAS signals */
-        try {
-            var nr = db.exec(
-                "SELECT negative_score FROM entries " +
-                "WHERE ts >= datetime('now','-7 days') ORDER BY ts ASC"
-            );
-            if (nr.length && nr[0].values.length >= 4) {
-                var nv = nr[0].values.map(function (r) { return r[0]; });
-                var mid = Math.floor(nv.length / 2);
-                var earlier = nv.slice(0, mid);
-                var recent = nv.slice(mid);
-                var avgE = earlier.reduce(function (a, b) { return a + b; }, 0) / earlier.length;
-                var avgR = recent.reduce(function (a, b) { return a + b; }, 0) / recent.length;
-                if (avgR > avgE * 1.2) {
-                    flags.push({
-                        type: 'strain',
-                        msg: 'Strain trending up (' + avgE.toFixed(0) + ' → ' + avgR.toFixed(0) + ')',
-                        severity: 'medium'
-                    });
-                }
-            }
-        } catch (_) { }
-
-        /* 3. Alignment decline over recent blocks */
-        try {
-            var ar = db.exec(
-                'SELECT alignment_retro FROM intent_checkins ' +
-                'WHERE alignment_retro IS NOT NULL ORDER BY id DESC LIMIT ' + CFG.driftWindowBlocks
-            );
-            if (ar.length && ar[0].values.length >= 3) {
-                var av = ar[0].values.map(function (r) { return r[0]; }).reverse();
-                var mid2 = Math.floor(av.length / 2);
-                var first = av.slice(0, mid2);
-                var second = av.slice(mid2);
-                var avgF = first.reduce(function (a, b) { return a + b; }, 0) / first.length;
-                var avgS = second.reduce(function (a, b) { return a + b; }, 0) / second.length;
-                if (avgS < avgF * 0.8) {
-                    flags.push({
-                        type: 'alignment',
-                        msg: 'Alignment declining (' + (avgF * 100).toFixed(0) + '% → ' + (avgS * 100).toFixed(0) + '%)',
-                        severity: 'medium'
-                    });
-                }
-            }
-        } catch (_) { }
-
-        return { downshift: flags.length >= 2, flags: flags };
-    }
-
-    /* ===================================================================
        Notifications
        =================================================================== */
     function isInWindow() {
@@ -354,10 +279,6 @@
             '<h2>Intent Check-In</h2>',
 
             '<div id="intent-notification" class="intent-note" style="display:none"></div>',
-            '<div id="collapse-warning" class="intent-collapse" style="display:none"></div>',
-            '<div id="drift-feedback" class="intent-drift" style="display:none"></div>',
-
-            '<div id="last-intent-display" class="intent-last" style="display:none"></div>',
 
             '<div class="intent-form">',
             '  <div class="intent-field">',
@@ -440,79 +361,11 @@
         var sec = document.getElementById('intent-section');
         if (sec) sec.classList.remove('intent-highlight');
 
-        /* drift feedback */
-        if (driftFlag) {
-            showDriftFeedback(result.alignRetro);
-        } else {
-            document.getElementById('drift-feedback').style.display = 'none';
-        }
-
-        renderCollapseWarning();
-        renderLastIntent();
         drawCharts();
-
-        /* status line */
-        var msg = 'Checked in.';
-        if (result.alignRetro !== null) msg += ' Alignment: ' + (result.alignRetro * 100).toFixed(0) + '%';
-        setStatus(msg);
+        setStatus('Checked in.');
     }
 
-    /* ===================================================================
-       Drift feedback
-       =================================================================== */
-    function showDriftFeedback(score) {
-        var el = document.getElementById('drift-feedback');
-        el.style.display = 'block';
-        el.innerHTML =
-            '<strong>Intent drift detected</strong> (alignment: ' + (score * 100).toFixed(0) + '%)<br>' +
-            '<span style="color:#666">Was this shift intentional or reactive? ' +
-            'Neither answer is wrong — just notice.</span>';
-    }
 
-    /* ===================================================================
-       Collapse warning banner
-       =================================================================== */
-    function renderCollapseWarning() {
-        var collapse = computeCollapseWarning();
-        var el = document.getElementById('collapse-warning');
-
-        if (collapse.downshift) {
-            el.style.display = 'block';
-            el.style.background = '#fff0f0';
-            el.style.borderColor = '#d9534f';
-            el.innerHTML =
-                '<strong>⚡ Consider a 10 % downshift</strong><br>' +
-                collapse.flags.map(function (f) { return '<span>• ' + esc(f.msg) + '</span>'; }).join('<br>');
-        } else if (collapse.flags.length === 1) {
-            el.style.display = 'block';
-            el.style.background = '#fffbe6';
-            el.style.borderColor = '#e6c300';
-            el.innerHTML =
-                '<strong>📍 Note</strong><br>' +
-                collapse.flags.map(function (f) { return '<span>• ' + esc(f.msg) + '</span>'; }).join('<br>');
-        } else {
-            el.style.display = 'none';
-        }
-    }
-
-    /* ===================================================================
-       Last stated intent (shown above retro field)
-       =================================================================== */
-    function renderLastIntent() {
-        var el = document.getElementById('last-intent-display');
-        if (!el) return;
-        var last = getLastCheckin();
-        if (!last || !last.prospective) {
-            el.style.display = 'none';
-            return;
-        }
-        var ts = new Date(last.ts);
-        el.style.display = 'block';
-        el.innerHTML =
-            '<strong>Last stated intent</strong>' +
-            '<div class="il-text">' + esc(last.prospective) + '</div>' +
-            '<div class="il-meta">' + fmt(ts) + '</div>';
-    }
 
     /* ===================================================================
        Mini-charts: Sleep trend & Alignment trend
@@ -661,8 +514,6 @@
         initSchema();
         injectChartStyles();
         buildUI();
-        renderCollapseWarning();
-        renderLastIntent();
         drawCharts();
         startNotifyLoop();
         /* load embedding model async — non-blocking */
@@ -672,8 +523,6 @@
     /* Expose a refresh hook so cloud sync can re-render after merge */
     window.panasRefreshIntent = function () {
         if (!db) return;
-        renderLastIntent();
-        renderCollapseWarning();
         drawCharts();
     };
 
