@@ -203,54 +203,20 @@
             gap: .6rem
         }
 
-        .settings-toggle {
-            margin-bottom: .5rem;
-        }
-
-        .settings-toggle button {
-            font-size: 12px;
-            padding: .4rem .6rem;
-        }
-
+        .settings-toggle { margin-bottom: .5rem; }
+        .settings-toggle button { font-size: 12px; padding: .4rem .6rem; }
         .settings-box {
-            border: 2px solid #ddd;
-            border-radius: 8px;
-            padding: 1rem;
-            background: #f9f9f9;
-            margin-bottom: 1rem;
-            display: none;
+            border: 2px solid #ddd; border-radius: 8px; padding: 1rem;
+            background: #f9f9f9; margin-bottom: 1rem; display: none;
         }
-
-        .settings-box.expanded {
-            display: block;
-        }
-
+        .settings-box.expanded { display: block; }
+        .settings-box label { display: block; margin-top: .8rem; font-weight: 600; font-size: 13px; }
         .settings-box input {
-            width: 100%;
-            padding: .5rem;
-            margin-top: .3rem;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            font-family: monospace;
-            font-size: 12px;
+            width: 100%; padding: .5rem; margin-top: .3rem;
+            border: 1px solid #ddd; border-radius: 4px; font-family: monospace; font-size: 12px;
         }
+        .settings-box button { margin-top: .8rem; }
 
-        .settings-box label {
-            display: block;
-            margin-top: .8rem;
-            font-weight: 600;
-            font-size: 13px;
-        }
-
-        .settings-box button {
-            margin-top: .8rem;
-        }
-
-        .sync-status {
-            margin-top: .5rem;
-            font-size: 12px;
-            color: #666;
-        }
 
         /* ---- Intent Calibration section ---- */
         #intent-section {
@@ -403,26 +369,10 @@
 
         <div class="row">
             <div class="settings-toggle">
-                <button id="toggleSettings">⚙️ GitHub Sync Settings</button>
+                <button id="toggleSettings">⚙️ Cloud Sync Settings</button>
             </div>
-            <div class="settings-box" id="settingsBox">
-                <strong>GitHub Sync Settings</strong>
-                <label>GitHub Token (with repo permissions):</label>
-                <input id="ghToken" type="password" placeholder="ghp_...">
-                <label>Owner:</label>
-                <input id="ghOwner" type="text" placeholder="rlhjansen">
-                <label>Repo:</label>
-                <input id="ghRepo" type="text" placeholder="minimal_mood_dashboard">
-                <label>Branch:</label>
-                <input id="ghBranch" type="text" placeholder="main">
-                <label>Data file path:</label>
-                <input id="ghPath" type="text" placeholder="data/entries.json">
-                <button id="saveSettings">Save Settings</button>
-                <button id="testSync">Test Sync Now</button>
-                <div class="sync-status" id="syncStatus"></div>
-            </div>
+            <div class="settings-box" id="settingsBox"></div>
         </div>
-
         <div class="row">
             <div id="importBox" class="import-box" tabindex="0">
                 <strong>Import database (.sqlite)</strong>
@@ -488,7 +438,6 @@
             // --- SQLite init
             const SQL = await initSqlJs({ locateFile: f => `https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.10.2/${f}` });
             const LSKEY = "panas_db";
-            const SETTINGS_KEY = "panas_gh_settings";
             function base64ToU8(b64) { if (!b64) return new Uint8Array(); const s = atob(b64); const u = new Uint8Array(s.length); for (let i = 0; i < s.length; i++)u[i] = s.charCodeAt(i); return u; }
             function u8ToBase64(u8) { let s = ""; u8.forEach(b => s += String.fromCharCode(b)); return btoa(s); }
             function persist() {
@@ -499,152 +448,6 @@
                 }
             }
 
-            // GitHub Sync Functions
-            function getGHSettings() {
-                const saved = localStorage.getItem(SETTINGS_KEY);
-                return saved ? JSON.parse(saved) : { token: "", owner: "rlhjansen", repo: "minimal_mood_dashboard", branch: "main", path: "data/entries.json" };
-            }
-
-            function saveGHSettings(settings) {
-                localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
-            }
-
-            function setSyncStatus(msg, isError = false) {
-                const el = document.getElementById("syncStatus");
-                if (el) {
-                    el.textContent = msg;
-                    el.style.color = isError ? "#d62728" : "#2ca02c";
-                }
-            }
-
-            async function syncFromGitHub() {
-                const settings = getGHSettings();
-                if (!settings.token || !settings.owner || !settings.repo) {
-                    console.log("GitHub sync not configured, skipping pull.");
-                    return false;
-                }
-
-                try {
-                    const url = `https://api.github.com/repos/${settings.owner}/${settings.repo}/contents/${settings.path}?ref=${settings.branch}`;
-                    const response = await fetch(url, {
-                        headers: {
-                            'Authorization': `token ${settings.token}`,
-                            'Accept': 'application/vnd.github.v3+json'
-                        }
-                    });
-
-                    if (response.status === 404) {
-                        console.log("No remote data file found yet, will create on first push.");
-                        return false;
-                    }
-
-                    if (!response.ok) {
-                        throw new Error(`GitHub API error: ${response.status} ${response.statusText}`);
-                    }
-
-                    const data = await response.json();
-                    const content = atob(data.content.replace(/\s/g, ''));
-                    const entries = JSON.parse(content);
-
-                    if (!Array.isArray(entries) || entries.length === 0) {
-                        console.log("No entries in remote file.");
-                        return false;
-                    }
-
-                    // Merge remote entries into local DB
-                    const existingIds = new Set();
-                    const res = db.exec("SELECT id FROM entries");
-                    if (res.length > 0) {
-                        res[0].values.forEach(row => existingIds.add(row[0]));
-                    }
-
-                    let importedCount = 0;
-                    entries.forEach(entry => {
-                        if (!existingIds.has(entry.id)) {
-                            const cols = ["id", "ts", "log", ...ITEMS, "positive_score", "negative_score"];
-                            const vals = [entry.id, entry.ts, entry.log || "", ...ITEMS.map(k => entry.items[k]), entry.positive_score, entry.negative_score];
-                            const q = `INSERT INTO entries (${cols.map(c => '"' + c + '"').join(",")}) VALUES (${cols.map(() => "?").join(",")})`;
-                            const stmt = db.prepare(q);
-                            stmt.run(vals);
-                            stmt.free();
-                            importedCount++;
-                        }
-                    });
-
-                    if (importedCount > 0) {
-                        persist();
-                        console.log(`Synced ${importedCount} new entries from GitHub.`);
-                        setSyncStatus(`Synced ${importedCount} new entries from GitHub.`);
-                        return true;
-                    } else {
-                        console.log("Already up to date with GitHub.");
-                        return false;
-                    }
-                } catch (error) {
-                    console.error("Sync from GitHub failed:", error);
-                    setSyncStatus(`Sync failed: ${error.message}`, true);
-                    return false;
-                }
-            }
-
-            async function syncToGitHub() {
-                const settings = getGHSettings();
-                if (!settings.token || !settings.owner || !settings.repo) {
-                    console.log("GitHub sync not configured, skipping push.");
-                    return;
-                }
-
-                try {
-                    // First, pull any remote changes to avoid conflicts
-                    await syncFromGitHub();
-
-                    const entries = getAllEntries();
-                    const content = JSON.stringify(entries, null, 2);
-                    const encodedContent = btoa(unescape(encodeURIComponent(content)));
-
-                    // Get current file SHA (fresh after pull)
-                    const url = `https://api.github.com/repos/${settings.owner}/${settings.repo}/contents/${settings.path}?ref=${settings.branch}`;
-                    let sha = null;
-
-                    const getResponse = await fetch(url, {
-                        headers: {
-                            'Authorization': `token ${settings.token}`,
-                            'Accept': 'application/vnd.github.v3+json'
-                        }
-                    });
-
-                    if (getResponse.ok) {
-                        const fileData = await getResponse.json();
-                        sha = fileData.sha;
-                    }
-
-                    // Create or update file
-                    const putResponse = await fetch(url.split('?')[0], {
-                        method: 'PUT',
-                        headers: {
-                            'Authorization': `token ${settings.token}`,
-                            'Accept': 'application/vnd.github.v3+json',
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({
-                            message: `Update mood entries (${entries.length} total)`,
-                            content: encodedContent,
-                            branch: settings.branch,
-                            ...(sha && { sha })
-                        })
-                    });
-
-                    if (!putResponse.ok) {
-                        throw new Error(`GitHub API error: ${putResponse.status} ${putResponse.statusText}`);
-                    }
-
-                    console.log(`Pushed ${entries.length} entries to GitHub.`);
-                    setSyncStatus(`Pushed ${entries.length} entries to GitHub.`);
-                } catch (error) {
-                    console.error("Sync to GitHub failed:", error);
-                    setSyncStatus(`Push failed: ${error.message}`, true);
-                }
-            }
 
             let dbBytes = base64ToU8(localStorage.getItem(LSKEY) || "");
             let db = dbBytes.length ? new SQL.Database(dbBytes) : new SQL.Database();
@@ -665,49 +468,11 @@
             db.exec(`UPDATE entries SET log='' WHERE log IS NULL`);
             persist();
 
-            // Load GitHub settings into UI
-            const ghSettings = getGHSettings();
-            document.getElementById("ghToken").value = ghSettings.token || "";
-            document.getElementById("ghOwner").value = ghSettings.owner || "rlhjansen";
-            document.getElementById("ghRepo").value = ghSettings.repo || "minimal_mood_dashboard";
-            document.getElementById("ghBranch").value = ghSettings.branch || "main";
-            document.getElementById("ghPath").value = ghSettings.path || "data/entries.json";
+
 
             // Toggle settings visibility
             document.getElementById("toggleSettings").onclick = () => {
-                const box = document.getElementById("settingsBox");
-                box.classList.toggle("expanded");
-            };
-
-            // Auto-sync from GitHub on page load
-            (async () => {
-                const synced = await syncFromGitHub();
-                if (synced) {
-                    refreshFromDb();
-                }
-            })();
-
-            // Save settings
-            document.getElementById("saveSettings").onclick = () => {
-                const settings = {
-                    token: document.getElementById("ghToken").value.trim(),
-                    owner: document.getElementById("ghOwner").value.trim(),
-                    repo: document.getElementById("ghRepo").value.trim(),
-                    branch: document.getElementById("ghBranch").value.trim(),
-                    path: document.getElementById("ghPath").value.trim()
-                };
-                saveGHSettings(settings);
-                setSyncStatus("Settings saved!");
-            };
-
-            // Test sync button
-            document.getElementById("testSync").onclick = async () => {
-                setSyncStatus("Syncing...");
-                const synced = await syncFromGitHub();
-                if (synced) {
-                    refreshFromDb();
-                }
-                await syncToGitHub();
+                document.getElementById("settingsBox").classList.toggle("expanded");
             };
 
             // --- Import (.sqlite)
@@ -1050,9 +815,6 @@
                 document.getElementById("log").value = "";
                 document.getElementById("hours-slept").value = "";
                 updateLastEntryDate();
-
-                // Auto-sync to GitHub after save
-                await syncToGitHub();
             };
 
             // Clear

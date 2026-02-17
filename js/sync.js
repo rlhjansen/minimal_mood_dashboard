@@ -591,7 +591,7 @@ window.PanasSync = (function () {
             '<p>Enable encrypted multi-device sync. Your data is encrypted before it leaves this browser.</p>' +
             '<label>Supabase Project URL:</label>' +
             '<input id="sbUrl" type="text" placeholder="https://xxxxx.supabase.co" value="' + esc(s.url) + '">' +
-            '<label>Supabase Anon Key:</label>' +
+            '<label>Supabase Publishable Key:</label>' +
             '<input id="sbAnonKey" type="text" placeholder="eyJ..." value="' + esc(s.anonKey) + '">' +
             '<button id="saveSbSettings">Save Cloud Settings</button>' +
             '<div id="sbConfigStatus" style="font-size:12px;color:#666;margin-top:.4rem"></div>' +
