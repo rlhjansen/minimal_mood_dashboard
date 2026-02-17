@@ -357,6 +357,8 @@
             '<div id="collapse-warning" class="intent-collapse" style="display:none"></div>',
             '<div id="drift-feedback" class="intent-drift" style="display:none"></div>',
 
+            '<div id="last-intent-display" class="intent-last" style="display:none"></div>',
+
             '<div class="intent-form">',
             '  <div class="intent-field">',
             '    <label for="intent-retro">What did I actually do since the last check-in?</label>',
@@ -373,10 +375,18 @@
             '  </div>',
             '</div>',
 
-            '<details class="intent-history" id="intent-history-box">',
-            '  <summary><strong>Recent Check-ins</strong></summary>',
-            '  <div id="intent-list"></div>',
-            '</details>'
+            '<div class="intent-charts">',
+            '  <div class="intent-chart-wrap">',
+            '    <h3>Sleep Trend</h3>',
+            '    <svg id="sleep-chart" viewBox="0 0 320 120"></svg>',
+            '  </div>',
+            '  <div class="intent-chart-wrap">',
+            '    <h3>Check-in Alignment</h3>',
+            '    <svg id="align-chart" viewBox="0 0 320 120"></svg>',
+            '  </div>',
+            '</div>',
+
+            ''
         ].join('\n');
 
         anchor.appendChild(section);
@@ -438,7 +448,8 @@
         }
 
         renderCollapseWarning();
-        renderHistory();
+        renderLastIntent();
+        drawCharts();
 
         /* status line */
         var msg = 'Checked in.';
@@ -485,37 +496,156 @@
     }
 
     /* ===================================================================
-       History list
+       Last stated intent (shown above retro field)
        =================================================================== */
-    function renderHistory() {
-        var list = document.getElementById('intent-list');
-        if (!list) return;
-        var checkins = getRecentCheckins(10);
-        if (!checkins.length) {
-            list.innerHTML = '<p style="color:#999;font-size:13px">No check-ins yet.</p>';
+    function renderLastIntent() {
+        var el = document.getElementById('last-intent-display');
+        if (!el) return;
+        var last = getLastCheckin();
+        if (!last || !last.prospective) {
+            el.style.display = 'none';
+            return;
+        }
+        var ts = new Date(last.ts);
+        el.style.display = 'block';
+        el.innerHTML =
+            '<strong>Last stated intent</strong>' +
+            '<div class="il-text">' + esc(last.prospective) + '</div>' +
+            '<div class="il-meta">' + fmt(ts) + '</div>';
+    }
+
+    /* ===================================================================
+       Mini-charts: Sleep trend & Alignment trend
+       =================================================================== */
+    function injectChartStyles() {
+        if (document.getElementById('intent-chart-css')) return;
+        var style = document.createElement('style');
+        style.id = 'intent-chart-css';
+        style.textContent = [
+            '.intent-charts { display:grid; grid-template-columns:1fr 1fr; gap:.8rem; margin-top:1rem; max-width:640px; }',
+            '.intent-chart-wrap h3 { font-size:13px; margin:0 0 .3rem; color:#555; }',
+            '.intent-chart-wrap svg { width:100%; height:120px; background:#fafafa; border:1px solid #eee; border-radius:6px; }',
+            '.intent-chart-empty { font-size:12px; color:#bbb; text-anchor:middle; }',
+            '@media(max-width:600px){ .intent-charts{grid-template-columns:1fr;} }'
+        ].join('\n');
+        document.head.appendChild(style);
+    }
+
+    function drawSleepChart() {
+        var svg = d3.select('#sleep-chart');
+        if (svg.empty()) return;
+        svg.selectAll('*').remove();
+
+        /* Gather sleep data from entries, intent_checkins, and sleep_log tables */
+        var rows = [];
+        try {
+            var r1 = db.exec("SELECT ts, hours_slept FROM entries WHERE hours_slept IS NOT NULL ORDER BY ts ASC");
+            if (r1.length) r1[0].values.forEach(function (r) { rows.push({ ts: new Date(r[0]), val: r[1] }); });
+        } catch (_) {}
+        try {
+            var r2 = db.exec("SELECT ts, hours_slept FROM intent_checkins WHERE hours_slept IS NOT NULL ORDER BY ts ASC");
+            if (r2.length) r2[0].values.forEach(function (r) { rows.push({ ts: new Date(r[0]), val: r[1] }); });
+        } catch (_) {}
+        try {
+            var r3 = db.exec("SELECT ts, hours_slept FROM sleep_log WHERE hours_slept IS NOT NULL ORDER BY ts ASC");
+            if (r3.length) r3[0].values.forEach(function (r) { rows.push({ ts: new Date(r[0]), val: r[1] }); });
+        } catch (_) {}
+
+        /* De-duplicate by date (keep last value per calendar day) */
+        rows.sort(function (a, b) { return a.ts - b.ts; });
+
+        if (!rows.length) {
+            svg.append('text').attr('class', 'intent-chart-empty')
+                .attr('x', 160).attr('y', 65).text('No sleep data yet');
             return;
         }
 
-        list.innerHTML = checkins.map(function (c) {
-            var ts   = new Date(c.ts);
-            var time = fmt(ts);
-            var aStr = c.alignment_retro !== null ? (c.alignment_retro * 100).toFixed(0) + '%' : '—';
-            var drift = c.drift_flag
-                ? ' style="border-left:3px solid #d9534f;padding-left:8px"'
-                : '';
-            var parts = [];
-            parts.push('<div class="intent-entry"' + drift + '>');
-            parts.push('  <div class="intent-entry-head">');
-            parts.push('    <span class="ie-time">' + time + '</span>');
-            parts.push('    <span class="ie-align" title="Alignment with previous intent">↔ ' + aStr + '</span>');
-            if (c.drift_flag) parts.push('    <span class="ie-badge ie-badge--drift">drift</span>');
-            parts.push('  </div>');
-            if (c.retrospective) parts.push('  <div class="ie-text"><b>Did:</b> ' + esc(c.retrospective) + '</div>');
-            if (c.prospective)   parts.push('  <div class="ie-text"><b>Next:</b> ' + esc(c.prospective) + '</div>');
-            if (c.hours_slept)   parts.push('  <div class="ie-sleep">💤 ' + c.hours_slept + 'h</div>');
-            parts.push('</div>');
-            return parts.join('\n');
-        }).join('');
+        var m = { l: 30, r: 8, t: 8, b: 22 };
+        var W = 320, H = 120, iw = W - m.l - m.r, ih = H - m.t - m.b;
+        var g = svg.append('g').attr('transform', 'translate(' + m.l + ',' + m.t + ')');
+
+        var x = d3.scaleTime().domain(d3.extent(rows, function (d) { return d.ts; })).range([0, iw]);
+        var yMin = Math.max(0, d3.min(rows, function (d) { return d.val; }) - 1);
+        var yMax = d3.max(rows, function (d) { return d.val; }) + 1;
+        var y = d3.scaleLinear().domain([yMin, yMax]).range([ih, 0]);
+
+        /* Gentle reference band at 7-9h */
+        g.append('rect').attr('x', 0).attr('width', iw)
+            .attr('y', y(9)).attr('height', y(7) - y(9))
+            .attr('fill', '#e8f5e9').attr('opacity', 0.5);
+
+        g.append('g').attr('transform', 'translate(0,' + ih + ')')
+            .call(d3.axisBottom(x).ticks(4).tickFormat(d3.timeFormat('%b %d')))
+            .selectAll('text').style('font-size', '9px');
+        g.append('g').call(d3.axisLeft(y).ticks(4).tickFormat(function (v) { return v + 'h'; }))
+            .selectAll('text').style('font-size', '9px');
+
+        /* Line */
+        var line = d3.line().x(function (d) { return x(d.ts); }).y(function (d) { return y(d.val); })
+            .curve(d3.curveMonotoneX);
+        g.append('path').datum(rows).attr('fill', 'none')
+            .attr('stroke', '#5b8bd6').attr('stroke-width', 1.5).attr('d', line);
+
+        /* Dots */
+        g.selectAll('.sleep-dot').data(rows).enter().append('circle')
+            .attr('cx', function (d) { return x(d.ts); })
+            .attr('cy', function (d) { return y(d.val); })
+            .attr('r', 3).attr('fill', '#5b8bd6').attr('stroke', '#fff').attr('stroke-width', 1);
+    }
+
+    function drawAlignChart() {
+        var svg = d3.select('#align-chart');
+        if (svg.empty()) return;
+        svg.selectAll('*').remove();
+
+        var rows = [];
+        try {
+            var r = db.exec("SELECT ts, alignment_retro FROM intent_checkins WHERE alignment_retro IS NOT NULL ORDER BY ts ASC");
+            if (r.length) r[0].values.forEach(function (v) { rows.push({ ts: new Date(v[0]), val: v[1] }); });
+        } catch (_) {}
+
+        if (!rows.length) {
+            svg.append('text').attr('class', 'intent-chart-empty')
+                .attr('x', 160).attr('y', 65).text('No alignment data yet');
+            return;
+        }
+
+        var m = { l: 32, r: 8, t: 8, b: 22 };
+        var W = 320, H = 120, iw = W - m.l - m.r, ih = H - m.t - m.b;
+        var g = svg.append('g').attr('transform', 'translate(' + m.l + ',' + m.t + ')');
+
+        var x = d3.scaleTime().domain(d3.extent(rows, function (d) { return d.ts; })).range([0, iw]);
+        var y = d3.scaleLinear().domain([0, 1]).range([ih, 0]);
+
+        /* Threshold reference */
+        g.append('line').attr('x1', 0).attr('x2', iw)
+            .attr('y1', y(CFG.alignThreshold)).attr('y2', y(CFG.alignThreshold))
+            .attr('stroke', '#d9534f').attr('stroke-dasharray', '4,3').attr('opacity', 0.5);
+
+        g.append('g').attr('transform', 'translate(0,' + ih + ')')
+            .call(d3.axisBottom(x).ticks(4).tickFormat(d3.timeFormat('%b %d')))
+            .selectAll('text').style('font-size', '9px');
+        g.append('g').call(d3.axisLeft(y).ticks(4).tickFormat(function (v) { return (v * 100).toFixed(0) + '%'; }))
+            .selectAll('text').style('font-size', '9px');
+
+        /* Line */
+        var line = d3.line().x(function (d) { return x(d.ts); }).y(function (d) { return y(d.val); })
+            .curve(d3.curveMonotoneX);
+        g.append('path').datum(rows).attr('fill', 'none')
+            .attr('stroke', '#8a5bbd').attr('stroke-width', 1.5).attr('d', line);
+
+        /* Dots — colored by drift threshold */
+        g.selectAll('.align-dot').data(rows).enter().append('circle')
+            .attr('cx', function (d) { return x(d.ts); })
+            .attr('cy', function (d) { return y(d.val); })
+            .attr('r', 3)
+            .attr('fill', function (d) { return d.val < CFG.alignThreshold ? '#d9534f' : '#8a5bbd'; })
+            .attr('stroke', '#fff').attr('stroke-width', 1);
+    }
+
+    function drawCharts() {
+        drawSleepChart();
+        drawAlignChart();
     }
 
     /* ===================================================================
@@ -529,9 +659,11 @@
             return;
         }
         initSchema();
+        injectChartStyles();
         buildUI();
         renderCollapseWarning();
-        renderHistory();
+        renderLastIntent();
+        drawCharts();
         startNotifyLoop();
         /* load embedding model async — non-blocking */
         initEmbeddings();
