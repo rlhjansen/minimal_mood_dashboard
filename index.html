@@ -1,4 +1,6 @@
-<html lang="en"><head>
+<html lang="en">
+
+<head>
     <meta charset="utf-8">
     <title>PANAS-GEN Windrose + History</title>
     <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -203,19 +205,48 @@
             gap: .6rem
         }
 
-        .settings-toggle { margin-bottom: .5rem; }
-        .settings-toggle button { font-size: 12px; padding: .4rem .6rem; }
+        .settings-toggle {
+            margin-bottom: .5rem;
+        }
+
+        .settings-toggle button {
+            font-size: 12px;
+            padding: .4rem .6rem;
+        }
+
         .settings-box {
-            border: 2px solid #ddd; border-radius: 8px; padding: 1rem;
-            background: #f9f9f9; margin-bottom: 1rem; display: none;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            padding: 1rem;
+            background: #f9f9f9;
+            margin-bottom: 1rem;
+            display: none;
         }
-        .settings-box.expanded { display: block; }
-        .settings-box label { display: block; margin-top: .8rem; font-weight: 600; font-size: 13px; }
+
+        .settings-box.expanded {
+            display: block;
+        }
+
+        .settings-box label {
+            display: block;
+            margin-top: .8rem;
+            font-weight: 600;
+            font-size: 13px;
+        }
+
         .settings-box input {
-            width: 100%; padding: .5rem; margin-top: .3rem;
-            border: 1px solid #ddd; border-radius: 4px; font-family: monospace; font-size: 12px;
+            width: 100%;
+            padding: .5rem;
+            margin-top: .3rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 12px;
         }
-        .settings-box button { margin-top: .8rem; }
+
+        .settings-box button {
+            margin-top: .8rem;
+        }
 
 
         /* ---- Intent Calibration section ---- */
@@ -231,7 +262,13 @@
             gap: .5rem;
             margin-top: .4rem;
         }
-        .sleep-row label { font-size: 13px; font-weight: 600; white-space: nowrap; }
+
+        .sleep-row label {
+            font-size: 13px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
         .sleep-row button {
             padding: .3rem .7rem;
             border: 1px solid #bbb;
@@ -241,7 +278,11 @@
             cursor: pointer;
             font-family: inherit;
         }
-        .sleep-row button:hover { background: #e4e4e4; }
+
+        .sleep-row button:hover {
+            background: #e4e4e4;
+        }
+
         .sleep-row input[type="number"] {
             width: 70px;
             padding: .3rem;
@@ -250,26 +291,38 @@
             font-family: inherit;
             font-size: 14px;
         }
+
         #last-entry-date {
             font-size: 11px;
             color: #888;
             margin-left: auto;
         }
-        #last-entry-date .fresh { color: #2a7; }
-        #last-entry-date .stale { color: #c63; }
-        #intent-section h2 { margin: 0 0 .8rem; }
+
+        #last-entry-date .fresh {
+            color: #2a7;
+        }
+
+        #last-entry-date .stale {
+            color: #c63;
+        }
+
+        #intent-section h2 {
+            margin: 0 0 .8rem;
+        }
 
         .intent-form {
             display: grid;
             gap: .55rem;
             max-width: 640px;
         }
+
         .intent-field label {
             display: block;
             font-weight: 600;
             font-size: 13px;
             margin-bottom: .15rem;
         }
+
         .intent-field textarea,
         .intent-field input[type="text"] {
             width: 100%;
@@ -280,12 +333,18 @@
             border-radius: 4px;
             box-sizing: border-box;
         }
+
         .intent-field--inline {
             display: flex;
             align-items: center;
             gap: .5rem;
         }
-        .intent-field--inline label { margin: 0; white-space: nowrap; }
+
+        .intent-field--inline label {
+            margin: 0;
+            white-space: nowrap;
+        }
+
         .intent-field--inline input[type="number"] {
             width: 80px;
             padding: .35rem;
@@ -294,12 +353,14 @@
             font-family: inherit;
             font-size: 14px;
         }
+
         .intent-actions {
             display: flex;
             align-items: center;
             gap: .6rem;
             margin-top: .2rem;
         }
+
         .intent-status {
             font-size: 12px;
             color: #666;
@@ -314,6 +375,7 @@
             margin-bottom: .7rem;
             font-size: 14px;
         }
+
         .intent-drift {
             background: #f0f0f0;
             border-left: 3px solid #999;
@@ -321,6 +383,7 @@
             margin-bottom: .7rem;
             font-size: 13px;
         }
+
         .intent-collapse {
             border-left: 3px solid #d9534f;
             padding: .55rem 1rem;
@@ -339,27 +402,91 @@
             font-size: 13px;
             color: #444;
         }
-        .intent-last strong { font-size: 11px; text-transform: uppercase; color: #7a5ea8; letter-spacing: .4px; }
-        .intent-last .il-text { margin-top: .25rem; }
-        .intent-last .il-meta { font-size: 11px; color: #999; margin-top: .2rem; }
+
+        .intent-last strong {
+            font-size: 11px;
+            text-transform: uppercase;
+            color: #7a5ea8;
+            letter-spacing: .4px;
+        }
+
+        .intent-last .il-text {
+            margin-top: .25rem;
+        }
+
+        .intent-last .il-meta {
+            font-size: 11px;
+            color: #999;
+            margin-top: .2rem;
+        }
 
         /* gentle pulse when check-in is due */
-        @keyframes intent-pulse { 0%,100%{border-color:#eee} 50%{border-color:#ffc107} }
-        #intent-section.intent-highlight { animation: intent-pulse 2s ease-in-out 3; }
+        @keyframes intent-pulse {
+
+            0%,
+            100% {
+                border-color: #eee
+            }
+
+            50% {
+                border-color: #ffc107
+            }
+        }
+
+        #intent-section.intent-highlight {
+            animation: intent-pulse 2s ease-in-out 3;
+        }
 
         /* ---- Attribute selection on windrose ---- */
-        .wedge-selected { stroke: #333; stroke-width: 2.5; cursor: pointer; }
-        .wedge-hover { opacity: .85; cursor: pointer; }
-        .attr-chips { display: flex; gap: 4px; flex-wrap: wrap; align-items: center; min-height: 22px; }
-        .attr-chip {
-            display: inline-flex; align-items: center; gap: 3px;
-            padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: 600;
-            cursor: pointer; border: 1px solid rgba(0,0,0,.15); user-select: none;
+        .wedge-selected {
+            stroke: #333;
+            stroke-width: 2.5;
+            cursor: pointer;
         }
-        .attr-chip:hover { opacity: .8; }
-        .attr-chip .chip-x { font-size: 13px; margin-left: 2px; opacity: .5; }
-        .attr-chip .chip-x:hover { opacity: 1; }
-        #ts-heading { margin: .2rem 0 .3rem; }
+
+        .wedge-hover {
+            opacity: .85;
+            cursor: pointer;
+        }
+
+        .attr-chips {
+            display: flex;
+            gap: 4px;
+            flex-wrap: wrap;
+            align-items: center;
+            min-height: 22px;
+        }
+
+        .attr-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 3px;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 11px;
+            font-weight: 600;
+            cursor: pointer;
+            border: 1px solid rgba(0, 0, 0, .15);
+            user-select: none;
+        }
+
+        .attr-chip:hover {
+            opacity: .8;
+        }
+
+        .attr-chip .chip-x {
+            font-size: 13px;
+            margin-left: 2px;
+            opacity: .5;
+        }
+
+        .attr-chip .chip-x:hover {
+            opacity: 1;
+        }
+
+        #ts-heading {
+            margin: .2rem 0 .3rem;
+        }
     </style>
 </head>
 
@@ -378,7 +505,8 @@
                 <strong>Import database (.sqlite)</strong>
                 Drop file here or click to choose
                 <div class="import-help">Replaces the in-browser database; UI refreshes from the newest entry.</div>
-                <input id="fileInput" type="file" accept=".sqlite,application/x-sqlite3,application/octet-stream" style="display:none">
+                <input id="fileInput" type="file" accept=".sqlite,application/x-sqlite3,application/octet-stream"
+                    style="display:none">
             </div>
         </div>
 
@@ -405,7 +533,8 @@
     <div id="right">
         <h2 id="ts-heading">Scores Over Time</h2>
         <div class="legend" id="ts-legend">
-            <span style="display:inline-block;width:80px;height:12px;border-radius:2px;background:linear-gradient(to right, #7832a0, #a0a0a0, #ffdc28);vertical-align:middle"></span>
+            <span
+                style="display:inline-block;width:80px;height:12px;border-radius:2px;background:linear-gradient(to right, #7832a0, #a0a0a0, #ffdc28);vertical-align:middle"></span>
             <span style="font-size:11px">Neg ← Color → Pos</span> &nbsp;|&nbsp; Height = Balance, Saturation = Intensity
         </div>
         <div class="attr-chips" id="attr-chips"></div>
@@ -445,7 +574,7 @@
                 localStorage.setItem(LSKEY, u8ToBase64(db.export()));
                 /* Non-blocking cloud push if sync is active */
                 if (window.PanasSync && window.PanasSync.isReady()) {
-                    window.PanasSync.pushToCloud(function() { return db.export(); });
+                    window.PanasSync.pushToCloud(function () { return db.export(); });
                 }
             }
 
@@ -556,8 +685,8 @@
             const selectedAttributes = new Set();
             // 10 distinct hues for up to 10 simultaneous selections
             const ATTR_PALETTE = [
-                "#e6194b","#3cb44b","#4363d8","#f58231","#911eb4",
-                "#42d4f4","#f032e6","#bfef45","#fabebe","#469990"
+                "#e6194b", "#3cb44b", "#4363d8", "#f58231", "#911eb4",
+                "#42d4f4", "#f032e6", "#bfef45", "#fabebe", "#469990"
             ];
             let attrColorMap = {};  // label → color
             function assignAttrColors() {
@@ -596,7 +725,7 @@
                     return '<span class="attr-chip" style="background:' + color + '22;color:' + color + ';border-color:' + color + '55" data-attr="' + label + '">' +
                         label + '<span class="chip-x">&times;</span></span>';
                 }).join('') +
-                '<span class="attr-chip" style="background:#f5f5f5;color:#666;border-color:#ccc" id="clear-all-attrs">Clear all</span>';
+                    '<span class="attr-chip" style="background:#f5f5f5;color:#666;border-color:#ccc" id="clear-all-attrs">Clear all</span>';
                 container.querySelectorAll('.attr-chip[data-attr]').forEach(el => {
                     el.onclick = () => toggleAttribute(el.dataset.attr);
                 });
@@ -647,12 +776,12 @@
                             ev.stopPropagation();
                             toggleAttribute(label);
                         })
-                        .on("mouseenter", function() { d3.select(this).classed("wedge-hover", true); })
-                        .on("mouseleave", function() { d3.select(this).classed("wedge-hover", false); });
+                        .on("mouseenter", function () { d3.select(this).classed("wedge-hover", true); })
+                        .on("mouseleave", function () { d3.select(this).classed("wedge-hover", false); });
                     if (isSelected) {
                         w.classed("wedge-selected", true)
-                         .attr("stroke", attrColorMap[label] || "#333")
-                         .attr("stroke-width", 2.5);
+                            .attr("stroke", attrColorMap[label] || "#333")
+                            .attr("stroke-width", 2.5);
                     }
                 });
             }
@@ -970,7 +1099,7 @@
                             parts.push(`<span style="color:${attrColorMap[a] || '#666'}">&#9632; ${a}: ${d.itemVals[a]}</span>`);
                         });
                     }
-                    if (d.log) parts.push(`<div style="margin-top:4px;opacity:.9">${d.log.replace(/</g,"&lt;")}</div>`);
+                    if (d.log) parts.push(`<div style="margin-top:4px;opacity:.9">${d.log.replace(/</g, "&lt;")}</div>`);
                     return parts.join("<br>");
                 }
 
@@ -1142,16 +1271,16 @@
                 try {
                     const r1 = db.exec('SELECT ts FROM entries ORDER BY id DESC LIMIT 1');
                     if (r1.length && r1[0].values.length) candidates.push(new Date(r1[0].values[0][0]));
-                } catch (_) {}
+                } catch (_) { }
                 try {
                     const r2 = db.exec('SELECT ts FROM sleep_log ORDER BY id DESC LIMIT 1');
                     if (r2.length && r2[0].values.length) candidates.push(new Date(r2[0].values[0][0]));
-                } catch (_) {}
+                } catch (_) { }
                 if (!candidates.length) { el.innerHTML = '<span class="stale">No entries yet</span>'; return; }
                 const lastTs = candidates.reduce((a, b) => a > b ? a : b);
                 const today = new Date();
                 const isToday = lastTs.toDateString() === today.toDateString();
-                const label = lastTs.toLocaleDateString() + ' ' + lastTs.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
+                const label = lastTs.toLocaleDateString() + ' ' + lastTs.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
                 el.innerHTML = isToday
                     ? '<span class="fresh">✓ Last entry: ' + label + '</span>'
                     : '<span class="stale">⚠ Last entry: ' + label + '</span>';
@@ -1163,7 +1292,7 @@
             window.panasSQL = SQL;
             window.panasPersist = persist;
             window.panasRefreshFromDb = refreshFromDb;
-            window.panasGetSleep = function() {
+            window.panasGetSleep = function () {
                 var el = document.getElementById('hours-slept');
                 return el && el.value ? parseFloat(el.value) : null;
             };
@@ -1173,4 +1302,6 @@
     <script src="js/sync.js"></script>
     <script src="js/intent.js"></script>
 
-</body></html>
+</body>
+
+</html>

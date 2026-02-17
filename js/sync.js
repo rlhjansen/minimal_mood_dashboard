@@ -32,7 +32,7 @@ window.PanasSync = (function () {
     'use strict';
 
     var LS_SETTINGS = 'panas_supabase_config';
-    var client      = null;
+    var client = null;
     var currentUser = null;
 
     /* ================================================================
@@ -158,7 +158,7 @@ window.PanasSync = (function () {
         return pullRaw().then(function (bytes) {
             if (!bytes) return false;
             var SQL = window.panasSQL;
-            var db  = window.panasDB;
+            var db = window.panasDB;
             if (!SQL || !db) return false;
 
             var cloudDB;
