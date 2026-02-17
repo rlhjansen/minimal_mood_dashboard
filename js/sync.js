@@ -328,16 +328,9 @@ window.PanasSync = (function () {
             '<span>Synced as <span class="sb-user">' + esc(currentUser.email) + '</span></span>' +
             '<span class="sb-msg ok"></span>' +
             '<span class="sb-right">' +
-            '  <button id="sb-sync" title="Sync now">↻ Sync</button>' +
+            '  <span style="color:#999;font-size:11px">Refresh page to pull data</span>' +
             '  <button id="sb-signout">Sign out</button>' +
             '</span>';
-
-        document.getElementById('sb-sync').addEventListener('click', function () {
-            setSyncMsg('Syncing…', false);
-            mergeFromCloud().then(function () {
-                return pushToCloud(function () { return window.panasDB.export(); });
-            });
-        });
 
         document.getElementById('sb-signout').addEventListener('click', function () {
             signOut();

@@ -446,6 +446,15 @@
             .attr('r', 3).attr('fill', '#5b8bd6').attr('stroke', '#fff').attr('stroke-width', 1);
     }
 
+    function ensureTooltip() {
+        if (!alignTooltip) {
+            alignTooltip = d3.select('body').append('div')
+                .attr('class', 'tooltip').style('opacity', 0);
+        }
+        return alignTooltip;
+    }
+    var alignTooltip = null;
+
     function drawAlignChart() {
         var svg = d3.select('#align-chart');
         if (svg.empty()) return;
@@ -453,8 +462,13 @@
 
         var rows = [];
         try {
-            var r = db.exec("SELECT ts, alignment_retro FROM intent_checkins WHERE alignment_retro IS NOT NULL ORDER BY ts ASC");
-            if (r.length) r[0].values.forEach(function (v) { rows.push({ ts: new Date(v[0]), val: v[1] }); });
+            var r = db.exec(
+                "SELECT ts, alignment_retro, retrospective, prospective FROM intent_checkins " +
+                "WHERE alignment_retro IS NOT NULL ORDER BY ts ASC"
+            );
+            if (r.length) r[0].values.forEach(function (v) {
+                rows.push({ ts: new Date(v[0]), val: v[1], retro: v[2] || '', prospect: v[3] || '' });
+            });
         } catch (_) { }
 
         if (!rows.length) {
@@ -487,13 +501,43 @@
         g.append('path').datum(rows).attr('fill', 'none')
             .attr('stroke', '#8a5bbd').attr('stroke-width', 1.5).attr('d', line);
 
+        /* Tooltip builder */
+        var tip = ensureTooltip();
+        function tipHtml(d) {
+            var parts = ['<b>' + d.ts.toLocaleString() + '</b>'];
+            parts.push('Alignment: ' + (d.val * 100).toFixed(0) + '%');
+            if (d.retro) parts.push('<span style="opacity:.6;font-size:.85em">Retro:</span> ' + esc(d.retro));
+            if (d.prospect) parts.push('<span style="opacity:.6;font-size:.85em">Intent:</span> ' + esc(d.prospect));
+            return parts.join('<br>');
+        }
+
+        /* Invisible hover zones (full height) for each data point */
+        var bandW = rows.length > 1 ? Math.max(6, iw / rows.length) : iw;
+        g.selectAll('.align-hover').data(rows).enter().append('rect')
+            .attr('class', 'align-hover')
+            .attr('x', function (d) { return x(d.ts) - bandW / 2; })
+            .attr('y', 0).attr('width', bandW).attr('height', ih)
+            .attr('fill', 'transparent').attr('cursor', 'crosshair')
+            .on('mouseover', function (ev, d) {
+                tip.style('opacity', 1).html(tipHtml(d))
+                    .style('left', (ev.pageX + 10) + 'px').style('top', (ev.pageY - 28) + 'px');
+            })
+            .on('mousemove', function (ev, d) {
+                tip.style('opacity', 1).html(tipHtml(d))
+                    .style('left', (ev.pageX + 10) + 'px').style('top', (ev.pageY - 28) + 'px');
+            })
+            .on('mouseout', function () {
+                tip.style('opacity', 0);
+            });
+
         /* Dots — colored by drift threshold */
         g.selectAll('.align-dot').data(rows).enter().append('circle')
             .attr('cx', function (d) { return x(d.ts); })
             .attr('cy', function (d) { return y(d.val); })
             .attr('r', 3)
             .attr('fill', function (d) { return d.val < CFG.alignThreshold ? '#d9534f' : '#8a5bbd'; })
-            .attr('stroke', '#fff').attr('stroke-width', 1);
+            .attr('stroke', '#fff').attr('stroke-width', 1)
+            .style('pointer-events', 'none');
     }
 
     function drawCharts() {

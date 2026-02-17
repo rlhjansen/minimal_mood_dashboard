@@ -522,12 +522,15 @@
 
         <div class="controls">
             <button id="randomize">Randomize petals</button>
-            <button id="save">Save + Download DB + Page</button>
+            <button id="save">Save + Download DB</button>
             <button id="copyJson">Copy JSON</button>
             <button id="clear">Clear DB</button>
         </div>
 
         <div id="status">30-day average (33 entries)</div>
+        <div style="margin-top:.4rem;font-size:11px;color:#999">
+            <a href="https://github.com/rlhjansen/minimal_mood_dashboard" target="_blank" style="color:#888">rlhjansen/minimal_mood_dashboard</a>
+        </div>
     </div>
 
     <div id="right">
@@ -935,8 +938,8 @@
                 drawTimeSeries();
                 drawMonthlyAverage();
 
-                downloadDBAndPage();
-                status("Saved & downloaded database + page.");
+                downloadDB();
+                status("Saved & downloaded database.");
                 document.getElementById("log").value = "";
                 document.getElementById("hours-slept").value = "";
                 updateLastEntryDate();
@@ -1246,18 +1249,12 @@
                 if (window.panasRefreshIntent) window.panasRefreshIntent();
             }
 
-            function downloadDBAndPage() {
+            function downloadDB() {
                 const dbBlob = new Blob([db.export()], { type: "application/x-sqlite3" });
                 const dbUrl = URL.createObjectURL(dbBlob);
                 const adb = document.createElement("a");
                 adb.href = dbUrl; adb.download = "panas.sqlite"; adb.click();
                 URL.revokeObjectURL(dbUrl);
-                const html = document.documentElement.outerHTML;
-                const pageBlob = new Blob([html], { type: "text/html" });
-                const pageUrl = URL.createObjectURL(pageBlob);
-                const ap = document.createElement("a");
-                ap.href = pageUrl; ap.download = "panas.html"; ap.click();
-                URL.revokeObjectURL(pageUrl);
             }
 
             // Initial alignment
