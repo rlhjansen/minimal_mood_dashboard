@@ -172,6 +172,7 @@ window.PanasSync = (function () {
             imported += mergeTable(cloudDB, db, 'entries');
             imported += mergeTable(cloudDB, db, 'intent_checkins');
             imported += mergeTable(cloudDB, db, 'sleep_log');
+            imported += mergeSettings(cloudDB, db);
             cloudDB.close();
 
             if (imported > 0) {
@@ -227,6 +228,27 @@ window.PanasSync = (function () {
                 }
             });
         } catch (e) { /* table doesn't exist in source */ }
+        return imported;
+    }
+
+    /* Merge user_settings (key-value pairs, no ts column): import keys missing locally */
+    function mergeSettings(srcDB, dstDB) {
+        var imported = 0;
+        try {
+            var srcRes = srcDB.exec('SELECT key, value FROM user_settings');
+            if (!srcRes.length) return 0;
+            srcRes[0].values.forEach(function (row) {
+                var key = row[0], value = row[1];
+                try {
+                    var existing = dstDB.exec("SELECT key FROM user_settings WHERE key='" + key.replace(/'/g, "''") + "'");
+                    if (!existing.length || !existing[0].values.length) {
+                        var stmt = dstDB.prepare('INSERT OR REPLACE INTO user_settings (key, value) VALUES (?, ?)');
+                        stmt.run([key, value]); stmt.free();
+                        imported++;
+                    }
+                } catch (_) {}
+            });
+        } catch (_) { /* user_settings doesn't exist in source */ }
         return imported;
     }
 

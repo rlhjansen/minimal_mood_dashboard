@@ -6,7 +6,10 @@
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <style>
         :root {
-            --pad: 18px
+            --pad: 18px;
+            --color-pos: #ffdc28;
+            --color-neg: #7832a0;
+            --color-accent: #1f77b4
         }
 
         body {
@@ -51,13 +54,13 @@
         }
 
         .handle {
-            fill: #1f77b4;
+            fill: var(--color-accent);
             cursor: pointer
         }
 
         .current {
-            fill: rgba(31, 119, 180, .25);
-            stroke: #1f77b4;
+            fill: color-mix(in srgb, var(--color-accent) 25%, transparent);
+            stroke: var(--color-accent);
             stroke-width: 2
         }
 
@@ -122,11 +125,11 @@
         }
 
         .sw.pos {
-            background: #ffdc28
+            background: var(--color-pos)
         }
 
         .sw.neg {
-            background: #7832a0
+            background: var(--color-neg)
         }
 
         .sw.extraversion {
@@ -487,6 +490,45 @@
         #ts-heading {
             margin: .2rem 0 .3rem;
         }
+
+        /* ---- Persistent color picker ---- */
+        .colorpicker-bar {
+            display: flex;
+            gap: 14px;
+            align-items: center;
+            flex-wrap: wrap;
+            margin-top: .5rem;
+        }
+
+        .colorpicker-bar label {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .colorpicker-bar input[type="color"] {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 28px;
+            height: 28px;
+            border: 2px solid #ccc;
+            border-radius: 6px;
+            padding: 0;
+            cursor: pointer;
+            background: none;
+        }
+
+        .colorpicker-bar input[type="color"]::-webkit-color-swatch-wrapper {
+            padding: 2px;
+        }
+
+        .colorpicker-bar input[type="color"]::-webkit-color-swatch {
+            border: none;
+            border-radius: 3px;
+        }
     </style>
 </head>
 
@@ -527,6 +569,13 @@
             <button id="clear">Clear DB</button>
         </div>
 
+        <div class="colorpicker-bar" id="colorpicker-bar">
+            <label>Pos <input type="color" id="color-pos" value="#ffdc28"></label>
+            <label>Neg <input type="color" id="color-neg" value="#7832a0"></label>
+            <label>Accent <input type="color" id="color-accent" value="#1f77b4"></label>
+            <button id="reset-colors">Reset</button>
+        </div>
+
         <div id="status">30-day average (33 entries)</div>
         <div style="margin-top:.4rem;font-size:11px;color:#999">
             <a href="https://github.com/rlhjansen/minimal_mood_dashboard" target="_blank" style="color:#888">rlhjansen/minimal_mood_dashboard</a>
@@ -537,8 +586,8 @@
     <div id="right">
         <h2 id="ts-heading">Scores Over Time</h2>
         <div class="legend" id="ts-legend">
-            <span
-                style="display:inline-block;width:80px;height:12px;border-radius:2px;background:linear-gradient(to right, #7832a0, #a0a0a0, #ffdc28);vertical-align:middle"></span>
+            <span id="ts-gradient"
+                style="display:inline-block;width:80px;height:12px;border-radius:2px;background:linear-gradient(to right, var(--color-neg), #a0a0a0, var(--color-pos));vertical-align:middle"></span>
             <span style="font-size:11px">Neg ← Color → Pos</span> &nbsp;|&nbsp; Height = Balance, Saturation = Intensity
         </div>
         <div class="attr-chips" id="attr-chips"></div>
@@ -601,6 +650,49 @@
             db.exec(`CREATE TABLE IF NOT EXISTS sleep_log (id INTEGER PRIMARY KEY AUTOINCREMENT, ts TEXT, hours_slept REAL)`);
             db.exec(`UPDATE entries SET log='' WHERE log IS NULL`);
             persist();
+
+            // --- Color settings (persisted to DB)
+            db.exec(`CREATE TABLE IF NOT EXISTS user_settings (key TEXT PRIMARY KEY, value TEXT)`);
+            const COLOR_DEFAULTS = { color_positive: '#ffdc28', color_negative: '#7832a0', color_accent: '#1f77b4' };
+
+            function getSetting(key, defaultVal) {
+                try {
+                    const stmt = db.prepare("SELECT value FROM user_settings WHERE key = ?");
+                    stmt.bind([key]);
+                    if (stmt.step()) { const val = stmt.get()[0]; stmt.free(); return val; }
+                    stmt.free();
+                } catch (_) {}
+                return defaultVal;
+            }
+
+            function setSetting(key, value) {
+                const stmt = db.prepare("INSERT OR REPLACE INTO user_settings (key, value) VALUES (?, ?)");
+                stmt.run([key, value]); stmt.free();
+                persist();
+            }
+
+            function getColors() {
+                return {
+                    positive: getSetting('color_positive', COLOR_DEFAULTS.color_positive),
+                    negative: getSetting('color_negative', COLOR_DEFAULTS.color_negative),
+                    accent:   getSetting('color_accent',   COLOR_DEFAULTS.color_accent),
+                };
+            }
+
+            function applyColors(colors) {
+                const r = document.documentElement;
+                r.style.setProperty('--color-pos', colors.positive);
+                r.style.setProperty('--color-neg', colors.negative);
+                r.style.setProperty('--color-accent', colors.accent);
+                const posEl = document.getElementById('color-pos');
+                const negEl = document.getElementById('color-neg');
+                const accEl = document.getElementById('color-accent');
+                if (posEl) posEl.value = colors.positive;
+                if (negEl) negEl.value = colors.negative;
+                if (accEl) accEl.value = colors.accent;
+            }
+
+            applyColors(getColors());
 
 
 
@@ -756,10 +848,10 @@
             // Get wedge color based on item type (pos/neg) and value
             function getWedgeColor(label, value) {
                 const isPositive = POS_ITEMS.has(label);
-                // Saturation: value 1→5 maps to 0→1
                 const sat = (value - 1) / 4;
-                const baseColor = isPositive ? d3.rgb(255, 220, 40) : d3.rgb(120, 50, 160); // bright yellow / deep purple
-                const gray = d3.rgb(240, 240, 240); // light gray base
+                const colors = getColors();
+                const baseColor = isPositive ? d3.rgb(colors.positive) : d3.rgb(colors.negative);
+                const gray = d3.rgb(240, 240, 240);
                 return d3.interpolateRgb(gray, baseColor)(sat);
             }
 
@@ -1163,17 +1255,12 @@
                 // Color function: log ratio determines color (yellow for positive, purple for negative)
                 // We interpolate in RGB space
                 function getColor(d) {
-                    // logRatio: negative = more negative affect, 0 = equal, positive = more positive affect
+                    const colors = getColors();
                     const sat = satScale(d.total);
-                    // Purple for negative, yellow for positive
-                    const purple = d3.rgb(120, 50, 160);  // deep purple
-                    const yellow = d3.rgb(255, 220, 40);  // bright yellow
-
-                    // Map log ratio to 0-1 range for interpolation
+                    const purple = d3.rgb(colors.negative);
+                    const yellow = d3.rgb(colors.positive);
                     const colorT = logRatioScale(d.logRatio);
                     const baseColor = d3.interpolateRgb(purple, yellow)(colorT);
-
-                    // Apply saturation: interpolate between gray and the base color
                     const gray = d3.rgb(160, 160, 160);
                     return d3.interpolateRgb(gray, baseColor)(sat);
                 }
@@ -1239,6 +1326,7 @@
             drawTimeSeries();
 
             function refreshFromDb() {
+                applyColors(getColors());
                 const latest = getMostRecentEntry();
                 ITEMS.forEach(k => values[k] = (latest && latest[k] != null) ? latest[k] : 3);
                 updateHandlePositions();
@@ -1286,6 +1374,26 @@
                     : '<span class="stale">⚠ Last entry: ' + label + '</span>';
             }
             updateLastEntryDate();
+
+            // --- Color picker event handlers
+            function onColorChange() {
+                setSetting(this.dataset.colorKey, this.value);
+                applyColors(getColors());
+                drawWedges(); updateHandlePositions();
+                drawPolygons(); drawTimeSeries(); drawMonthlyAverage();
+            }
+            document.getElementById('color-pos').dataset.colorKey = 'color_positive';
+            document.getElementById('color-neg').dataset.colorKey = 'color_negative';
+            document.getElementById('color-accent').dataset.colorKey = 'color_accent';
+            document.getElementById('color-pos').addEventListener('input', onColorChange);
+            document.getElementById('color-neg').addEventListener('input', onColorChange);
+            document.getElementById('color-accent').addEventListener('input', onColorChange);
+            document.getElementById('reset-colors').addEventListener('click', function () {
+                Object.entries(COLOR_DEFAULTS).forEach(([k, v]) => setSetting(k, v));
+                applyColors(getColors());
+                drawWedges(); updateHandlePositions();
+                drawPolygons(); drawTimeSeries(); drawMonthlyAverage();
+            });
 
             // Expose shared state for external modules (js/sync.js, js/intent.js)
             window.panasDB = db;
