@@ -260,7 +260,7 @@ window.PanasSync = (function () {
         var style = document.createElement('style');
         style.id = 'panas-sync-css';
         style.textContent = [
-            '#sync-bar{grid-column:1/-1;display:flex;align-items:center;gap:.5rem;padding:.5rem .8rem;background:#f8f9fa;border:1px solid #eee;border-radius:8px;font-size:13px;flex-wrap:wrap;min-height:32px;}',
+            '#sync-bar{grid-column:1/-1;display:flex;align-items:center;gap:.5rem;padding:.8rem 1rem;background:#f8f9fa;border:1px solid #eee;border-radius:8px;font-size:13px;flex-wrap:wrap;min-height:80px;}',
             '#sync-bar .sb-icon{font-size:15px;}',
             '#sync-bar input[type="email"]{padding:.3rem .5rem;border:1px solid #ddd;border-radius:4px;font-size:13px;font-family:inherit;width:220px;}',
             '#sync-bar button{padding:.25rem .6rem;font-size:12px;border:1px solid #ddd;border-radius:6px;background:#fff;cursor:pointer;}',
@@ -365,15 +365,18 @@ window.PanasSync = (function () {
 
         if (!isConfigured() || !client) {
             renderNotConfigured();
-            return;
-        }
-
-        if (!currentUser) {
+        } else if (!currentUser) {
             renderSignedOut();
-            return;
+        } else {
+            renderReady();
         }
 
-        renderReady();
+        /* Append logo to far right */
+        var logo = document.createElement('img');
+        logo.src = 'favicon.png';
+        logo.alt = '';
+        logo.style.cssText = 'width:80px;height:80px;border-radius:6px;opacity:.85;margin-left:auto;flex-shrink:0';
+        syncBar.appendChild(logo);
     }
 
     /* ================================================================
