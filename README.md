@@ -34,35 +34,22 @@ Inspired by a post from [forth](https://x.com/forthrighter/status/19575248013771
 
 Data is protected by Supabase Row Level Security — only the authenticated user can read/write their own row.
 
-## Intent Calibration Module
+## Sleep Module
 
-A lightweight **3-hour check-in** system sits below the PANAS dashboard:
+A **"Gone to bed"** button below the PANAS dashboard logs bedtime timestamps for passive tracking. The sleep section shows two charts:
 
-| Feature | Details |
+| Chart | Details |
 |---|---|
-| **Retrospective / Prospective** | Free-text "What did I do?" → "What's my intent for the next block?" |
-| **Target direction** | Concise phrase you're steering toward (e.g. "Ship parsing module") |
-| **Alignment scoring** | Cosine similarity between previous intent and current retrospective. Uses sentence embeddings (Transformers.js) when served via HTTP, bag-of-words fallback from `file://` |
-| **Drift feedback** | Neutral prompt when alignment drops below threshold — "Was this shift intentional or reactive?" |
-| **Collapse early warning** | Rolling 7-day heuristic across sleep, PANAS strain signals, and alignment trend. Suggests 10% downshift when ≥ 2 flags fire |
-| **Notifications** | Browser `Notification` API reminders every 3 hours (08:00–20:00), configurable |
+| **Sleep Trend** | Hours slept over time (from PANAS entries and standalone sleep logs) |
+| **Bedtime Log** | Time-of-day dots showing when you pressed "Gone to bed" |
 
-### Semantic similarity (optional)
-
-For best alignment scoring, serve the dashboard from a local server so the embedding model can load:
-
-```bash
-python -m http.server 8000
-# then open http://localhost:8000
-```
-
-From `file://` everything works — alignment just uses text-overlap instead of embeddings.
+Both are independent — bedtime timestamps don't interact with hours-slept values.
 
 ### Files
 
 ```
 index.html          – main dashboard (PANAS windrose + timeseries)
 js/sync.js          – cloud sync module (Supabase auth + merge)
-js/intent.js        – intent calibration module (check-in, alignment, collapse warning)
+js/sleep.js         – sleep charts + bedtime logging
 README.md
 ```

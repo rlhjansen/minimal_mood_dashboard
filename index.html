@@ -251,14 +251,6 @@
             margin-top: .8rem;
         }
 
-
-        /* ---- Intent Calibration section ---- */
-        #intent-section {
-            border-top: 2px solid #eee;
-            padding-top: 1rem;
-            margin-top: .8rem;
-        }
-
         .sleep-row {
             display: flex;
             align-items: center;
@@ -307,137 +299,6 @@
 
         #last-entry-date .stale {
             color: #c63;
-        }
-
-        #intent-section h2 {
-            margin: 0 0 .8rem;
-        }
-
-        .intent-form {
-            display: grid;
-            gap: .55rem;
-            max-width: 640px;
-        }
-
-        .intent-field label {
-            display: block;
-            font-weight: 600;
-            font-size: 13px;
-            margin-bottom: .15rem;
-        }
-
-        .intent-field textarea,
-        .intent-field input[type="text"] {
-            width: 100%;
-            padding: .4rem;
-            font-family: inherit;
-            font-size: 14px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            box-sizing: border-box;
-        }
-
-        .intent-field--inline {
-            display: flex;
-            align-items: center;
-            gap: .5rem;
-        }
-
-        .intent-field--inline label {
-            margin: 0;
-            white-space: nowrap;
-        }
-
-        .intent-field--inline input[type="number"] {
-            width: 80px;
-            padding: .35rem;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            font-family: inherit;
-            font-size: 14px;
-        }
-
-        .intent-actions {
-            display: flex;
-            align-items: center;
-            gap: .6rem;
-            margin-top: .2rem;
-        }
-
-        .intent-status {
-            font-size: 12px;
-            color: #666;
-        }
-
-        /* notification / warning banners */
-        .intent-note {
-            background: #fff3cd;
-            border: 1px solid #ffc107;
-            border-radius: 6px;
-            padding: .7rem 1rem;
-            margin-bottom: .7rem;
-            font-size: 14px;
-        }
-
-        .intent-drift {
-            background: #f0f0f0;
-            border-left: 3px solid #999;
-            padding: .55rem 1rem;
-            margin-bottom: .7rem;
-            font-size: 13px;
-        }
-
-        .intent-collapse {
-            border-left: 3px solid #d9534f;
-            padding: .55rem 1rem;
-            margin-bottom: .7rem;
-            font-size: 13px;
-            background: #fff0f0;
-        }
-
-        /* last intent display */
-        .intent-last {
-            background: #f4f0fa;
-            border: 1px solid #d5cce8;
-            border-radius: 8px;
-            padding: .6rem .8rem;
-            margin-bottom: .6rem;
-            font-size: 13px;
-            color: #444;
-        }
-
-        .intent-last strong {
-            font-size: 11px;
-            text-transform: uppercase;
-            color: #7a5ea8;
-            letter-spacing: .4px;
-        }
-
-        .intent-last .il-text {
-            margin-top: .25rem;
-        }
-
-        .intent-last .il-meta {
-            font-size: 11px;
-            color: #999;
-            margin-top: .2rem;
-        }
-
-        /* gentle pulse when check-in is due */
-        @keyframes intent-pulse {
-
-            0%,
-            100% {
-                border-color: #eee
-            }
-
-            50% {
-                border-color: #ffc107
-            }
-        }
-
-        #intent-section.intent-highlight {
-            animation: intent-pulse 2s ease-in-out 3;
         }
 
         /* ---- Attribute selection on windrose ---- */
@@ -593,7 +454,7 @@
         <div class="attr-chips" id="attr-chips"></div>
         <svg id="timeseries" viewBox="0,0,760,310"></svg>
 
-        <div id="intent-anchor"></div>
+        <div id="sleep-anchor"></div>
 
     </div>
 
@@ -1334,8 +1195,8 @@
                 drawPreview(null);
                 drawTimeSeries();
                 drawMonthlyAverage();
-                /* Also refresh intent module (may have new rows from cloud merge) */
-                if (window.panasRefreshIntent) window.panasRefreshIntent();
+                /* Also refresh sleep module (may have new rows from cloud merge) */
+                if (window.panasRefreshSleep) window.panasRefreshSleep();
             }
 
             function downloadDB() {
@@ -1395,20 +1256,16 @@
                 drawPolygons(); drawTimeSeries(); drawMonthlyAverage();
             });
 
-            // Expose shared state for external modules (js/sync.js, js/intent.js)
+            // Expose shared state for external modules (js/sync.js, js/sleep.js)
             window.panasDB = db;
             window.panasSQL = SQL;
             window.panasPersist = persist;
             window.panasRefreshFromDb = refreshFromDb;
-            window.panasGetSleep = function () {
-                var el = document.getElementById('hours-slept');
-                return el && el.value ? parseFloat(el.value) : null;
-            };
             window.dispatchEvent(new CustomEvent('panas-db-ready'));
         })();
     </script>
     <script src="js/sync.js"></script>
-    <script src="js/intent.js"></script>
+    <script src="js/sleep.js"></script>
 
 </body>
 

@@ -170,8 +170,8 @@ window.PanasSync = (function () {
 
             var imported = 0;
             imported += mergeTable(cloudDB, db, 'entries');
-            imported += mergeTable(cloudDB, db, 'intent_checkins');
             imported += mergeTable(cloudDB, db, 'sleep_log');
+            imported += mergeTable(cloudDB, db, 'bedtime_log');
             imported += mergeSettings(cloudDB, db);
             cloudDB.close();
 
