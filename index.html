@@ -428,7 +428,6 @@
             <button id="randomize">Randomize petals</button>
             <button id="save">Save + Download DB</button>
             <button id="copyJson">Copy JSON</button>
-            <button id="clear">Clear DB</button>
         </div>
 
         <div class="colorpicker-bar" id="colorpicker-bar">
@@ -446,7 +445,13 @@
     </div>
 
     <div id="right">
-        <h2 id="ts-heading">Scores Over Time</h2>
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:.6rem;flex-wrap:wrap">
+            <h2 id="ts-heading" style="margin:0">Scores Over Time</h2>
+            <button id="ts-view-toggle" title="Toggle time-based vs. uniform spacing (last 2 months)"
+                style="font-size:12px;padding:.35rem .7rem;border:1px solid #ccc;border-radius:6px;background:#fff;cursor:pointer">
+                Uniform (2 months)
+            </button>
+        </div>
         <div class="legend" id="ts-legend">
             <span id="ts-gradient"
                 style="display:inline-block;width:80px;height:12px;border-radius:2px;background:linear-gradient(to right, var(--color-neg), #a0a0a0, var(--color-pos));vertical-align:middle"></span>
@@ -901,15 +906,7 @@
             };
 
             // Clear
-            document.getElementById("clear").onclick = () => {
-                if (!confirm("Delete all saved entries?")) return;
-                db.exec("DELETE FROM entries"); persist();
-                ITEMS.forEach(k => values[k] = 3);
-                updateHandlePositions();
-                drawPolygons(); drawPreview(null); drawTimeSeries();
-                monthlyPoly.attr("d", null);
-                status("Database cleared.");
-            };
+            // (Clear DB button removed — preserved data avoids accidental loss.)
 
             // ===== Copy JSON =====
             function getAllEntries() {
@@ -923,19 +920,86 @@
                 });
             }
 
+            function getAllDataByDate() {
+                const byDate = {};
+                function ensureDate(ts) {
+                    const d = new Date(ts).toISOString().slice(0, 10);
+                    if (!byDate[d]) byDate[d] = {};
+                    return byDate[d];
+                }
+
+                // PANAS entries
+                const entries = getAllEntries();
+                entries.forEach(e => {
+                    const day = ensureDate(e.ts);
+                    if (!day.panas) day.panas = [];
+                    day.panas.push(e);
+                });
+
+                // Sleep logs (hours_slept)
+                try {
+                    const r = db.exec("SELECT ts, hours_slept FROM sleep_log WHERE hours_slept IS NOT NULL ORDER BY ts ASC");
+                    if (r.length) r[0].values.forEach(row => {
+                        const day = ensureDate(row[0]);
+                        if (!day.sleep) day.sleep = [];
+                        day.sleep.push({ ts: row[0], hours_slept: row[1] });
+                    });
+                } catch (_) {}
+
+                // Sleep from entries table
+                try {
+                    const r = db.exec("SELECT ts, hours_slept FROM entries WHERE hours_slept IS NOT NULL ORDER BY ts ASC");
+                    if (r.length) r[0].values.forEach(row => {
+                        const day = ensureDate(row[0]);
+                        if (!day.sleep) day.sleep = [];
+                        day.sleep.push({ ts: row[0], hours_slept: row[1], source: "panas" });
+                    });
+                } catch (_) {}
+
+                // Bedtime logs
+                try {
+                    const r = db.exec("SELECT ts FROM bedtime_log ORDER BY ts ASC");
+                    if (r.length) r[0].values.forEach(row => {
+                        const day = ensureDate(row[0]);
+                        if (!day.bedtime) day.bedtime = [];
+                        day.bedtime.push({ ts: row[0] });
+                    });
+                } catch (_) {}
+
+                // Per-sleep-day summary (bedtime + hours_slept + inferred wake time).
+                // Grouped on "sleep day" (times before noon belong to the previous night).
+                try {
+                    const summary = window.panasSleepSummary ? window.panasSleepSummary() : null;
+                    if (summary) {
+                        Object.keys(summary).forEach(function (k) {
+                            const s = summary[k];
+                            if (!byDate[k]) byDate[k] = {};
+                            byDate[k].sleep_summary = s;
+                        });
+                    }
+                } catch (_) {}
+
+                // Return with keys sorted ascending by date so the export is in
+                // chronological order regardless of the order data sources were merged.
+                const sortedKeys = Object.keys(byDate).sort();
+                const sorted = {};
+                sortedKeys.forEach(function (k) { sorted[k] = byDate[k]; });
+                return sorted;
+            }
+
             async function copyJSON() {
-                const data = getAllEntries();
+                const data = getAllDataByDate();
+                const dateCount = Object.keys(data).length;
                 const text = JSON.stringify(data, null, 2);
-                if (!data.length) { status("No entries to copy."); return; }
+                if (!dateCount) { status("No entries to copy."); return; }
                 try {
                     await navigator.clipboard.writeText(text);
-                    status(`Copied ${data.length} ${data.length === 1 ? "entry" : "entries"} to clipboard as JSON.`);
+                    status(`Copied ${dateCount} ${dateCount === 1 ? "date" : "dates"} to clipboard as JSON.`);
                 } catch (e) {
-                    // Fallback: try execCommand, then download
                     try {
                         const ta = document.createElement("textarea");
                         ta.value = text; document.body.appendChild(ta); ta.select(); document.execCommand("copy"); document.body.removeChild(ta);
-                        status(`Copied ${data.length} ${data.length === 1 ? "entry" : "entries"} to clipboard as JSON.`);
+                        status(`Copied ${dateCount} ${dateCount === 1 ? "date" : "dates"} to clipboard as JSON.`);
                     } catch (err) {
                         const blob = new Blob([text], { type: "application/json" });
                         const url = URL.createObjectURL(blob);
@@ -951,6 +1015,119 @@
             const tsvg = d3.select("#timeseries").attr("viewBox", [0, 0, 760, 310]);
             const tooltip = d3.select("body").append("div").attr("class", "tooltip").style("opacity", 0);
 
+            // View mode: 'time' (default) or 'uniform' (last 2 months, evenly spaced + frequency strip)
+            let tsViewMode = 'time';
+            const UNIFORM_WINDOW_MS = 60 * 24 * 60 * 60 * 1000; // 2 months (~60 days)
+
+            const tsViewToggle = document.getElementById('ts-view-toggle');
+            function updateToggleLabel() {
+                tsViewToggle.textContent = tsViewMode === 'time'
+                    ? 'Uniform (2 months)'
+                    : 'Time-based';
+                tsViewToggle.title = tsViewMode === 'time'
+                    ? 'Switch to uniform spacing for entries from the last 2 months'
+                    : 'Switch back to real-time x-axis';
+            }
+            updateToggleLabel();
+            tsViewToggle.addEventListener('click', () => {
+                tsViewMode = tsViewMode === 'time' ? 'uniform' : 'time';
+                updateToggleLabel();
+                drawTimeSeries();
+            });
+
+            /* Color for time-since-previous-entry band.
+               <1h  → cyan, <6h → green, ~2d (2880min) → yellow, >1 week (10080min) → red. */
+            const GAP_COLOR_SCALE = d3.scaleLinear()
+                .domain([0, 60, 360, 2880, 10080])
+                .range(['#00d4ff', '#00d4ff', '#2ecc40', '#f5c400', '#d9353f'])
+                .interpolate(d3.interpolateHcl)
+                .clamp(true);
+            function gapColorMinutes(mins) { return GAP_COLOR_SCALE(mins); }
+
+            /* Prepare rows with either a date-based or uniform-index x value. */
+            function applyViewX(rows, iw) {
+                if (tsViewMode === 'uniform') {
+                    const cutoff = Date.now() - UNIFORM_WINDOW_MS;
+                    const filtered = rows.filter(r => r.ts.getTime() >= cutoff);
+                    const n = Math.max(1, filtered.length);
+                    filtered.forEach((r, i) => {
+                        r._xVal = n === 1 ? iw / 2 : (i / (n - 1)) * iw;
+                        r._gapMin = i === 0 ? null : (r.ts - filtered[i - 1].ts) / 60000;
+                    });
+                    return {
+                        rows: filtered,
+                        xAccessor: d => d._xVal,
+                        renderAxis: (g, ih) => {
+                            // sparse date labels at ~5 positions
+                            const ticks = [];
+                            const step = Math.max(1, Math.floor(filtered.length / 5));
+                            for (let i = 0; i < filtered.length; i += step) ticks.push(filtered[i]);
+                            if (filtered.length && ticks[ticks.length - 1] !== filtered[filtered.length - 1]) {
+                                ticks.push(filtered[filtered.length - 1]);
+                            }
+                            const axis = g.append('g').attr('transform', `translate(0,${ih})`);
+                            axis.append('line').attr('x1', 0).attr('x2', iw).attr('stroke', '#888');
+                            ticks.forEach(t => {
+                                axis.append('line').attr('x1', t._xVal).attr('x2', t._xVal)
+                                    .attr('y1', 0).attr('y2', 5).attr('stroke', '#888');
+                                axis.append('text').attr('x', t._xVal).attr('y', 18)
+                                    .attr('text-anchor', 'middle').style('font-size', '10px').style('fill', '#555')
+                                    .text(d3.timeFormat('%b %d')(t.ts));
+                            });
+                        }
+                    };
+                }
+                // time mode (default)
+                const x = d3.scaleTime().domain(d3.extent(rows, d => d.ts)).range([0, iw]);
+                rows.forEach(r => { r._xVal = x(r.ts); });
+                return {
+                    rows: rows,
+                    xAccessor: d => d._xVal,
+                    renderAxis: (g, ih) => {
+                        g.append('g').attr('transform', `translate(0,${ih})`).call(d3.axisBottom(x));
+                    }
+                };
+            }
+
+            /* Draw a thin frequency-color strip just below the x-axis showing
+               time-since-previous-entry for each entry.  Only used in uniform mode. */
+            function drawFrequencyStrip(g, rows, iw, ih) {
+                if (tsViewMode !== 'uniform' || rows.length < 2) return;
+                const stripY = ih + 24;  // below the axis labels
+                const stripH = 6;
+                for (let i = 1; i < rows.length; i++) {
+                    const gapMin = rows[i]._gapMin;
+                    const x0 = rows[i - 1]._xVal;
+                    const x1 = rows[i]._xVal;
+                    g.append('rect')
+                        .attr('x', x0).attr('y', stripY)
+                        .attr('width', Math.max(0.5, x1 - x0)).attr('height', stripH)
+                        .attr('fill', gapColorMinutes(gapMin))
+                        .append('title').text(
+                            'Gap: ' + (gapMin < 60
+                                ? gapMin.toFixed(0) + ' min'
+                                : gapMin < 60 * 24
+                                    ? (gapMin / 60).toFixed(1) + ' h'
+                                    : (gapMin / 60 / 24).toFixed(1) + ' d')
+                        );
+                }
+                // Legend
+                const legendY = stripY + stripH + 12;
+                const legendPairs = [
+                    ['#00d4ff', '< 1 h'],
+                    ['#2ecc40', '< 6 h'],
+                    ['#f5c400', '~ 2 d'],
+                    ['#d9353f', '> 1 w']
+                ];
+                let lx = 0;
+                legendPairs.forEach(p => {
+                    g.append('rect').attr('x', lx).attr('y', legendY - 7).attr('width', 10).attr('height', 7).attr('fill', p[0]);
+                    const t = g.append('text').attr('x', lx + 13).attr('y', legendY)
+                        .style('font-size', '10px').style('fill', '#666').text(p[1]);
+                    lx += 13 + t.node().getComputedTextLength() + 12;
+                });
+            }
+
             function drawTimeSeries() {
                 if (selectedAttributes.size > 0) {
                     drawAttributeTimeSeries();
@@ -963,10 +1140,18 @@
                 tsvg.selectAll("*").remove();
                 const res = db.exec(`SELECT ts, log, ${ITEMS.map(n => `"${n}"`).join(",")} FROM entries ORDER BY ts ASC`);
                 if (!res.length) return;
-                const rows = res[0].values.map(r => {
+                const raw = res[0].values.map(r => {
                     const itemVals = {}; ITEMS.forEach((name, idx) => itemVals[name] = r[2 + idx]);
                     return { ts: new Date(r[0]), log: r[1] || "", itemVals };
                 });
+
+                const margin = { l: 50, r: 20, t: 10, b: tsViewMode === 'uniform' ? 78 : 50 };
+                const W = 760, H = 310, iw = W - margin.l - margin.r, ih = H - margin.t - margin.b;
+                const g = tsvg.append("g").attr("transform", `translate(${margin.l},${margin.t})`);
+
+                const view = applyViewX(raw, iw);
+                const rows = view.rows;
+                if (!rows.length) return;
 
                 const attrs = Array.from(selectedAttributes);
                 const posAttrs = attrs.filter(a => POS_ITEMS.has(a));
@@ -986,25 +1171,21 @@
                         layers[attr] = { y0: -negSum, y1: -(negSum + val) };
                         negSum += val;
                     });
-                    return { ts: r.ts, log: r.log, itemVals: r.itemVals, layers, posTotal: posSum, negTotal: negSum };
+                    return { ts: r.ts, log: r.log, itemVals: r.itemVals, layers, posTotal: posSum, negTotal: negSum, _xVal: r._xVal, _gapMin: r._gapMin };
                 });
 
                 const maxPos = d3.max(stackedRows, d => d.posTotal) || 5;
                 const maxNeg = d3.max(stackedRows, d => d.negTotal) || 5;
                 const yMax = Math.max(maxPos, maxNeg, 5);
 
-                const margin = { l: 50, r: 20, t: 10, b: 50 };
-                const W = 760, H = 310, iw = W - margin.l - margin.r, ih = H - margin.t - margin.b;
-                const g = tsvg.append("g").attr("transform", `translate(${margin.l},${margin.t})`);
-                const x = d3.scaleTime().domain(d3.extent(rows, d => d.ts)).range([0, iw]);
-
                 const hasPos = posAttrs.length > 0, hasNeg = negAttrs.length > 0;
                 const yMin = hasNeg ? -yMax : 0;
                 const yMaxVal = hasPos ? yMax : 0;
                 const y = d3.scaleLinear().domain([yMin, yMaxVal]).nice().range([ih, 0]);
 
-                // X-axis at y=0
-                g.append("g").attr("transform", `translate(0,${y(0)})`).call(d3.axisBottom(x));
+                // X-axis — at bottom (keeps uniform legend/strip clean). In time mode we
+                // still emulate the earlier behavior with ticks at the bottom here.
+                view.renderAxis(g, ih);
                 g.append("g").call(d3.axisLeft(y));
 
                 // Zero line
@@ -1018,7 +1199,7 @@
                 posAttrs.forEach(attr => {
                     const color = attrColorMap[attr] || "#999";
                     const area = d3.area()
-                        .x(d => x(d.ts))
+                        .x(d => d._xVal)
                         .y0(d => y(d.layers[attr].y0))
                         .y1(d => y(d.layers[attr].y1))
                         .curve(d3.curveMonotoneX);
@@ -1032,7 +1213,7 @@
                 negAttrs.forEach(attr => {
                     const color = attrColorMap[attr] || "#999";
                     const area = d3.area()
-                        .x(d => x(d.ts))
+                        .x(d => d._xVal)
                         .y0(d => y(d.layers[attr].y0))
                         .y1(d => y(d.layers[attr].y1))
                         .curve(d3.curveMonotoneX);
@@ -1041,6 +1222,9 @@
                         .attr("stroke", color).attr("stroke-width", 1.2)
                         .attr("d", area);
                 });
+
+                // Frequency color strip (uniform mode only)
+                drawFrequencyStrip(g, stackedRows, iw, ih);
 
                 // Tooltip helper
                 function tipHtml(d) {
@@ -1065,7 +1249,7 @@
                 const bandW = rows.length > 1 ? Math.max(4, iw / rows.length) : iw;
                 g.selectAll(".hover-zone").data(stackedRows).enter().append("rect")
                     .attr("class", "hover-zone")
-                    .attr("x", d => x(d.ts) - bandW / 2).attr("y", 0)
+                    .attr("x", d => d._xVal - bandW / 2).attr("y", 0)
                     .attr("width", bandW).attr("height", ih)
                     .attr("fill", "transparent").attr("cursor", "crosshair")
                     .on("mouseover", (ev, d) => {
@@ -1085,7 +1269,6 @@
                         drawMonthlyAverage();
                     });
 
-                g.append("text").attr("x", iw / 2).attr("y", ih + 38).attr("text-anchor", "middle").text("Date");
                 g.append("text").attr("x", -ih / 2).attr("y", -38).attr("text-anchor", "middle").attr("transform", "rotate(-90)").text("Score");
             }
 
@@ -1093,29 +1276,29 @@
                 tsvg.selectAll("*").remove();
                 const res = db.exec(`SELECT ts, positive_score, negative_score, log, ${ITEMS.map(n => `"${n}"`).join(",")} FROM entries ORDER BY ts ASC`);
                 if (!res.length) return;
-                const rows = res[0].values.map(r => {
+                const raw = res[0].values.map(r => {
                     const itemVals = {}; ITEMS.forEach((name, idx) => itemVals[name] = r[4 + idx]);
                     const pos = r[1], neg = r[2];
-                    const total = pos + neg; // total intensity (20-100 range, since each is 10-50)
-                    // Log ratio: log(pos/neg), symmetric around 0 when equal
-                    // Range is roughly -1.6 to +1.6 (log(10/50) to log(50/10))
+                    const total = pos + neg;
                     const logRatio = Math.log(pos / neg);
                     return { ts: new Date(r[0]), pos, neg, diff: pos - neg, total, logRatio, log: r[3] || "", itemVals };
                 });
 
-                // Calculate saturation scale based on YOUR actual score range
-                // Full 0→1 saturation range mapped to your data's min→max
+                const margin = { l: 70, r: 20, t: 10, b: tsViewMode === 'uniform' ? 78 : 50 };
+                const W = 760, H = 310, iw = W - margin.l - margin.r, ih = H - margin.t - margin.b;
+                const g = tsvg.append("g").attr("transform", `translate(${margin.l},${margin.t})`);
+
+                const view = applyViewX(raw, iw);
+                const rows = view.rows;
+                if (!rows.length) return;
+
+                // Saturation + color scales from visible data
                 const totalMin = d3.min(rows, d => d.total);
                 const totalMax = d3.max(rows, d => d.total);
                 const satScale = d3.scaleLinear().domain([totalMin, totalMax]).range([0, 1]).clamp(true);
-
-                // Map log ratio to 0-1 for color interpolation
-                // Use YOUR actual data range so the most extreme entry gets full color
-                const absLogRatioMax = d3.max(rows, d => Math.abs(d.logRatio));
+                const absLogRatioMax = d3.max(rows, d => Math.abs(d.logRatio)) || 1;
                 const logRatioScale = d3.scaleLinear().domain([-absLogRatioMax, absLogRatioMax]).range([0, 1]).clamp(true);
 
-                // Color function: log ratio determines color (yellow for positive, purple for negative)
-                // We interpolate in RGB space
                 function getColor(d) {
                     const colors = getColors();
                     const sat = satScale(d.total);
@@ -1127,44 +1310,46 @@
                     return d3.interpolateRgb(gray, baseColor)(sat);
                 }
 
-                const margin = { l: 70, r: 20, t: 10, b: 50 };
-                const W = 760, H = 310, iw = W - margin.l - margin.r, ih = H - margin.t - margin.b;
-                const g = tsvg.append("g").attr("transform", `translate(${margin.l},${margin.t})`);
-                const x = d3.scaleTime().domain(d3.extent(rows, d => d.ts)).range([0, iw]);
-                const y = d3.scaleLinear().domain([-40, 40]).range([ih, 0]); // centered for difference
+                const y = d3.scaleLinear().domain([-40, 40]).range([ih, 0]);
 
-                g.append("g").attr("transform", `translate(0,${ih})`).call(d3.axisBottom(x));
+                view.renderAxis(g, ih);
                 g.append("g").call(d3.axisLeft(y));
 
-                // Add zero line for reference
+                // Zero line
                 const y0 = y(0);
                 g.append("line").attr("x1", 0).attr("x2", iw).attr("y1", y0).attr("y2", y0)
                     .attr("stroke", "#999").attr("stroke-dasharray", "4,4").attr("opacity", 0.7);
 
-                // Draw filled bars from zero to each point
-                const barWidth = Math.max(2, Math.min(20, iw / rows.length * 0.7));
+                // Bars
+                const barWidth = Math.max(2, Math.min(20, iw / Math.max(1, rows.length) * 0.7));
                 g.selectAll(".bar").data(rows).enter().append("rect").attr("class", "bar")
-                    .attr("x", d => x(d.ts) - barWidth / 2)
+                    .attr("x", d => d._xVal - barWidth / 2)
                     .attr("y", d => d.diff >= 0 ? y(d.diff) : y0)
                     .attr("width", barWidth)
                     .attr("height", d => Math.abs(y(d.diff) - y0))
                     .attr("fill", d => getColor(d))
                     .attr("opacity", 0.7);
 
-                // Draw line connecting points
-                const lineDiff = d3.line().x(d => x(d.ts)).y(d => y(d.diff));
+                // Line
+                const lineDiff = d3.line().x(d => d._xVal).y(d => y(d.diff));
                 g.append("path").datum(rows).attr("fill", "none").attr("stroke", "#333").attr("stroke-width", 1.5).attr("d", lineDiff);
 
+                // Frequency strip (uniform mode)
+                drawFrequencyStrip(g, rows, iw, ih);
+
                 const showTip = (ev, d) => {
+                    const gapStr = (d._gapMin != null)
+                        ? `<br>Since last: ${d._gapMin < 60 ? d._gapMin.toFixed(0)+' min' : d._gapMin < 1440 ? (d._gapMin/60).toFixed(1)+' h' : (d._gapMin/1440).toFixed(1)+' d'}`
+                        : '';
                     tooltip.style("opacity", 1)
-                        .html(`<b>${d.ts.toLocaleString()}</b><br>Balance: ${d.diff} (Pos: ${d.pos}, Neg: ${d.neg})<br>Log ratio: ${d.logRatio.toFixed(2)}${d.log ? `<div style="margin-top:4px;opacity:.9">${d.log.replace(/</g, "&lt;")}</div>` : ""}`)
+                        .html(`<b>${d.ts.toLocaleString()}</b><br>Balance: ${d.diff} (Pos: ${d.pos}, Neg: ${d.neg})<br>Log ratio: ${d.logRatio.toFixed(2)}${gapStr}${d.log ? `<div style="margin-top:4px;opacity:.9">${d.log.replace(/</g, "&lt;")}</div>` : ""}`)
                         .style("left", (ev.pageX + 10) + "px").style("top", (ev.pageY - 28) + "px");
                 };
                 const hideTip = () => tooltip.style("opacity", 0);
 
                 function onOver(ev, d) {
                     showTip(ev, d);
-                    drawMonthlyAverage();    // ensure monthly is drawn once (for status), then hide
+                    drawMonthlyAverage();
                     monthlyPoly.attr("d", null);
                     drawPreview(d.itemVals);
                     status(`Previewing ${d.ts.toLocaleString()} on windrose`);
@@ -1173,16 +1358,15 @@
                 function onOut() {
                     hideTip();
                     drawPreview(null);
-                    drawMonthlyAverage();    // restore monthly average on idle
+                    drawMonthlyAverage();
                 }
 
                 // Interactive circles on top
                 g.selectAll(".pt").data(rows).enter().append("circle").attr("class", "pt")
-                    .attr("cx", d => x(d.ts)).attr("cy", d => y(d.diff)).attr("r", 5)
+                    .attr("cx", d => d._xVal).attr("cy", d => y(d.diff)).attr("r", 5)
                     .attr("fill", d => getColor(d)).attr("stroke", "#333").attr("stroke-width", 1)
                     .on("mouseover", onOver).on("mousemove", onMove).on("mouseout", onOut);
 
-                g.append("text").attr("x", iw / 2).attr("y", ih + 38).attr("text-anchor", "middle").text("Date");
                 g.append("text").attr("x", -ih / 2).attr("y", -48).attr("text-anchor", "middle").attr("transform", "rotate(-90)").text("Balance (−40 to +40)");
             }
             drawTimeSeries();
@@ -1196,7 +1380,11 @@
                 drawPreview(null);
                 drawTimeSeries();
                 drawMonthlyAverage();
-                /* Also refresh sleep module (may have new rows from cloud merge) */
+                /* Re-publish the (possibly newly-imported) DB reference and refresh
+                   the sleep module against it. Without this, sleep.js keeps
+                   querying the original empty DB after .sqlite import. */
+                window.panasDB = db;
+                if (window.panasSleepRebind) window.panasSleepRebind(db);
                 if (window.panasRefreshSleep) window.panasRefreshSleep();
             }
 
