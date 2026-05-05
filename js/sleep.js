@@ -6,7 +6,7 @@
  *     · y = time-of-day (18:00 → next-day 12:00)
  *     · dot at bedtime, filled area from bedtime for `hours_slept` duration
  *     · "?" marker when both bedtime and hours are missing for a day
- * – "Lying comfortably in bed" button → logs timestamp to bedtime_log
+ * – "Going to sleep" button → logs timestamp to bedtime_log
  *
  * Depends on window.panasDB  (sql.js Database)
  *         and window.panasPersist (function to flush DB to localStorage)
@@ -41,7 +41,7 @@
         section.innerHTML = [
             '<h2 style="margin:0 0 .8rem">Sleep</h2>',
             '<div style="display:flex;align-items:center;gap:.6rem;margin-bottom:.8rem;flex-wrap:wrap">',
-            '  <button id="bedtime-btn" style="padding:.45rem .9rem;border:1px solid #7a5ea8;border-radius:8px;background:#f4f0fa;color:#7a5ea8;cursor:pointer;font-size:14px;font-family:inherit">Lying comfortably in bed</button>',
+            '  <button id="bedtime-btn" style="padding:.45rem .9rem;border:1px solid #7a5ea8;border-radius:8px;background:#f4f0fa;color:#7a5ea8;cursor:pointer;font-size:14px;font-family:inherit">Going to sleep</button>',
             '  <span id="bedtime-status" style="font-size:12px;color:#666"></span>',
             '</div>',
             '<div class="sleep-chart-wrap">',
@@ -94,10 +94,10 @@
        =================================================================== */
 
     /** Convert a timestamp into a "sleep day" (YYYY-MM-DD).
-     *  Times before noon belong to the previous calendar day's night. */
+     *  Times before 5 PM belong to the previous calendar day's night. */
     function sleepDayKey(d) {
         var x = new Date(d.getTime());
-        if (x.getHours() < 12) x.setDate(x.getDate() - 1);
+        if (x.getHours() < 17) x.setDate(x.getDate() - 1);
         return x.getFullYear() + '-' +
             String(x.getMonth() + 1).padStart(2, '0') + '-' +
             String(x.getDate()).padStart(2, '0') + 'T00:00:00';
