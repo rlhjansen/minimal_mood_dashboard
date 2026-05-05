@@ -910,12 +910,12 @@
 
             // ===== Copy JSON =====
             function getAllEntries() {
-                const res = db.exec(`SELECT id, ts, log, positive_score, negative_score, ${ITEMS.map(n => `"${n}"`).join(",")} FROM entries ORDER BY ts ASC`);
+                const res = db.exec(`SELECT id, ts, log, ${ITEMS.map(n => `"${n}"`).join(",")} FROM entries ORDER BY ts ASC`);
                 if (!res.length) return [];
                 const rows = res[0].values;
                 return rows.map(r => {
-                    const obj = { id: r[0], ts: r[1], log: r[2] || "", positive_score: r[3], negative_score: r[4], items: {} };
-                    ITEMS.forEach((name, idx) => obj.items[name] = r[5 + idx]);
+                    const obj = { id: r[0], ts: r[1].slice(0, 16), log: r[2] || "", items: {} };
+                    ITEMS.forEach((name, idx) => obj.items[name] = r[3 + idx]);
                     return obj;
                 });
             }
