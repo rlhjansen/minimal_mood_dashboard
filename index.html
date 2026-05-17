@@ -163,7 +163,7 @@
 
         textarea {
             width: 100%;
-            height: 80px;
+            height: 140px;
             margin-top: .6rem;
             padding: .4rem;
             font-family: inherit;
@@ -503,6 +503,219 @@
                 display: none !important;
             }
         }
+
+        /* ---------- Reflection / Summaries section ---------- */
+        #reflection {
+            grid-column: 1 / -1;
+            border: 1px solid #e0e0e0;
+            border-radius: 10px;
+            background: #fcfcfc;
+            padding: .8rem 1rem;
+            margin-top: .4rem;
+        }
+
+        .rf-header {
+            display: flex;
+            align-items: center;
+            gap: .8rem;
+            flex-wrap: wrap;
+        }
+
+        .rf-toggle {
+            background: none;
+            border: none;
+            padding: 0;
+            font-size: 1.05rem;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: .4rem;
+            cursor: pointer;
+        }
+        .rf-toggle:hover { background: none; text-decoration: underline; }
+
+        .rf-caret { display: inline-block; transition: transform .15s ease; font-size: .9em; color: #888; }
+        #reflection:not(.collapsed) .rf-caret { transform: rotate(90deg); }
+
+        .rf-count { font-weight: 400; color: #888; font-size: .85rem; }
+        .rf-selstatus { font-size: 12px; color: #555; }
+        .rf-selstatus.active { color: #1f77b4; font-weight: 600; }
+        #rf-clear-range { padding: .25rem .55rem; font-size: 12px; }
+
+        .rf-body { display: none; margin-top: .8rem; }
+        #reflection:not(.collapsed) .rf-body { display: block; }
+
+        .rf-layout {
+            display: grid;
+            grid-template-columns: minmax(160px, 0.56fr) minmax(320px, 1.6fr) minmax(300px, 1.34fr);
+            gap: 1rem;
+            align-items: stretch;
+        }
+        @media (max-width: 1100px) {
+            .rf-layout { grid-template-columns: 1fr 1fr; }
+            .rf-col-side { grid-column: 1 / -1; }
+        }
+        @media (max-width: 760px) {
+            .rf-layout { grid-template-columns: 1fr; }
+            .rf-col-side { grid-column: auto; }
+        }
+
+        .rf-col { display: flex; flex-direction: column; min-width: 0; }
+        .rf-col-title {
+            font-size: 11px; text-transform: uppercase; letter-spacing: .04em;
+            color: #888; font-weight: 600; margin-bottom: .3rem;
+        }
+
+        .rf-entries, .rf-detail {
+            max-height: 520px;
+            overflow-y: auto;
+            border: 1px solid #e8e8e8;
+            border-radius: 6px;
+            background: #fff;
+            flex: 1 1 auto;
+        }
+
+        .rf-row {
+            display: flex;
+            align-items: center;
+            gap: .8rem;
+            padding: .35rem .55rem;
+            font-size: 12px;
+            border-bottom: 1px solid #f0f0f0;
+            cursor: pointer;
+        }
+        .rf-row:last-child { border-bottom: none; }
+        .rf-row:hover { background: #f6f9fc; }
+        .rf-row.in-range { background: #fff7d6; }
+        .rf-row.in-range:hover { background: #ffeeb3; }
+        .rf-row .rf-ts { color: #444; font-variant-numeric: tabular-nums; flex: 0 0 auto; }
+        .rf-row .rf-scores {
+            font-variant-numeric: tabular-nums;
+            font-family: ui-monospace, Consolas, monospace;
+            font-size: 11.5px;
+            white-space: nowrap;
+            flex: 0 0 auto;
+        }
+        .rf-row .rf-scores .pos { color: var(--color-pos); font-weight: 600; filter: brightness(.78); }
+        .rf-row .rf-scores .neg { color: var(--color-neg); font-weight: 600; margin-left: .35rem; }
+        .rf-row .rf-badge {
+            font-size: 10px;
+            background: #1f77b4;
+            color: #fff;
+            border-radius: 10px;
+            padding: 1px 7px;
+            cursor: pointer;
+            user-select: none;
+            margin-left: auto;
+        }
+        .rf-row .rf-badge:hover { background: #155a8a; }
+        .rf-row .rf-badge.zero { background: transparent; color: #ccc; cursor: default; }
+        .rf-row .rf-badge.zero:hover { background: transparent; }
+
+        /* Detail block ---------- */
+        .rf-detail-empty {
+            padding: 1rem;
+            color: #888;
+            font-size: 12px;
+            text-align: center;
+        }
+        .rf-detail-mean {
+            position: sticky;
+            top: 0;
+            background: #f6f9fc;
+            border-bottom: 1px solid #e0e0e0;
+            padding: .45rem .6rem;
+            font-size: 14px;
+            font-family: ui-monospace, Consolas, monospace;
+            font-weight: 600;
+            z-index: 1;
+        }
+        .rf-detail-mean .pos { color: var(--color-pos); filter: brightness(.78); }
+        .rf-detail-mean .neg { color: var(--color-neg); }
+        .rf-detail-mean .sep { color: #aaa; margin: 0 .25rem; font-weight: 400; }
+
+        .rf-detail-entry {
+            padding: .5rem .6rem;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        .rf-detail-entry:last-child { border-bottom: none; }
+        .rf-detail-entry .de-head {
+            display: flex; align-items: center; gap: .6rem; font-size: 11.5px; color: #555;
+        }
+        .rf-detail-entry .de-head .ts { color: #333; font-variant-numeric: tabular-nums; }
+        .rf-detail-entry .de-bars {
+            display: grid;
+            grid-template-columns: 18px 1fr 32px;
+            gap: .4rem;
+            align-items: center;
+            margin-top: .3rem;
+            font-size: 11px;
+        }
+        .rf-detail-entry .de-bars .lab { color: #777; font-weight: 600; text-align: right; }
+        .rf-detail-entry .de-bars .bar-track {
+            height: 8px; background: #f0f0f0; border-radius: 4px; overflow: hidden;
+        }
+        .rf-detail-entry .de-bars .bar-fill { height: 100%; border-radius: 4px; }
+        .rf-detail-entry .de-bars .bar-fill.pos { background: var(--color-pos); }
+        .rf-detail-entry .de-bars .bar-fill.neg { background: var(--color-neg); }
+        .rf-detail-entry .de-bars .v {
+            font-variant-numeric: tabular-nums; font-family: ui-monospace, Consolas, monospace;
+            color: #444; text-align: right;
+        }
+        .rf-detail-entry .de-log {
+            margin-top: .35rem;
+            color: #333;
+            font-size: 12px;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+        .rf-detail-entry .de-log:empty { display: none; }
+
+        /* Editor + summaries list -------- */
+        .rf-col-side .rf-editor { display: flex; flex-direction: column; flex: 1 1 auto; }
+        .rf-col-side .rf-editor textarea {
+            width: 100%; min-height: 300px; flex: 1 1 auto;
+            font-family: inherit; font-size: 13px;
+            padding: .5rem; border: 1px solid #bbb; border-radius: 6px; box-sizing: border-box;
+            background: #fff;
+            resize: vertical;
+        }
+        .rf-col-side .rf-editor textarea:focus { border-color: #1f77b4; outline: none; }
+        .rf-col-side .rf-editor-row {
+            display: flex; gap: .5rem; align-items: center; margin-top: .4rem; flex-wrap: wrap;
+        }
+        .rf-col-side .rf-editor-row button { padding: .35rem .7rem; font-size: 12px; }
+        .rf-editor-msg { font-size: 12px; color: #2a7; }
+        .rf-editor-msg.err { color: #c33; }
+
+        .rf-list-wrap { margin-top: .8rem; flex: 1 1 auto; display: flex; flex-direction: column; min-height: 0; }
+        .rf-list {
+            margin-top: .3rem;
+            max-height: 220px;
+            overflow-y: auto;
+            border: 1px solid #e8e8e8;
+            border-radius: 6px;
+            background: #fff;
+        }
+        .rf-summary-item {
+            padding: .45rem .6rem;
+            border-bottom: 1px solid #f0f0f0;
+            font-size: 12px;
+        }
+        .rf-summary-item:last-child { border-bottom: none; }
+        .rf-summary-item .rf-sum-head {
+            display: flex; gap: .5rem; align-items: center; flex-wrap: wrap;
+        }
+        .rf-summary-item .rf-sum-range { font-weight: 600; color: #333; }
+        .rf-summary-item .rf-sum-meta { color: #888; font-size: 11px; }
+        .rf-summary-item .rf-sum-spacer { flex: 1; }
+        .rf-summary-item button {
+            padding: .15rem .45rem; font-size: 11px; border-radius: 4px;
+        }
+        .rf-summary-item .rf-sum-text {
+            margin-top: .25rem; color: #444; white-space: pre-wrap;
+        }
+        .rf-summary-item.highlight { background: #fff7d6; }
     </style>
 </head>
 
@@ -540,6 +753,7 @@
             <button id="randomize">Randomize petals</button>
             <button id="save">Save + Download DB</button>
             <button id="copyJson">Copy JSON</button>
+            <button id="copyJsonShort" title="Older than 2 months: replaced with summaries + mean/std">Copy JSON (short)</button>
         </div>
 
         <div class="colorpicker-bar" id="colorpicker-bar">
@@ -575,6 +789,45 @@
         <div id="sleep-anchor"></div>
 
     </div>
+
+    <section id="reflection" class="reflection collapsed">
+        <header class="rf-header">
+            <button type="button" id="rf-toggle" class="rf-toggle" aria-expanded="false">
+                <span class="rf-caret">▸</span>
+                <span>Reflection / Summaries</span>
+                <span class="rf-count" id="rf-count"></span>
+            </button>
+            <span class="rf-selstatus" id="rf-selstatus">No range selected — click two entry rows to pick a range.</span>
+            <button type="button" id="rf-clear-range" style="display:none">Clear range</button>
+        </header>
+        <div class="rf-body">
+            <div class="rf-layout">
+                <div class="rf-col rf-col-entries">
+                    <div class="rf-col-title">Entries (click to select range)</div>
+                    <div class="rf-entries" id="rf-entries" aria-label="entries list"></div>
+                </div>
+                <div class="rf-col rf-col-detail">
+                    <div class="rf-col-title" id="rf-detail-title">Selected entries</div>
+                    <div class="rf-detail" id="rf-detail"></div>
+                </div>
+                <div class="rf-col rf-col-side">
+                    <div class="rf-editor">
+                        <div class="rf-col-title">Summary</div>
+                        <textarea id="rf-text"></textarea>
+                        <div class="rf-editor-row">
+                            <button type="button" id="rf-save">Save summary</button>
+                            <button type="button" id="rf-cancel-edit" style="display:none">Cancel edit</button>
+                            <span class="rf-editor-msg" id="rf-editor-msg"></span>
+                        </div>
+                    </div>
+                    <div class="rf-list-wrap">
+                        <div class="rf-col-title">Existing summaries</div>
+                        <div class="rf-list" id="rf-list"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
 
     <script src="https://d3js.org/d3.v7.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.10.2/sql-wasm.js"></script>
@@ -627,6 +880,17 @@
             ensureCol("negative_score", "INTEGER");
             ensureCol("hours_slept", "REAL");
             db.exec(`CREATE TABLE IF NOT EXISTS sleep_log (id INTEGER PRIMARY KEY AUTOINCREMENT, ts TEXT, hours_slept REAL)`);
+            // Reflection summaries: non-destructive notes spanning [start_ts, end_ts].
+            // `ts` column doubles as the creation timestamp / merge key for cloud sync.
+            db.exec(`CREATE TABLE IF NOT EXISTS summaries (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                ts TEXT NOT NULL,
+                start_ts TEXT NOT NULL,
+                end_ts TEXT NOT NULL,
+                text TEXT NOT NULL DEFAULT '',
+                n_entries INTEGER,
+                updated_at TEXT
+            )`);
             db.exec(`UPDATE entries SET log='' WHERE log IS NULL`);
             persist();
 
@@ -1078,6 +1342,24 @@
                     });
                 } catch (_) {}
 
+                // Reflection summaries — attached to the day of their end_ts so they
+                // appear chronologically after the entries they describe.
+                try {
+                    const sums = (typeof getAllSummaries === "function") ? getAllSummaries() : [];
+                    sums.forEach(function (s) {
+                        const day = ensureDate(s.end_ts);
+                        if (!day.summaries) day.summaries = [];
+                        day.summaries.push({
+                            id: s.id,
+                            saved_at: s.ts,
+                            updated_at: s.updated_at,
+                            range: { start: s.start_ts, end: s.end_ts },
+                            n_entries: s.n_entries,
+                            text: s.text
+                        });
+                    });
+                } catch (_) {}
+
                 // Per-sleep-day summary (bedtime + hours_slept + inferred wake time).
                 // Grouped on "sleep day" (times before noon belong to the previous night).
                 try {
@@ -1122,6 +1404,537 @@
             }
 
             document.getElementById("copyJson").onclick = copyJSON;
+
+            // ===================================================================
+            // Reflection / summaries: non-destructive weekly summarization, plus
+            // a short-form JSON export that aggregates entries older than 2 months.
+            // ===================================================================
+            const SHORT_FORM_CUTOFF_DAYS = 60;
+            // ITEMS used for stats; positive_score / negative_score intentionally excluded
+            // from aggregated blocks because they are deterministic derivations.
+
+            function getAllSummaries() {
+                try {
+                    const res = db.exec("SELECT id, ts, start_ts, end_ts, text, n_entries, updated_at FROM summaries ORDER BY start_ts ASC, id ASC");
+                    if (!res.length) return [];
+                    return res[0].values.map(r => ({
+                        id: r[0], ts: r[1], start_ts: r[2], end_ts: r[3],
+                        text: r[4] || "", n_entries: r[5], updated_at: r[6]
+                    }));
+                } catch (_) { return []; }
+            }
+
+            function getEntriesForRange(startISO, endISO) {
+                const cols = ITEMS.map(n => '"' + n + '"').join(",");
+                const res = db.exec(
+                    `SELECT id, ts, log, hours_slept, ${cols} FROM entries WHERE ts >= '${startISO}' AND ts <= '${endISO}' ORDER BY ts ASC`
+                );
+                if (!res.length) return [];
+                return res[0].values.map(r => {
+                    const o = { id: r[0], ts: r[1], log: r[2] || "", hours_slept: r[3], items: {} };
+                    ITEMS.forEach((n, i) => o.items[n] = r[4 + i]);
+                    return o;
+                });
+            }
+
+            function getSleepLogsForRange(startISO, endISO) {
+                try {
+                    const res = db.exec(
+                        `SELECT ts, hours_slept FROM sleep_log WHERE hours_slept IS NOT NULL AND ts >= '${startISO}' AND ts <= '${endISO}' ORDER BY ts ASC`
+                    );
+                    if (!res.length) return [];
+                    return res[0].values.map(r => ({ ts: r[0], hours_slept: r[1] }));
+                } catch (_) { return []; }
+            }
+
+            function meanStd(values) {
+                const xs = values.filter(v => v != null && !Number.isNaN(v));
+                const n = xs.length;
+                if (n === 0) return { n: 0, mean: null, std: null };
+                const m = xs.reduce((a, b) => a + b, 0) / n;
+                if (n < 2) return { n: 1, mean: round3(m), std: null };
+                const v = xs.reduce((a, b) => a + (b - m) * (b - m), 0) / (n - 1);
+                return { n, mean: round3(m), std: round3(Math.sqrt(v)) };
+            }
+            function round3(x) { return Math.round(x * 1000) / 1000; }
+
+            function aggregateBlock(entries, sleepLogs, label, summaryMeta) {
+                const panas_mean = {};
+                const panas_std = {};
+                ITEMS.forEach(it => {
+                    const ms = meanStd(entries.map(e => e.items[it]));
+                    panas_mean[it] = ms.mean;
+                    panas_std[it] = ms.std;
+                });
+                const sleepVals = entries.map(e => e.hours_slept).filter(v => v != null)
+                    .concat(sleepLogs.map(s => s.hours_slept));
+                const sleepStats = meanStd(sleepVals);
+                const ids = entries.map(e => e.id);
+                const first = entries.length ? entries[0].ts : null;
+                const last = entries.length ? entries[entries.length - 1].ts : null;
+                const block = {
+                    kind: label,
+                    span: { start: first, end: last },
+                    n_entries: entries.length,
+                    entry_ids: ids,
+                    panas_mean,
+                    panas_std,
+                    sleep: { n_with_sleep: sleepStats.n, mean_hours: sleepStats.mean, std_hours: sleepStats.std }
+                };
+                if (summaryMeta) {
+                    block.summary_id = summaryMeta.id;
+                    block.summary_range = { start: summaryMeta.start_ts, end: summaryMeta.end_ts };
+                    block.summary_text = summaryMeta.text;
+                    block.summary_saved_at = summaryMeta.ts || null;
+                    block.summary_updated_at = summaryMeta.updated_at || null;
+                }
+                return block;
+            }
+
+            function buildShortFormExport() {
+                const now = new Date();
+                const cutoff = new Date(now.getTime() - SHORT_FORM_CUTOFF_DAYS * 86400 * 1000);
+                const cutoffISO = cutoff.toISOString();
+
+                const allEntriesRes = db.exec(
+                    "SELECT id, ts FROM entries ORDER BY ts ASC"
+                );
+                const allEntries = allEntriesRes.length ? allEntriesRes[0].values.map(r => ({ id: r[0], ts: r[1] })) : [];
+                const oldEntries = allEntries.filter(e => e.ts < cutoffISO);
+                const recentEntries = allEntries.filter(e => e.ts >= cutoffISO);
+
+                const summaries = getAllSummaries();
+                // Sort by span length descending (longer summaries claim entries first),
+                // tie-break by creation ts descending (newer wins). Greedy claim only
+                // applies to OLD entries so each old entry is replaced at most once.
+                const ranked = summaries.slice().sort((a, b) => {
+                    const la = new Date(a.end_ts) - new Date(a.start_ts);
+                    const lb = new Date(b.end_ts) - new Date(b.start_ts);
+                    if (lb !== la) return lb - la;
+                    return (b.ts || "").localeCompare(a.ts || "");
+                });
+
+                const covered = new Set();
+                const claimedBy = {};
+                ranked.forEach(s => {
+                    const matched = oldEntries.filter(e =>
+                        e.ts >= s.start_ts && e.ts <= s.end_ts && !covered.has(e.id)
+                    );
+                    if (!matched.length) return;
+                    matched.forEach(e => covered.add(e.id));
+                    claimedBy[s.id] = matched.map(e => e.id);
+                });
+
+                // One block per summary; aggregates run over every entry in its range.
+                // 'replaces_entries' flags whether per-entry rows were dropped from the
+                // timeline (older) or are still present verbatim (recent).
+                const summaryBlocks = summaries.map(s => {
+                    const detailed = getEntriesForRange(s.start_ts, s.end_ts);
+                    const sleepLogs = getSleepLogsForRange(s.start_ts, s.end_ts);
+                    const block = aggregateBlock(detailed, sleepLogs, "summary", s);
+                    block.replaces_entries = !!claimedBy[s.id];
+                    return block;
+                });
+
+                const uncovered = oldEntries.filter(e => !covered.has(e.id));
+                let unsummarizedBlock = null;
+                if (uncovered.length) {
+                    const detailed = getEntriesForRange(uncovered[0].ts, uncovered[uncovered.length - 1].ts)
+                        .filter(e => uncovered.some(u => u.id === e.id));
+                    const sleepLogs = getSleepLogsForRange(uncovered[0].ts, uncovered[uncovered.length - 1].ts);
+                    unsummarizedBlock = aggregateBlock(detailed, sleepLogs, "older_aggregate", null);
+                }
+
+                // Recent entries: kept verbatim, one item per entry.
+                const recentDetailed = recentEntries.length
+                    ? getEntriesForRange(recentEntries[0].ts, recentEntries[recentEntries.length - 1].ts)
+                    : [];
+                const recentItems = recentDetailed.map(e => ({
+                    kind: "entry",
+                    ts: e.ts,
+                    entry_id: e.id,
+                    hours_slept: e.hours_slept,
+                    log: e.log,
+                    panas: e.items
+                }));
+
+                // One time-ordered timeline. Entries are positioned at their own ts;
+                // summaries and the older-aggregate are positioned at their span END so
+                // they appear after the entries they describe. Tie-break: aggregate items
+                // sort after a verbatim entry that shares the same timestamp.
+                const timeline = summaryBlocks.slice();
+                if (unsummarizedBlock) timeline.push(unsummarizedBlock);
+                timeline.push(...recentItems);
+                const posKey = (it) => it.kind === "entry"
+                    ? [it.ts, 0]
+                    : [(it.span && it.span.end) || "", 1];
+                timeline.sort((a, b) => {
+                    const ka = posKey(a), kb = posKey(b);
+                    if (ka[0] !== kb[0]) return ka[0].localeCompare(kb[0]);
+                    return ka[1] - kb[1];
+                });
+
+                const meta = {
+                    generated_at: now.toISOString(),
+                    cutoff_ts: cutoffISO,
+                    cutoff_days: SHORT_FORM_CUTOFF_DAYS,
+                    n_total_entries: allEntries.length,
+                    n_summary_blocks: summaryBlocks.length,
+                    n_summarized_old_entries: covered.size,
+                    n_unsummarized_older_aggregated: unsummarizedBlock ? unsummarizedBlock.n_entries : 0,
+                    n_recent_entries: recentEntries.length,
+                    notes: "Timeline is a single chronological list. Items carry a 'kind' tag: 'entry' (verbatim entry), 'summary' (a user-written summary covering a span, with PANAS aggregates over the entries in that span; 'replaces_entries' is true when its older entries were dropped from the timeline in favor of the block, false when the entries it covers are still present verbatim because they fall within the recent window), or 'older_aggregate' (older-than-cutoff entries not covered by any summary, lumped into one block). Summaries and aggregates are positioned at their span end, so they appear after the entries they describe. positive_score / negative_score are omitted from aggregates."
+                };
+
+                return { meta, timeline };
+            }
+
+            async function copyJSONShort() {
+                const data = buildShortFormExport();
+                const text = JSON.stringify(data, null, 2);
+                const summaryCount = data.meta.n_summary_blocks;
+                const summarized = data.meta.n_summarized_old_entries;
+                const olderAgg = data.meta.n_unsummarized_older_aggregated;
+                const recent = data.meta.n_recent_entries;
+                const msg = `Copied short-form JSON (${summaryCount} summary block(s), ${summarized} summarized + ${olderAgg} older aggregated, ${recent} recent entries).`;
+                try {
+                    await navigator.clipboard.writeText(text);
+                    status(msg);
+                } catch (e) {
+                    try {
+                        const ta = document.createElement("textarea");
+                        ta.value = text; document.body.appendChild(ta); ta.select();
+                        document.execCommand("copy"); document.body.removeChild(ta);
+                        status(msg);
+                    } catch (_) {
+                        const blob = new Blob([text], { type: "application/json" });
+                        const url = URL.createObjectURL(blob);
+                        const a = document.createElement("a");
+                        a.href = url; a.download = "panas_short.json"; a.click();
+                        URL.revokeObjectURL(url);
+                        status("Clipboard blocked. Downloaded panas_short.json instead.");
+                    }
+                }
+            }
+            document.getElementById("copyJsonShort").onclick = copyJSONShort;
+
+            // ---------- Reflection UI ----------
+            const rfState = {
+                rangeStart: null,   // ISO string (inclusive)
+                rangeEnd: null,     // ISO string (inclusive)
+                editingId: null,    // summary id being edited, or null
+                highlightSummaryId: null
+            };
+
+            const rfEntriesEl = document.getElementById("rf-entries");
+            const rfDetailEl = document.getElementById("rf-detail");
+            const rfDetailTitleEl = document.getElementById("rf-detail-title");
+            const rfListEl = document.getElementById("rf-list");
+            const rfTextEl = document.getElementById("rf-text");
+            const rfMsgEl = document.getElementById("rf-editor-msg");
+            const rfSelStatusEl = document.getElementById("rf-selstatus");
+            const rfClearBtn = document.getElementById("rf-clear-range");
+            const rfCountEl = document.getElementById("rf-count");
+            const rfToggleBtn = document.getElementById("rf-toggle");
+            const rfSectionEl = document.getElementById("reflection");
+            const rfCancelEditBtn = document.getElementById("rf-cancel-edit");
+
+            function esc(s) {
+                return (s == null ? "" : String(s))
+                    .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+            }
+
+            function setRange(startISO, endISO) {
+                rfState.rangeStart = startISO;
+                rfState.rangeEnd = endISO;
+                renderEntries();
+                renderDetail();
+                renderSelStatus();
+            }
+
+            function renderSelStatus() {
+                const hasAny = !!(rfState.rangeStart || rfState.rangeEnd);
+                rfClearBtn.style.display = hasAny ? "" : "none";
+                if (!rfState.rangeStart) {
+                    rfSelStatusEl.classList.remove("active");
+                    rfSelStatusEl.textContent = "No range selected — click two entry rows to pick a range.";
+                    return;
+                }
+                if (!rfState.rangeEnd) {
+                    rfSelStatusEl.classList.add("active");
+                    rfSelStatusEl.textContent = "Start anchored — click another row to set the end.";
+                    return;
+                }
+                const s = new Date(rfState.rangeStart).toLocaleString();
+                const e = new Date(rfState.rangeEnd).toLocaleString();
+                const r = db.exec(
+                    `SELECT COUNT(*) FROM entries WHERE ts >= '${rfState.rangeStart}' AND ts <= '${rfState.rangeEnd}'`
+                );
+                const n = r.length ? r[0].values[0][0] : 0;
+                rfSelStatusEl.classList.add("active");
+                rfSelStatusEl.textContent = `Selected: ${s} → ${e}  (${n} entr${n === 1 ? "y" : "ies"})`;
+            }
+
+            function summariesByEntryId() {
+                const summaries = getAllSummaries();
+                if (!summaries.length) return { byId: new Map(), all: [] };
+                const res = db.exec(
+                    "SELECT id, ts FROM entries ORDER BY ts ASC"
+                );
+                const all = res.length ? res[0].values : [];
+                const byId = new Map();
+                all.forEach(([id, ts]) => {
+                    const matched = summaries.filter(s => ts >= s.start_ts && ts <= s.end_ts);
+                    if (matched.length) byId.set(id, matched);
+                });
+                return { byId, all: summaries };
+            }
+
+            function renderEntries() {
+                const res = db.exec(
+                    "SELECT id, ts, log, positive_score, negative_score FROM entries ORDER BY ts DESC"
+                );
+                const rows = res.length ? res[0].values : [];
+                const { byId } = summariesByEntryId();
+                const startISO = rfState.rangeStart;
+                const endISO = rfState.rangeEnd;
+
+                if (!rows.length) {
+                    rfEntriesEl.innerHTML = '<div style="padding:.8rem;color:#888;font-size:12px">No entries yet.</div>';
+                    return;
+                }
+
+                const html = rows.map(r => {
+                    const id = r[0], ts = r[1], log = r[2] || "", pos = r[3], neg = r[4];
+                    const inRange = (startISO && endISO && ts >= startISO && ts <= endISO);
+                    const isAnchorOnly = (startISO && !endISO && ts === startISO);
+                    const sums = byId.get(id) || [];
+                    const badge = sums.length
+                        ? `<span class="rf-badge" data-entry-id="${id}" title="${esc(sums.map(s => `${s.start_ts.slice(0,10)} → ${s.end_ts.slice(0,10)}`).join('\n'))}">${sums.length} ✎</span>`
+                        : `<span class="rf-badge zero" title="No summary covers this entry">·</span>`;
+                    const tsLabel = new Date(ts).toLocaleString([], { year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit" });
+                    const cls = ["rf-row", (inRange || isAnchorOnly) ? "in-range" : ""].filter(Boolean).join(" ");
+                    const rowTitle = log ? esc(log) : "";
+                    return `<div class="${cls}" data-ts="${esc(ts)}" data-id="${id}" title="${rowTitle}">
+                        <span class="rf-ts">${esc(tsLabel)}</span>
+                        <span class="rf-scores"><span class="pos">+${pos != null ? pos : "?"}</span><span class="neg">-${neg != null ? neg : "?"}</span></span>
+                        ${badge}
+                    </div>`;
+                }).join("");
+                rfEntriesEl.innerHTML = html;
+
+                rfEntriesEl.querySelectorAll(".rf-row").forEach(row => {
+                    row.addEventListener("click", ev => {
+                        if (ev.target.closest(".rf-badge")) return;
+                        const ts = row.dataset.ts;
+                        // First click sets start (and clears end). Second click sets end.
+                        if (!rfState.rangeStart || (rfState.rangeStart && rfState.rangeEnd)) {
+                            setRange(ts, null);
+                        } else {
+                            // Extend: pick whichever ordering is valid
+                            if (ts < rfState.rangeStart) {
+                                setRange(ts, rfState.rangeStart);
+                            } else if (ts === rfState.rangeStart) {
+                                // Clicking the same row clears the selection
+                                setRange(null, null);
+                            } else {
+                                setRange(rfState.rangeStart, ts);
+                            }
+                        }
+                    });
+                });
+
+                rfEntriesEl.querySelectorAll(".rf-badge[data-entry-id]").forEach(b => {
+                    b.addEventListener("click", ev => {
+                        ev.stopPropagation();
+                        const entryId = parseInt(b.dataset.entryId, 10);
+                        const sums = byId.get(entryId) || [];
+                        if (!sums.length) return;
+                        rfState.highlightSummaryId = sums[0].id;
+                        renderSummaryList();
+                        const target = rfListEl.querySelector(`[data-sum-id="${sums[0].id}"]`);
+                        if (target) target.scrollIntoView({ behavior: "smooth", block: "nearest" });
+                    });
+                });
+            }
+
+            function renderDetail() {
+                const startISO = rfState.rangeStart;
+                const endISO = rfState.rangeEnd;
+                if (!startISO || !endISO) {
+                    rfDetailEl.innerHTML = '<div class="rf-detail-empty">Click two entry rows on the left to select a range. The PANAS scores &amp; logs of the selected entries will appear here for reference while you write.</div>';
+                    return;
+                }
+                const entries = getEntriesForRange(startISO, endISO);
+                if (!entries.length) {
+                    rfDetailEl.innerHTML = '<div class="rf-detail-empty">No entries within the selected range.</div>';
+                    return;
+                }
+                const posVals = [], negVals = [];
+                entries.forEach(e => {
+                    let p = 0, n = 0;
+                    POS_ITEMS.forEach(it => { p += e.items[it] || 0; });
+                    NEG_ITEMS.forEach(it => { n += e.items[it] || 0; });
+                    e._pos = p; e._neg = n;
+                    posVals.push(p); negVals.push(n);
+                });
+                const mean = arr => arr.length ? arr.reduce((a, b) => a + b, 0) / arr.length : 0;
+                const meanPos = mean(posVals), meanNeg = mean(negVals);
+                // Each PANAS subscale sums 10 items × 1–5 → range [10, 50].
+                const MAX = 50;
+                const head = `<div class="rf-detail-mean" title="Mean positive / negative PANAS subscale across selection (each on a 10–50 scale)">
+                    <span class="pos">${meanPos.toFixed(1)}</span><span class="sep">/</span><span class="neg">${meanNeg.toFixed(1)}</span>
+                </div>`;
+                const body = entries.map(e => {
+                    const tsLabel = new Date(e.ts).toLocaleString([], { year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit" });
+                    const ppct = Math.max(0, Math.min(100, (e._pos / MAX) * 100));
+                    const npct = Math.max(0, Math.min(100, (e._neg / MAX) * 100));
+                    const sleep = (e.hours_slept != null) ? ` · sleep ${e.hours_slept}h` : "";
+                    return `<div class="rf-detail-entry">
+                        <div class="de-head">
+                            <span class="ts">${esc(tsLabel)}</span>
+                            <span style="color:#888;font-size:11px">${sleep}</span>
+                        </div>
+                        <div class="de-bars">
+                            <span class="lab">+</span>
+                            <span class="bar-track"><span class="bar-fill pos" style="width:${ppct}%"></span></span>
+                            <span class="v">${e._pos}</span>
+                            <span class="lab">−</span>
+                            <span class="bar-track"><span class="bar-fill neg" style="width:${npct}%"></span></span>
+                            <span class="v">${e._neg}</span>
+                        </div>
+                        <div class="de-log">${esc(e.log)}</div>
+                    </div>`;
+                }).join("");
+                rfDetailEl.innerHTML = head + body;
+            }
+
+            function renderSummaryList() {
+                const sums = getAllSummaries();
+                rfCountEl.textContent = sums.length ? `(${sums.length})` : "";
+                if (!sums.length) {
+                    rfListEl.innerHTML = '<div style="padding:.6rem;color:#888;font-size:12px">No summaries yet.</div>';
+                    return;
+                }
+                // Newest start first for the list view
+                const ordered = sums.slice().sort((a, b) => (b.start_ts || "").localeCompare(a.start_ts || ""));
+                rfListEl.innerHTML = ordered.map(s => {
+                    const sLabel = new Date(s.start_ts).toLocaleString([], { year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit" });
+                    const eLabel = new Date(s.end_ts).toLocaleString([], { year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit" });
+                    const hl = (rfState.highlightSummaryId === s.id) ? " highlight" : "";
+                    return `<div class="rf-summary-item${hl}" data-sum-id="${s.id}">
+                        <div class="rf-sum-head">
+                            <span class="rf-sum-range">${esc(sLabel)} → ${esc(eLabel)}</span>
+                            <span class="rf-sum-meta">n=${s.n_entries == null ? "?" : s.n_entries} · created ${esc((s.ts || "").slice(0,16).replace("T"," "))}</span>
+                            <span class="rf-sum-spacer"></span>
+                            <button type="button" data-act="load" data-id="${s.id}">Load range</button>
+                            <button type="button" data-act="edit" data-id="${s.id}">Edit</button>
+                            <button type="button" data-act="delete" data-id="${s.id}">Delete</button>
+                        </div>
+                        <div class="rf-sum-text">${esc(s.text)}</div>
+                    </div>`;
+                }).join("");
+
+                rfListEl.querySelectorAll("button[data-act]").forEach(btn => {
+                    btn.addEventListener("click", () => {
+                        const id = parseInt(btn.dataset.id, 10);
+                        const act = btn.dataset.act;
+                        const target = sums.find(x => x.id === id);
+                        if (!target) return;
+                        if (act === "load") {
+                            setRange(target.start_ts, target.end_ts);
+                        } else if (act === "edit") {
+                            rfState.editingId = id;
+                            setRange(target.start_ts, target.end_ts);
+                            rfTextEl.value = target.text || "";
+                            rfCancelEditBtn.style.display = "";
+                            rfMsgEl.className = "rf-editor-msg";
+                            rfMsgEl.textContent = "Editing existing summary.";
+                            rfTextEl.focus();
+                        } else if (act === "delete") {
+                            if (!confirm("Delete this summary? Raw entries are unaffected.")) return;
+                            const stmt = db.prepare("DELETE FROM summaries WHERE id = ?");
+                            stmt.run([id]); stmt.free();
+                            persist();
+                            if (rfState.editingId === id) {
+                                rfState.editingId = null;
+                                rfTextEl.value = "";
+                                rfCancelEditBtn.style.display = "none";
+                            }
+                            renderReflection();
+                        }
+                    });
+                });
+            }
+
+            function renderReflection() {
+                renderEntries();
+                renderDetail();
+                renderSummaryList();
+                renderSelStatus();
+            }
+
+            function saveSummary() {
+                const startISO = rfState.rangeStart;
+                const endISO = rfState.rangeEnd;
+                if (!startISO || !endISO) {
+                    rfMsgEl.className = "rf-editor-msg err";
+                    rfMsgEl.textContent = "Select a start and end first (click two rows, or use the date pickers).";
+                    return;
+                }
+                if (endISO < startISO) {
+                    rfMsgEl.className = "rf-editor-msg err";
+                    rfMsgEl.textContent = "End is before start.";
+                    return;
+                }
+                const text = rfTextEl.value;
+                const countRes = db.exec(
+                    `SELECT COUNT(*) FROM entries WHERE ts >= '${startISO}' AND ts <= '${endISO}'`
+                );
+                const n = countRes.length ? countRes[0].values[0][0] : 0;
+                const nowISO = new Date().toISOString();
+                if (rfState.editingId != null) {
+                    const stmt = db.prepare(
+                        "UPDATE summaries SET start_ts=?, end_ts=?, text=?, n_entries=?, updated_at=? WHERE id=?"
+                    );
+                    stmt.run([startISO, endISO, text, n, nowISO, rfState.editingId]); stmt.free();
+                    rfState.editingId = null;
+                    rfCancelEditBtn.style.display = "none";
+                    rfMsgEl.className = "rf-editor-msg";
+                    rfMsgEl.textContent = "Summary updated.";
+                } else {
+                    const stmt = db.prepare(
+                        "INSERT INTO summaries (ts, start_ts, end_ts, text, n_entries, updated_at) VALUES (?, ?, ?, ?, ?, ?)"
+                    );
+                    stmt.run([nowISO, startISO, endISO, text, n, nowISO]); stmt.free();
+                    rfMsgEl.className = "rf-editor-msg";
+                    rfMsgEl.textContent = `Summary saved (covers ${n} entr${n === 1 ? "y" : "ies"}).`;
+                    rfTextEl.value = "";
+                }
+                persist();
+                renderReflection();
+            }
+
+            document.getElementById("rf-save").addEventListener("click", saveSummary);
+            document.getElementById("rf-cancel-edit").addEventListener("click", () => {
+                rfState.editingId = null;
+                rfTextEl.value = "";
+                rfCancelEditBtn.style.display = "none";
+                rfMsgEl.className = "rf-editor-msg";
+                rfMsgEl.textContent = "Edit cancelled.";
+            });
+            rfClearBtn.addEventListener("click", () => {
+                setRange(null, null);
+            });
+            rfToggleBtn.addEventListener("click", () => {
+                const wasCollapsed = rfSectionEl.classList.contains("collapsed");
+                rfSectionEl.classList.toggle("collapsed");
+                rfToggleBtn.setAttribute("aria-expanded", wasCollapsed ? "true" : "false");
+                if (wasCollapsed) renderReflection();
+            });
+
+            // Initial render (cheap even when collapsed; keeps badge count accurate)
+            renderReflection();
 
             // Timeseries
             const tsvg = d3.select("#timeseries").attr("viewBox", [0, 0, 760, 310]);
@@ -1498,6 +2311,7 @@
                 window.panasDB = db;
                 if (window.panasSleepRebind) window.panasSleepRebind(db);
                 if (window.panasRefreshSleep) window.panasRefreshSleep();
+                if (typeof renderReflection === "function") renderReflection();
             }
 
             function downloadDB() {

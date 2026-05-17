@@ -52,6 +52,15 @@ A **"Gone to bed"** button below the PANAS dashboard logs bedtime timestamps for
 
 Both are independent — bedtime timestamps don't interact with hours-slept values.
 
+## Reflection / Summaries
+
+A collapsible **Reflection / Summaries** panel at the bottom of the dashboard lets you scroll back through past entries and attach written summaries to date ranges. This is purely additive — raw entries are never modified or deleted.
+
+- Click two entry rows to select a range; a side-by-side detail block shows each selected entry's PANAS bars and full log text while you write the summary.
+- Each entry row shows a badge with the number of summaries covering it; clicking the badge highlights the covering summary so you can review or edit it.
+- Overlapping summaries are allowed (e.g. weekly + monthly).
+- **Copy JSON (short)** — same intent as **Copy JSON**, but produces a single `timeline` array in chronological order. Each item carries a `kind` tag: `summary` (a user-written summary block with `summary_text`, `summary_saved_at`, `summary_updated_at`, PANAS `panas_mean` / `panas_std`, and sleep stats; `replaces_entries` is true when its older entries were dropped from the timeline, false when its entries fall in the recent window and remain verbatim alongside it), `older_aggregate` (older-than-cutoff entries not covered by any summary, lumped into one block), or `entry` (a verbatim recent entry). The cutoff is 60 days before the button press. Summary/aggregate blocks are positioned at their span end so they appear after the entries they describe. The full **Copy JSON** export now also includes saved summaries (attached to the day of their end date, with `saved_at` / `updated_at`). Intended usage is to paste both the full JSON (as searchable context) and the short form (as the digest) into an LLM for reflective conversation.
+
 ## Files
 
 ```

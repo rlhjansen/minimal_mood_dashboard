@@ -172,6 +172,7 @@ window.PanasSync = (function () {
             imported += mergeTable(cloudDB, db, 'entries');
             imported += mergeTable(cloudDB, db, 'sleep_log');
             imported += mergeTable(cloudDB, db, 'bedtime_log');
+            imported += mergeTable(cloudDB, db, 'summaries');
             imported += mergeSettings(cloudDB, db);
             cloudDB.close();
 
