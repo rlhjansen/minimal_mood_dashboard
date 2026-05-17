@@ -40,6 +40,14 @@
             height: 310px
         }
 
+        /* Petal handles capture pointer gestures so dragging is reliable on touch.
+           The SVG itself does NOT set touch-action, so vertical page scrolling
+           still works when the user touches a wedge or empty area. */
+        .handle {
+            touch-action: none;
+            -ms-touch-action: none;
+        }
+
         .grid circle {
             fill: none;
             stroke: #eee
@@ -390,6 +398,110 @@
         .colorpicker-bar input[type="color"]::-webkit-color-swatch {
             border: none;
             border-radius: 3px;
+        }
+
+        /* ---------- Mobile / narrow-viewport layout ---------- */
+        @media (max-width: 760px) {
+            :root {
+                --pad: 10px;
+            }
+
+            body {
+                grid-template-columns: 1fr;
+                gap: 14px;
+            }
+
+            #left,
+            #right {
+                min-width: 0;
+            }
+
+            h2 {
+                font-size: 1.1rem;
+            }
+
+            /* Square radar that fits the viewport width; reserve room for outer labels */
+            svg#radar {
+                height: auto;
+                aspect-ratio: 1 / 1;
+                max-height: 92vw;
+            }
+
+            svg#timeseries {
+                height: 230px;
+            }
+
+            /* Bigger, finger-friendly tap targets */
+            button {
+                padding: .65rem 1rem;
+                font-size: 15px;
+                min-height: 44px;
+            }
+
+            .sleep-row button {
+                padding: .55rem .9rem;
+                font-size: 14px;
+                min-height: 40px;
+            }
+
+            .sleep-row input[type="number"],
+            textarea {
+                font-size: 16px; /* prevents iOS auto-zoom on focus */
+            }
+
+            textarea {
+                height: 70px;
+            }
+
+            .sleep-row {
+                flex-wrap: wrap;
+                row-gap: .35rem;
+            }
+
+            #last-entry-date {
+                margin-left: 0;
+                flex-basis: 100%;
+            }
+
+            .controls {
+                gap: .4rem;
+            }
+
+            .controls button {
+                flex: 1 1 auto;
+            }
+
+            .colorpicker-bar {
+                gap: 10px;
+            }
+
+            .import-box {
+                padding: 10px;
+                font-size: .9rem;
+            }
+
+            .label {
+                font-size: 13px;
+            }
+        }
+
+        /* On any coarse pointer (touch) device, make drag handles much easier to grab. */
+        @media (pointer: coarse) {
+            .handle {
+                /* Visual handle stays modest, but the hit area is enlarged via a wide
+                   translucent stroke painted behind the fill. SVG hit-testing
+                   includes the stroke, so the effective grab radius is ~16px. */
+                stroke: rgba(31, 119, 180, .25);
+                stroke-width: 24;
+                paint-order: stroke fill;
+            }
+        }
+
+        /* Hide the decorative sync-bar logo on phones — it overlaps the heading below. */
+        @media (max-width: 760px) {
+            #sync-bar img {
+                display: none !important;
+            }
         }
     </style>
 </head>
